@@ -1,9 +1,12 @@
-import { Header } from "../components/Header";
+import { useEffect } from "react";
 
-export function ProfilePage() {
+export function ProfilePage({ userId }: { userId: number }) {
+  useEffect(() => {
+    console.log(userId);
+  }, []);
+
   return (
     <>
-      <Header />
       <p>Profile page</p>
     </>
   );

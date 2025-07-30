@@ -1,6 +1,14 @@
 import { NavLink } from "react-router";
 import "./Header.css";
-export function Header() {
+
+type HeaderProps = { logedIn: boolean; setLogedIn: (logedIn: boolean) => void };
+
+export function Header({ logedIn, setLogedIn }: HeaderProps) {
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setLogedIn(false);
+  };
+
   return (
     <div className="header">
       <div className="left-section">
@@ -18,12 +26,24 @@ export function Header() {
       </div>
 
       <div className="right-section">
-        <NavLink to="/login">
-          <button>Login</button>
-        </NavLink>
-        <NavLink to="/register">
-          <button>Register</button>
-        </NavLink>
+        {logedIn ? (
+          <>
+            <NavLink to="/profile">
+              <button>Profile</button>
+            </NavLink>
+
+            <button onClick={handleLogout}>Logout</button>
+          </>
+        ) : (
+          <>
+            <NavLink to="/login">
+              <button>Login</button>
+            </NavLink>
+            <NavLink to="/register">
+              <button>Register</button>
+            </NavLink>
+          </>
+        )}
       </div>
     </div>
   );

@@ -13,6 +13,10 @@
   height: 60px;
 }
 
+.header .left-section{
+  width: 150px;
+}
+
 .header .middle-section {
   flex: 1;
   max-width: 850px;
@@ -30,4 +34,10 @@
 .header .link-text {
   margin: 0 10px;
   color: black;
+}
+
+.header .right-section{
+  width: 150px;
+  display: flex;
+  justify-content: right;
 }
