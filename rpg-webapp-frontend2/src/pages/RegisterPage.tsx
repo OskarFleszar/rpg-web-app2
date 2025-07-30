@@ -1,5 +1,10 @@
+import { Header } from "../components/Header";
+
 export function RegisterPage() {
   return (
-    <p>Register page</p>
-  )
+    <>
+      <Header />
+      <p>Register page</p>
+    </>
+  );
 }

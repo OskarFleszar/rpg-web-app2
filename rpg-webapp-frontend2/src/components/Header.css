@@ -1,0 +1,33 @@
+.header {
+  background-color: grey;
+  padding: 0 15px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+}
+
+.header .middle-section {
+  flex: 1;
+  max-width: 850px;
+  margin-left: 10px;
+  margin-right: 10px;
+
+  display: flex;
+  justify-content: center;
+}
+
+.header .header-link {
+  text-decoration: none;
+}
+
+.header .link-text {
+  margin: 0 10px;
+  color: black;
+}

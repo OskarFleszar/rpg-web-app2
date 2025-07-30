@@ -1,5 +1,10 @@
+import { Header } from "../components/Header";
+
 export function CharactersPage() {
-  return(
-    <p>Characters page</p>
-  )
+  return (
+    <>
+      <Header />
+      <p>Characters page</p>
+    </>
+  );
 }
