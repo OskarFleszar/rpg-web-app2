@@ -1,7 +1,10 @@
 import { NavLink } from "react-router";
 import "./Header.css";
 
-type HeaderProps = { logedIn: boolean; setLogedIn: (logedIn: boolean) => void };
+type HeaderProps = {
+  logedIn: boolean;
+  setLogedIn: (logedIn: boolean) => void;
+};
 
 export function Header({ logedIn, setLogedIn }: HeaderProps) {
   const handleLogout = () => {

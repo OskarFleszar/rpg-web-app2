@@ -15,19 +15,34 @@ function App() {
   const [logedIn, setLogedIn] = useState(false);
 
   const loadUserData = async () => {
-    const response = await axios.get("http://localhost:8080/api/user/one/id", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    localStorage.setItem("userId", response.data);
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/user/one/id",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      localStorage.setItem("userId", response.data);
+    } catch (error) {
+      localStorage.removeItem("token");
+      setLogedIn(false);
+      console.error("An error occured while fetchung user id:", error);
+    }
   };
 
   const checkIfLogedIn = () => {
-    if (localStorage.getItem("token") !== null) {
+    if (localStorage.getItem("token")) {
       setLogedIn(true);
+    } else {
+      setLogedIn(false);
     }
   };
+
+  useEffect(() => {
+    checkIfLogedIn();
+  }, []);
 
   useEffect(() => {
     checkIfLogedIn();
