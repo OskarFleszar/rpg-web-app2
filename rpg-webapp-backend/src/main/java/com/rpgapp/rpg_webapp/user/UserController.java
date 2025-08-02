@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -32,6 +33,20 @@ public class UserController {
 
     @GetMapping(path="/one")
     public User getOneUser() { return characterService.getCurrentUser();}
+
+    @GetMapping(path="/one/id")
+    public long getCurrentUserId() {
+        return characterService.getCurrentUser().getUserId();
+    }
+
+    @GetMapping(path="/one/basic/{userId}")
+    public Optional<UserBasicDTO> getUserBasic(@PathVariable long userId) {
+        return userService.getUserById(userId).map(user -> new UserBasicDTO(
+                user.getNickname(),
+                user.getEmail(),
+                user.getPassword()
+        ));
+    }
 
     @GetMapping(path="/campaigns")
     public Set<Campaign> getUserCampaigns(){

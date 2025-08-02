@@ -89,4 +89,8 @@ public class UserService {
         return campaignRepository.findCampaignsByUserId(userId);
     }
 
+    public Optional<User> getUserById(long userId){
+        return userRepository.findById(userId);
+    }
+
 }
