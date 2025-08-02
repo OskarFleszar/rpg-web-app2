@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import "./Header.css";
 
 type HeaderProps = {
@@ -7,10 +7,12 @@ type HeaderProps = {
 };
 
 export function Header({ logedIn, setLogedIn }: HeaderProps) {
+  const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     setLogedIn(false);
+    navigate("/");
   };
 
   return (

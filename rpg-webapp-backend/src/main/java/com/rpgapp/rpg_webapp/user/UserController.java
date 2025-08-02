@@ -64,7 +64,11 @@ public class UserController {
     }
 
     @PostMapping("/uploadProfileImage")
-    public void uploadProfileImage(MultipartFile file) throws IOException {userService.saveProfileImage(file);}
+    public ResponseEntity<Void> uploadProfileImage(@RequestParam("file") MultipartFile file) throws IOException {
+        userService.saveProfileImage(file);
+        return ResponseEntity.ok().build();
+    }
+
 
     @PostMapping
     public void registerNewUser(@RequestBody User user){
