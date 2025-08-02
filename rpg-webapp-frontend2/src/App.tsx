@@ -13,16 +13,14 @@ import { Header } from "./components/Header";
 function App() {
   //const [userData, setUserData] = useState({});
   const [logedIn, setLogedIn] = useState(false);
-  const [userId, setUserId] = useState(0);
 
   const loadUserData = async () => {
-    const response = await axios.get("http://localhost:8080/api/user/one", {
+    const response = await axios.get("http://localhost:8080/api/user/one/id", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-    setUserId(response.data.userId);
-    console.log(userId);
+    localStorage.setItem("userId", response.data);
   };
 
   const checkIfLogedIn = () => {
@@ -45,7 +43,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="characters" element={<CharactersPage />} />
         <Route path="campaigns" element={<CampaignsPage />} />
-        <Route path="profile" element={<ProfilePage userId={userId} />} />
+        <Route path="profile" element={<ProfilePage />} />
         <Route
           path="register"
           element={<RegisterPage setLogedIn={setLogedIn} />}

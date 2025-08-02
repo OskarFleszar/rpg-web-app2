@@ -6,6 +6,7 @@ type HeaderProps = { logedIn: boolean; setLogedIn: (logedIn: boolean) => void };
 export function Header({ logedIn, setLogedIn }: HeaderProps) {
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     setLogedIn(false);
   };
 
