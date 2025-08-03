@@ -24,6 +24,7 @@ export function RegisterPage({ setLogedIn }: RegisterPageProps) {
     const { token } = response.data;
     localStorage.setItem("token", token);
     setLogedIn(true);
+    alert("Register succesfull");
 
     navigate("/");
   };
