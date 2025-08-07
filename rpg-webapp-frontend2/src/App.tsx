@@ -3,7 +3,7 @@ import "./App.css";
 import { HomePage } from "./pages/HomePage";
 import { CharactersPage } from "./pages/CharactersPage";
 import { CampaignsPage } from "./pages/CampaignsPage";
-import { ProfilePage } from "./pages/ProfilePage";
+import { ProfilePage } from "./pages/profile/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { LoginPage } from "./pages/LoginPage";
 import { useEffect, useState } from "react";
