@@ -1,12 +1,13 @@
 import axios from "axios";
 import { useState } from "react";
 
+type BasicUserData = { nickname: string; email: string; password: string };
+
+type SetBasicUserData = React.Dispatch<React.SetStateAction<BasicUserData>>;
+
 type ProfileEditingProps = {
-  basicUserData: {
-    nickname: string;
-    email: string;
-    password: string;
-  };
+  basicUserData: BasicUserData;
+  setBasicUserData: SetBasicUserData;
   image?: string;
   setIsEditing: (isEditing: boolean) => void;
   fetchProfileImage: () => void;
@@ -15,6 +16,7 @@ type ProfileEditingProps = {
 
 export function ProfilePageEditing({
   basicUserData,
+  setBasicUserData,
   image,
   setIsEditing,
   fetchProfileImage,
@@ -51,9 +53,41 @@ export function ProfilePageEditing({
       setImage(URL.createObjectURL(file));
     }
   };
+
   const handleCancelButtonPress = () => {
     setIsEditing(false);
   };
+
+  const handleSave = async () => {
+    try {
+      await axios.put(
+        "http://localhost:8080/api/user",
+        {
+          nickname: basicUserData.nickname,
+          email: basicUserData.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      
+      setIsEditing(false);
+      alert("Dane zostały zaktualizowane");
+    } catch (error) {
+      console.error("Błąd podczas zapisywania zmian:", error);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setBasicUserData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
     <>
       <div className="profile-page">
@@ -70,9 +104,21 @@ export function ProfilePageEditing({
           />
         </div>
         <button onClick={handleImageUpload}>Upload picture</button>
-        <p>Nickname: {basicUserData.nickname}</p>
-        <p>Email: {basicUserData.email}</p>
+        <p>Nickname:</p>
+        <input
+          name="nickname"
+          value={basicUserData.nickname}
+          onChange={handleChange}
+        />
+
+        <p>Email:</p>
+        <input
+          name="email"
+          value={basicUserData.email}
+          onChange={handleChange}
+        />
         <button onClick={handleCancelButtonPress}>Cancel</button>
+        <button onClick={handleSave}>Save</button>
       </div>
     </>
   );

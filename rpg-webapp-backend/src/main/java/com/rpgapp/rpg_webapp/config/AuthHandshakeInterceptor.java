@@ -30,11 +30,11 @@ public class AuthHandshakeInterceptor implements ChannelInterceptor {
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             if (token != null && token.startsWith("Bearer ")) {
                 token = token.substring(7);
-                String username = jwtService.extractUsername(token);
+                String userId = jwtService.extractUserId(token);
 
-                if (username != null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    if (jwtService.isTokenValid(token, userDetails)) {
+                if (userId != null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+                    if (jwtService.isTokenValid(token)) {
                         accessor.getSessionAttributes().put("user", userDetails);
                         return message;
                     }

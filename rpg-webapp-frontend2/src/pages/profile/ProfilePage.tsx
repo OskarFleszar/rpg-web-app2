@@ -32,6 +32,7 @@ export function ProfilePage() {
       }
     );
     setBasicUserData(response.data);
+    console.log(response.data)
   };
 
   const fetchProfileImage = async () => {
@@ -60,6 +61,7 @@ export function ProfilePage() {
       {isEditing ? (
         <ProfilePageEditing
           basicUserData={basicUserData}
+          setBasicUserData={setBasicUserData}
           image={image}
           setIsEditing={setIsEditing}
           fetchProfileImage={fetchProfileImage}

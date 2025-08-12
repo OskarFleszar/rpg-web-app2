@@ -22,29 +22,53 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+    private final com.rpgapp.rpg_webapp.user.UserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
-        if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            if(jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        final String jwt = authHeader.substring(7);
+        final String subject = jwtService.extractUserId(jwt); // sub = userId (String)
+
+        if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Long userId;
+            try {
+                userId = Long.parseLong(subject);
+            } catch (NumberFormatException e) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            var userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent() && jwtService.isTokenValid(jwt)) {
+                var user = userOpt.get();
+
+                var authorities = java.util.List.of(
+                    new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                );
+
+                // username = ID jako String
+                var principal = new org.springframework.security.core.userdetails.User(
+                    String.valueOf(user.getId()),
+                    user.getPassword(),
+                    authorities
+                );
+
+                var authToken = new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }
+

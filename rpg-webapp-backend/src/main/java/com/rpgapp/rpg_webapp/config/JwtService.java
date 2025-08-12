@@ -19,53 +19,78 @@ public class JwtService {
 
     private static final String SECRET_KEY = "1517c73725cebc63bbc8712a2c9f1bcf80e9845767ee09428dc381e73c8176e3";
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    // --- PUBLIC API ---
+
+    public String generateToken(com.rpgapp.rpg_webapp.user.User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", user.getEmail());           // informacyjnie
+        claims.put("role", user.getRole().name());
+        claims.put("uid", String.valueOf(user.getId())); // wygodny claim
+        return buildToken(claims, String.valueOf(user.getId())); // sub = userId
+    }
+
+    // Zachowaj wersję z UserDetails, ale spróbuj zrzutować do Twojej encji
+    public String generateToken(UserDetails userDetails) {
+        if (userDetails instanceof com.rpgapp.rpg_webapp.user.User u) {
+            return generateToken(u);
+        }
+        // awaryjnie: sub = username (stare zachowanie)
+        return buildToken(new HashMap<>(), userDetails.getUsername());
+    }
+
+    public String extractUserId(String token) {
+        return extractClaim(token, Claims::getSubject); // sub = userId (String)
+    }
+
+    public String extractEmail(String token) {
+        return extractClaim(token, c -> c.get("email", String.class));
+    }
+
+    public boolean isTokenValid(String token) {
+        return !isTokenExpired(token);
+    }
+
+    // --- INTERNALS ---
+
+    private String buildToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+            .setClaims(claims)
+            .setSubject(subject) // = userId
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+            .compact();
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims =  extractAllClaims(token);
+        final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()))  && !isTokenExpired(token);
-    }
-
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+            .setSigningKey(getSignInKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
     }
 
-
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        byte[] keyBytes = io.jsonwebtoken.io.Decoders.BASE64.decode(SECRET_KEY);
+        return io.jsonwebtoken.security.Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    // --- ADAPTERY (opcjonalnie na czas migracji, by nie psuć starego kodu) ---
+    public String extractUsername(String token) {
+        // teraz "username" = email claim (nie subject)
+        return extractEmail(token);
+    }
+
+    public boolean isTokenValid(String token, UserDetails ignored) {
+        return isTokenValid(token);
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CharacterService {
@@ -28,14 +29,18 @@ public class CharacterService {
     }
 
     public User getCurrentUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(principal instanceof UserDetails) {
-            String email = ((UserDetails) principal).getUsername();
-            return userRepository.findUserByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        } else {
-            throw new IllegalStateException("User not authenticated");
-        }
+    var auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null) throw new IllegalStateException("User not authenticated");
+
+    Object principal = auth.getPrincipal();
+    if (principal instanceof org.springframework.security.core.userdetails.User userDetails) {
+        Long userId = Long.parseLong(userDetails.getUsername()); // ID jako String → Long
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found"));
     }
+    throw new IllegalStateException("User not authenticated");
+}
+
 
     public User getCurrentUserWS(SimpMessageHeaderAccessor headerAccessor) {
 

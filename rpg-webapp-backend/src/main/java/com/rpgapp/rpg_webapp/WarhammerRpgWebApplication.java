@@ -13,7 +13,4 @@ public class WarhammerRpgWebApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(WarhammerRpgWebApplication.class, args);
 	}
-
-
-
 }
