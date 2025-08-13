@@ -1,0 +1,17 @@
+.character-card {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    background-color: gray;
+    
+}
+
+.character-link {
+    text-decoration: none;
+}
+
+.character-card p{
+    
+    color: white;
+}

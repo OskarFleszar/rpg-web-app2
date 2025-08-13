@@ -45,8 +45,8 @@ public class CharacterService {
     public User getCurrentUserWS(SimpMessageHeaderAccessor headerAccessor) {
 
             UserDetails userDetails = (UserDetails) headerAccessor.getSessionAttributes().get("user");
-                String email = userDetails.getUsername();
-                return userRepository.findUserByEmail(email)
+                 Long userId = Long.parseLong(userDetails.getUsername());
+                return userRepository.findById(userId)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found in WebSocket session"));
 
     }
@@ -55,6 +55,19 @@ public class CharacterService {
         User user = getCurrentUser();
         return user.getCharacters();
     }
+
+    public List<CharacterBasicDTO> getCharactersBasic() {
+    User user = getCurrentUser();
+    return user.getCharacters()
+        .stream()
+        .map(character -> new CharacterBasicDTO(
+            character.getCharacterId(),
+            character.getName(),
+            character.getCharacterImage()
+        ))
+        .toList(); 
+}
+
     public Optional<Character> getOneCharacter(Long characterId) {
         return characterRepository.findById(characterId);
     }

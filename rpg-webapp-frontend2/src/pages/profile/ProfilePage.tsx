@@ -18,6 +18,7 @@ export function ProfilePage() {
   useEffect(() => {
     fetchProfileImage();
     loadBasicUserData();
+    console.log(localStorage.getItem("token"))
   }, []);
 
   const loadBasicUserData = async () => {

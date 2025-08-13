@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
 import { HomePage } from "./pages/HomePage";
-import { CharactersPage } from "./pages/CharactersPage";
+import { CharactersPage } from "./pages/characters/CharactersPage";
 import { CampaignsPage } from "./pages/CampaignsPage";
 import { ProfilePage } from "./pages/profile/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";

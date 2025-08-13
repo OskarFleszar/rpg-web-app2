@@ -32,6 +32,11 @@ public class CharacterController {
         return characterService.getOneCharacter(characterId);
     }
 
+    @GetMapping(path = "/basic")
+    public List<CharacterBasicDTO> getCharacterBasic(){
+        return characterService.getCharactersBasic();
+    }
+
     @PostMapping
     public void makeNewCharacter(@RequestBody Character character) {characterService.addNewCharacter(character);}
 

@@ -72,7 +72,7 @@ export function ProfilePageEditing({
           },
         }
       );
-      
+      handleImageUpload();
       setIsEditing(false);
       alert("Dane zostały zaktualizowane");
     } catch (error) {
@@ -103,7 +103,6 @@ export function ProfilePageEditing({
             onChange={handleImageChange}
           />
         </div>
-        <button onClick={handleImageUpload}>Upload picture</button>
         <p>Nickname:</p>
         <input
           name="nickname"
