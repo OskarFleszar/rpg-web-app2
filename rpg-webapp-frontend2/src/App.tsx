@@ -9,6 +9,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Header } from "./components/Header";
+import { CharacterPage } from "./pages/characters/CharacterPage";
 
 function App() {
   //const [userData, setUserData] = useState({});
@@ -57,6 +58,7 @@ function App() {
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="characters" element={<CharactersPage />} />
+        <Route path="characters/:id" element={<CharacterPage />}/>
         <Route path="campaigns" element={<CampaignsPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route

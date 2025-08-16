@@ -27,7 +27,6 @@ export function CharactersPage() {
         }
       );
       setCharacters(response.data);
-      console.log(response.data)
     } catch (error) {
       console.error("Błąd przy pobieraniu postaci uzytkownika:", error);
     }

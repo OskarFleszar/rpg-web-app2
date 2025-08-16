@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Embeddable
 @Data
 public class Skills {
@@ -23,6 +27,8 @@ public class Skills {
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "skill_name")
     @Column(name = "skill_info")
+    @JsonIgnore
+    @Getter(AccessLevel.NONE)
     private Map<String, SkillInfo> skills = new HashMap<>();
 
     @Data
@@ -36,6 +42,17 @@ public class Skills {
             this.level = level;
             this.type = type;
         }
+    }
+
+    @JsonAnyGetter
+    public Map<String, SkillInfo> any() {
+        return skills;
+    }
+
+    // opcjonalnie, by deserializacja też działała bezpośrednio z mapy
+    @JsonAnySetter
+    public void set(String name, SkillInfo value) {
+        skills.put(name, value);
     }
 
     public Skills() {

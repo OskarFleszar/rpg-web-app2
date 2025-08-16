@@ -6,6 +6,11 @@ import lombok.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rpgapp.rpg_webapp.character.Skills.SkillInfo;
+
 @Data
 @Embeddable
 public class Attribute {
@@ -23,8 +28,20 @@ public class Attribute {
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "attribute_name")
     @Column(name = "attribute")
+    @JsonIgnore
+    @Getter(AccessLevel.NONE)
     private Map<String, Attributes> attributes = new HashMap<>();
 
+    @JsonAnyGetter
+    public Map<String, Attributes> any() {
+        return attributes;
+    }
+
+    // opcjonalnie, by deserializacja też działała bezpośrednio z mapy
+    @JsonAnySetter
+    public void set(String name, Attributes value) {
+        attributes.put(name, value);
+    }
 
     public Attribute() {
         initializeAttributes();

@@ -1,0 +1,89 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
+import defaultPfp from "../../assets/images/nig.jpg";
+
+export function CharacterPage() {
+  const { id } = useParams();
+  const [character, setCharacter] = useState({
+    name: "",
+    race: "",
+    currentProfession: "",
+    lastProfession: "",
+    age: 0,
+    gender: "",
+    eyeColor: "",
+    weight: 0,
+    hairColor: "",
+    height: 0,
+    starSign: "",
+    siblings: 0,
+    birthPlace: "",
+    specialSigns: "",
+    campaignName: "",
+    campaignYear: "",
+    currentExp: 0,
+    totalExp: 0,
+    backstory: "",
+    gold: 0,
+    silver: 0,
+    bronze: 0,
+    notes: "",
+  });
+  const [weapons, setWeapons] = useState([]);
+  const [attributes, setAttributes] = useState({});
+  const [skills, setSkills] = useState({});
+  const [armor, setArmor] = useState([]);
+  const [equipment, setEquipment] = useState([]);
+  const [talents, setTalents] = useState([]);
+  const [image, setImage] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    fetchCharacterData();
+  }, []);
+
+  const fetchCharacterImage = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/character/characterImage/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          responseType: "blob",
+        }
+      );
+
+      const imageUrl = URL.createObjectURL(response.data);
+      if (image) URL.revokeObjectURL(image);
+      setImage(imageUrl);
+    } catch (error) {
+      console.error("Błąd przy pobieraniu zdjęcia profilowego:", error);
+      setImage(defaultPfp);
+    }
+  };
+
+  const fetchCharacterData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/character/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCharacter(response.data);
+      setWeapons(response.data.weapons);
+      setArmor(response.data.armor);
+      setEquipment(response.data.equipment);
+      setTalents(response.data.talents);
+      setAttributes(response.data.attributes);
+      setSkills(response.data.skills);
+    } catch (error) {
+      console.error("Błąd podczas ładowania danych postaci:", error);
+    }
+  };
+
+  return <></>;
+}
