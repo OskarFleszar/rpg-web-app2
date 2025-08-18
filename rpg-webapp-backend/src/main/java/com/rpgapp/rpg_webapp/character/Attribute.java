@@ -37,7 +37,13 @@ public class Attribute {
         return attributes;
     }
 
-    // opcjonalnie, by deserializacja też działała bezpośrednio z mapy
+    
+    @JsonIgnore
+    public Map<String, Attribute.Attributes> getAttributes() {
+        return attributes; 
+    }
+
+    
     @JsonAnySetter
     public void set(String name, Attributes value) {
         attributes.put(name, value);

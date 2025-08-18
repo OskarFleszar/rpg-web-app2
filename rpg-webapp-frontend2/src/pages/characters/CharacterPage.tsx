@@ -2,6 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import defaultPfp from "../../assets/images/nig.jpg";
+import "./CharacterPage.css";
+import { CharacterBasicInfo } from "./CharacterBasicInfo";
 
 export function CharacterPage() {
   const { id } = useParams();
@@ -40,6 +42,7 @@ export function CharacterPage() {
 
   useEffect(() => {
     fetchCharacterData();
+    fetchCharacterImage();
   }, []);
 
   const fetchCharacterImage = async () => {
@@ -85,5 +88,11 @@ export function CharacterPage() {
     }
   };
 
-  return <></>;
+  return (
+    <div className="charcter-card-page">
+      <div className="character-card-container">
+        <CharacterBasicInfo character={character} />
+      </div>
+    </div>
+  );
 }
