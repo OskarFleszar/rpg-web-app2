@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import defaultPfp from "../../assets/images/nig.jpg";
 import "./CharacterPage.css";
 import { CharacterBasicInfo } from "./CharacterBasicInfo";
+import { CharacterAttributes } from "./CharacterAttributes";
 
 export function CharacterPage() {
   const { id } = useParams();
@@ -83,6 +84,7 @@ export function CharacterPage() {
       setTalents(response.data.talents);
       setAttributes(response.data.attributes);
       setSkills(response.data.skills);
+     
     } catch (error) {
       console.error("Błąd podczas ładowania danych postaci:", error);
     }
@@ -92,6 +94,7 @@ export function CharacterPage() {
     <div className="charcter-card-page">
       <div className="character-card-container">
         <CharacterBasicInfo character={character} />
+        <CharacterAttributes attributes={attributes}/>
       </div>
     </div>
   );

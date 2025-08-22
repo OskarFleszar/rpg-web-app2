@@ -1,4 +1,4 @@
-type Character = {
+type CharacterProps = {
   character: {
     name: string;
     race: string;
@@ -26,7 +26,7 @@ type Character = {
   };
 };
 
-export function CharacterBasicInfo({ character }: Character) {
+export function CharacterBasicInfo({ character }: CharacterProps) {
   return (
     <div className="character-basic-info-container">
       <form>
