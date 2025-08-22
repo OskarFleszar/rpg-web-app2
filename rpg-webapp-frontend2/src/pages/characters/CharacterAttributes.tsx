@@ -14,26 +14,26 @@ export function CharacterAttributes({ attributes }: AttributesProps) {
   return (
     <div className="character-attributes-container">
       <div className="attributes-grid">
-        {Object.entries(attributes).map(([key, attribute]) => {
+        {Object.entries(attributes).map(([attributeName, attributeValues]) => {
           return (
-            <div className="single-attribute-container" key={key}>
-              <div className="attribute-name">{key}</div>
+            <div className="single-attribute-container" key={attributeName}>
+              <div className="attribute-name">{attributeName}</div>
               <div className="attribute-value">
                 <form>
                   <label>Starting Value:</label>
-                  <input type="number" value={attribute.baseValue} />
+                  <input type="number" value={attributeValues.baseValue} />
                 </form>
               </div>
               <div className="attribute-value">
                 <form>
                   <label>Advancement:</label>
-                  <input type="number" value={attribute.advancementPoints} />
+                  <input type="number" value={attributeValues.advancementPoints} />
                 </form>
               </div>
               <div className="attribute-value">
                 <form>
                   <label>Current Value:</label>
-                  <input type="number" value={attribute.currentValue} />
+                  <input type="number" value={attributeValues.currentValue} />
                 </form>
               </div>
             </div>

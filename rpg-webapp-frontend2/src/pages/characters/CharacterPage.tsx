@@ -5,6 +5,7 @@ import defaultPfp from "../../assets/images/nig.jpg";
 import "./CharacterPage.css";
 import { CharacterBasicInfo } from "./CharacterBasicInfo";
 import { CharacterAttributes } from "./CharacterAttributes";
+import { CharacterSkills } from "./CharacterSkills";
 
 export function CharacterPage() {
   const { id } = useParams();
@@ -40,7 +41,7 @@ export function CharacterPage() {
   const [equipment, setEquipment] = useState([]);
   const [talents, setTalents] = useState([]);
   const [image, setImage] = useState<string | undefined>(undefined);
-
+  
   useEffect(() => {
     fetchCharacterData();
     fetchCharacterImage();
@@ -84,7 +85,7 @@ export function CharacterPage() {
       setTalents(response.data.talents);
       setAttributes(response.data.attributes);
       setSkills(response.data.skills);
-     
+      console.log(response.data)
     } catch (error) {
       console.error("Błąd podczas ładowania danych postaci:", error);
     }
@@ -95,6 +96,7 @@ export function CharacterPage() {
       <div className="character-card-container">
         <CharacterBasicInfo character={character} />
         <CharacterAttributes attributes={attributes}/>
+        <CharacterSkills skills={skills} />
       </div>
     </div>
   );
