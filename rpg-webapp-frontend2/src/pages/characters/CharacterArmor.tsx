@@ -1,23 +1,17 @@
-import { useState } from "react";
-
 type CharacterArmorProps = {
   armors: {
     aromrType: string;
     location: string;
     armorPoints: number;
-    id: number | null;
   }[];
 };
 
 export function CharacterArmor({ armors }: CharacterArmorProps) {
-  const [armorsid] = useState(() => {
-    return armors.map((armor) => ({ ...armor, id: crypto.randomUUID() }));
-  });
   return (
     <div className="character-armor-container">
-      {armorsid.map((armor) => {
+      {armors.map((armor, idx) => {
         return (
-          <div className="single-armor-container" key={armor.id}>
+          <div className="single-armor-container" key={idx}>
             <div>
               <label>Armor type:</label>
               <input type="text" value={armor.aromrType} name="aromrType" />

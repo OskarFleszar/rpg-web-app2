@@ -9,6 +9,7 @@ import { CharacterSkills } from "./CharacterSkills";
 import { CharacterTalentsEquipment } from "./CharacterTalentsEquipment";
 import { CharacterWeapons } from "./CharacterWeapons";
 import { CharacterArmor } from "./CharacterArmor";
+import { CharacterGoldNotes } from "./CharacterGoldNotes";
 
 export function CharacterPage() {
   const { id } = useParams();
@@ -104,6 +105,7 @@ export function CharacterPage() {
         <CharacterWeapons weapons={weapons} />
         <CharacterArmor armors={armors} />
         <CharacterTalentsEquipment items={talents} />
+        <CharacterGoldNotes character={character} />
       </div>
     </div>
   );

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 type CharacterWeaponsProps = {
   weapons: {
     name: string;
@@ -7,19 +5,15 @@ type CharacterWeaponsProps = {
     strength: string;
     range: number;
     weaponAttributes: string;
-    id: number | null;
   }[];
 };
 
 export function CharacterWeapons({ weapons }: CharacterWeaponsProps) {
-  const [weaponsid] = useState(() => {
-    return weapons.map((weapon) => ({ ...weapon, id: crypto.randomUUID() }));
-  });
   return (
     <div className="character-weapons-container">
-      {weaponsid.map((weapon) => {
+      {weapons.map((weapon, idx) => {
         return (
-          <div className="single-weapon-container" key={weapon.id}>
+          <div className="single-weapon-container" key={idx}>
             <div>
               <label>Name:</label>
               <input type="text" value={weapon.name} name="name" />
