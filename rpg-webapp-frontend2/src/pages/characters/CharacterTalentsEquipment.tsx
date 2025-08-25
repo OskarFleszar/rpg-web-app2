@@ -10,24 +10,21 @@ type CharacterTalentsEqProps = {
 
 export function CharacterTalentsEquipment({ items }: CharacterTalentsEqProps) {
   const [itemsid] = useState(() => {
-    items.map((item) => ({ ...item, id: crypto.randomUUID() }));
+    return items.map((item) => ({ ...item, id: crypto.randomUUID() }));
   });
   return (
     <div className="character-talents-eq-container">
-      {items.map((itemsid) => {
+      {itemsid.map((item) => {
         return (
-          <div className="single-item-container" key={itemsid.id}>
+          <div className="single-item-container" key={item.id}>
             <div>
               <label>Name:</label>
-              <input type="text" name="name" value={itemsid.name} />
+              <input type="text" name="name" value={item.name} />
             </div>
 
             <div>
               <label>Description:</label>
-              <textarea
-                name="description"
-                value={itemsid.description}
-              />
+              <textarea name="description" value={item.description} />
             </div>
           </div>
         );

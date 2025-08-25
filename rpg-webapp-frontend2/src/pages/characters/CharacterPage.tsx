@@ -7,6 +7,8 @@ import { CharacterBasicInfo } from "./CharacterBasicInfo";
 import { CharacterAttributes } from "./CharacterAttributes";
 import { CharacterSkills } from "./CharacterSkills";
 import { CharacterTalentsEquipment } from "./CharacterTalentsEquipment";
+import { CharacterWeapons } from "./CharacterWeapons";
+import { CharacterArmor } from "./CharacterArmor";
 
 export function CharacterPage() {
   const { id } = useParams();
@@ -38,11 +40,11 @@ export function CharacterPage() {
   const [weapons, setWeapons] = useState([]);
   const [attributes, setAttributes] = useState({});
   const [skills, setSkills] = useState({});
-  const [armor, setArmor] = useState([]);
+  const [armors, setArmors] = useState([]);
   const [equipment, setEquipment] = useState([]);
   const [talents, setTalents] = useState([]);
   const [image, setImage] = useState<string | undefined>(undefined);
-  
+
   useEffect(() => {
     fetchCharacterData();
     fetchCharacterImage();
@@ -81,12 +83,12 @@ export function CharacterPage() {
       );
       setCharacter(response.data);
       setWeapons(response.data.weapons);
-      setArmor(response.data.armor);
+      setArmors(response.data.armor);
       setEquipment(response.data.equipment);
       setTalents(response.data.talents);
       setAttributes(response.data.attributes);
       setSkills(response.data.skills);
-      console.log(response.data)
+      console.log(response.data);
     } catch (error) {
       console.error("Błąd podczas ładowania danych postaci:", error);
     }
@@ -96,11 +98,11 @@ export function CharacterPage() {
     <div className="charcter-card-page">
       <div className="character-card-container">
         <CharacterBasicInfo character={character} />
-        <CharacterAttributes attributes={attributes}/>
+        <CharacterAttributes attributes={attributes} />
         <CharacterSkills skills={skills} />
         <CharacterTalentsEquipment items={equipment} />
-        {/*Weaons */}
-        {/*Armor */}
+        <CharacterWeapons weapons={weapons} />
+        <CharacterArmor armors={armors} />
         <CharacterTalentsEquipment items={talents} />
       </div>
     </div>

@@ -4,14 +4,17 @@ import "./CharacterCard.css";
 type CharacterCardProps = {
   character: {
     characterId: number;
-    name: String;
+    name: string;
     characterImage: string;
   };
 };
 
 export function CharacterCard({ character }: CharacterCardProps) {
   return (
-    <Link to={`/characters/${character.characterId}`} className="character-link">
+    <Link
+      to={`/characters/${character.characterId}`}
+      className="character-link"
+    >
       <div className="character-card">
         {character.characterImage ? (
           <img className="img" src={character.characterImage} alt="Profile" />
