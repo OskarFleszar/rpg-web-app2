@@ -11,6 +11,25 @@ import { CharacterWeapons } from "./CharacterWeapons";
 import { CharacterArmor } from "./CharacterArmor";
 import { CharacterGoldNotes } from "./CharacterGoldNotes";
 
+export type Items = {
+  name: string;
+  description: string;
+};
+
+export type Weapons = {
+  name: string;
+  category: string;
+  strength: string;
+  range: number;
+  weaponAttributes: string;
+};
+
+export type Armors = {
+  aromrType: string;
+  location: string;
+  armorPoints: number;
+};
+
 export function CharacterPage() {
   const { id } = useParams();
   const [character, setCharacter] = useState({
@@ -38,12 +57,12 @@ export function CharacterPage() {
     bronze: 0,
     notes: "",
   });
-  const [weapons, setWeapons] = useState([]);
+  const [weapons, setWeapons] = useState<Weapons[]>([]);
   const [attributes, setAttributes] = useState({});
   const [skills, setSkills] = useState({});
-  const [armors, setArmors] = useState([]);
-  const [equipment, setEquipment] = useState([]);
-  const [talents, setTalents] = useState([]);
+  const [armors, setArmors] = useState<Armors[]>([]);
+  const [equipment, setEquipment] = useState<Items[]>([]);
+  const [talents, setTalents] = useState<Items[]>([]);
   const [image, setImage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -98,14 +117,17 @@ export function CharacterPage() {
   return (
     <div className="charcter-card-page">
       <div className="character-card-container">
-        <CharacterBasicInfo character={character} />
-        <CharacterAttributes attributes={attributes} />
-        <CharacterSkills skills={skills} />
-        <CharacterTalentsEquipment items={equipment} />
-        <CharacterWeapons weapons={weapons} />
-        <CharacterArmor armors={armors} />
-        <CharacterTalentsEquipment items={talents} />
-        <CharacterGoldNotes character={character} />
+        <CharacterBasicInfo character={character} setCharacter={setCharacter} />
+        <CharacterAttributes
+          attributes={attributes}
+          setAttributes={setAttributes}
+        />
+        <CharacterSkills skills={skills} setSkills={setSkills} />
+        <CharacterTalentsEquipment items={equipment} setItems={setEquipment} />
+        <CharacterWeapons weapons={weapons} setWeapons={setWeapons} />
+        <CharacterArmor armors={armors} setArmors={setArmors} />
+        <CharacterTalentsEquipment items={talents} setItems={setTalents} />
+        <CharacterGoldNotes character={character} setCharacter={setCharacter} />
       </div>
     </div>
   );

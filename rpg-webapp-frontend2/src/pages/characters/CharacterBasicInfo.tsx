@@ -1,32 +1,46 @@
 type CharacterProps = {
-  character: {
-    name: string;
-    race: string;
-    currentProfession: string;
-    lastProfession: string;
-    age: number;
-    gender: string;
-    eyeColor: string;
-    weight: number;
-    hairColor: string;
-    height: number;
-    starSign: string;
-    siblings: number;
-    birthPlace: string;
-    specialSigns: string;
-    campaignName: string;
-    campaignYear: string;
-    currentExp: number;
-    totalExp: number;
-    backstory: string;
-    gold: number;
-    silver: number;
-    bronze: number;
-    notes: string;
-  };
+  name: string;
+  race: string;
+  currentProfession: string;
+  lastProfession: string;
+  age: number;
+  gender: string;
+  eyeColor: string;
+  weight: number;
+  hairColor: string;
+  height: number;
+  starSign: string;
+  siblings: number;
+  birthPlace: string;
+  specialSigns: string;
+  campaignName: string;
+  campaignYear: string;
+  currentExp: number;
+  totalExp: number;
+  backstory: string;
+  gold: number;
+  silver: number;
+  bronze: number;
+  notes: string;
 };
 
-export function CharacterBasicInfo({ character }: CharacterProps) {
+type CharacterBasicInfoProps = {
+  character: CharacterProps;
+  setCharacter: React.Dispatch<React.SetStateAction<CharacterProps>>;
+};
+
+export function CharacterBasicInfo({
+  character,
+  setCharacter,
+}: CharacterBasicInfoProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCharacter((prevCharacter) => ({
+      ...prevCharacter,
+      [name]: value,
+    }));
+  };
+
   return (
     <div className="character-basic-info-container">
       <form>
@@ -37,6 +51,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="name"
             value={character.name}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -47,6 +62,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="race"
             value={character.race}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -57,6 +73,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="currentProfession"
             value={character.currentProfession}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -67,6 +84,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="lastProfession"
             value={character.lastProfession}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -77,6 +95,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="campaignName"
             value={character.campaignName}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -87,6 +106,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="campaignYear"
             value={character.campaignYear}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -97,6 +117,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="age"
             value={character.age}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -107,6 +128,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="gender"
             value={character.gender}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -117,6 +139,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="eyeColor"
             value={character.eyeColor}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -127,6 +150,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="weight"
             value={character.weight}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -137,6 +161,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="hairColor"
             value={character.hairColor}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -147,6 +172,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="height"
             value={character.height}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -157,6 +183,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="starSign"
             value={character.starSign}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -167,6 +194,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="siblings"
             value={character.siblings}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -177,6 +205,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="birthPlace"
             value={character.birthPlace}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -187,6 +216,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="specialSigns"
             value={character.specialSigns}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -197,6 +227,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="currentExp"
             value={character.currentExp}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
 
@@ -207,6 +238,7 @@ export function CharacterBasicInfo({ character }: CharacterProps) {
             name="totalExp"
             value={character.totalExp}
             className="character-form-input"
+            onChange={handleChange}
           />
         </div>
       </form>

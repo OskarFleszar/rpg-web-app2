@@ -9,20 +9,33 @@ type Skills = Record<string, SkillInfo>;
 
 type CharacterSkillsProps = {
   skills: Skills;
+  setSkills: React.Dispatch<React.SetStateAction<Skills>>;
 };
 
-export function CharacterSkills({ skills }: CharacterSkillsProps) {
-  const baseSkills = Object.entries(skills).filter(([,  skillInfo ]) => {
-     return skillInfo.type === "BASIC";
+export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const level = value as SkillInfo["level"];
+    setSkills((prevSkills) => ({
+      ...prevSkills,
+      [name]: {
+        ...prevSkills[name],
+        level: level,
+      },
+    }));
+  };
+
+  const baseSkills = Object.entries(skills).filter(([, skillInfo]) => {
+    return skillInfo.type === "BASIC";
   });
 
-  const advancedSkills = Object.entries(skills).filter(([,  skillInfo ]) => {
+  const advancedSkills = Object.entries(skills).filter(([, skillInfo]) => {
     return skillInfo.type === "ADVANCED";
   });
 
   useEffect(() => {
-    console.log(baseSkills)
-  },[])
+    console.log(baseSkills);
+  }, []);
 
   return (
     <div className="character-skills-container">
@@ -35,15 +48,16 @@ export function CharacterSkills({ skills }: CharacterSkillsProps) {
               {["NOT_PURCHASED", "PURCHASED", "PLUS_10", "PLUS_20"].map(
                 (level) => {
                   return (
-                  <div className="skill-levels-container">
-                    <label key={level}>{level}</label>
-                    <input 
-                      type="radio"
-                      name={skillName} 
-                      value={level}
-                      checked={skillInfo.level === level}
-                    />
-                  </div>
+                    <div className="skill-levels-container">
+                      <label key={level}>{level}</label>
+                      <input
+                        type="radio"
+                        name={skillName}
+                        value={level}
+                        checked={skillInfo.level === level}
+                        onChange={handleChange}
+                      />
+                    </div>
                   );
                 }
               )}

@@ -1,14 +1,26 @@
+import type { Weapons } from "./CharacterPage";
+
 type CharacterWeaponsProps = {
-  weapons: {
-    name: string;
-    category: string;
-    strength: string;
-    range: number;
-    weaponAttributes: string;
-  }[];
+  weapons: Weapons[];
+  setWeapons: React.Dispatch<React.SetStateAction<Weapons[]>>;
 };
 
-export function CharacterWeapons({ weapons }: CharacterWeaponsProps) {
+export function CharacterWeapons({
+  weapons,
+  setWeapons,
+}: CharacterWeaponsProps) {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    idx: number
+  ) => {
+    const { name, value } = e.target;
+    setWeapons((prevWeapons) =>
+      prevWeapons.map((weapon, i) =>
+        i === idx ? { ...weapon, [name]: value } : weapon
+      )
+    );
+  };
+
   return (
     <div className="character-weapons-container">
       {weapons.map((weapon, idx) => {
@@ -16,19 +28,39 @@ export function CharacterWeapons({ weapons }: CharacterWeaponsProps) {
           <div className="single-weapon-container" key={idx}>
             <div>
               <label>Name:</label>
-              <input type="text" value={weapon.name} name="name" />
+              <input
+                type="text"
+                value={weapon.name}
+                name="name"
+                onChange={(e) => handleChange(e, idx)}
+              />
             </div>
             <div>
               <label>Category:</label>
-              <input type="text" value={weapon.category} name="category" />
+              <input
+                type="text"
+                value={weapon.category}
+                name="category"
+                onChange={(e) => handleChange(e, idx)}
+              />
             </div>
             <div>
               <label>Strength:</label>
-              <input type="text" value={weapon.strength} name="strength" />
+              <input
+                type="text"
+                value={weapon.strength}
+                name="strength"
+                onChange={(e) => handleChange(e, idx)}
+              />
             </div>
             <div>
               <label>Range:</label>
-              <input type="number" value={weapon.range} name="range" />
+              <input
+                type="number"
+                value={weapon.range}
+                name="range"
+                onChange={(e) => handleChange(e, idx)}
+              />
             </div>
             <div>
               <label>Attributes:</label>
@@ -36,6 +68,7 @@ export function CharacterWeapons({ weapons }: CharacterWeaponsProps) {
                 type="text"
                 value={weapon.weaponAttributes}
                 name="weaponAttributes"
+                onChange={(e) => handleChange(e, idx)}
               />
             </div>
           </div>

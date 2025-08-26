@@ -8,9 +8,27 @@ type Attributes = Record<string, Attribute>;
 
 type AttributesProps = {
   attributes: Attributes;
+  setAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
 };
 
-export function CharacterAttributes({ attributes }: AttributesProps) {
+export function CharacterAttributes({
+  attributes,
+  setAttributes,
+}: AttributesProps) {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof Attribute
+  ) => {
+    const { name, value } = e.target;
+    setAttributes((prevAttributes) => ({
+      ...prevAttributes,
+      [name]: {
+        ...prevAttributes[name],
+        [field]: parseInt(value),
+      },
+    }));
+  };
+
   return (
     <div className="character-attributes-container">
       <div className="attributes-grid">
@@ -21,19 +39,40 @@ export function CharacterAttributes({ attributes }: AttributesProps) {
               <div className="attribute-value">
                 <form>
                   <label>Starting Value:</label>
-                  <input type="number" value={attributeValues.baseValue} />
+                  <input
+                    type="number"
+                    name={attributeName}
+                    value={attributeValues.baseValue}
+                    onChange={(e) => {
+                      handleChange(e, "baseValue");
+                    }}
+                  />
                 </form>
               </div>
               <div className="attribute-value">
                 <form>
                   <label>Advancement:</label>
-                  <input type="number" value={attributeValues.advancementPoints} />
+                  <input
+                    type="number"
+                    name={attributeName}
+                    value={attributeValues.advancementPoints}
+                    onChange={(e) => {
+                      handleChange(e, "advancementPoints");
+                    }}
+                  />
                 </form>
               </div>
               <div className="attribute-value">
                 <form>
                   <label>Current Value:</label>
-                  <input type="number" value={attributeValues.currentValue} />
+                  <input
+                    type="number"
+                    name={attributeName}
+                    value={attributeValues.currentValue}
+                    onChange={(e) => {
+                      handleChange(e, "currentValue");
+                    }}
+                  />
                 </form>
               </div>
             </div>
