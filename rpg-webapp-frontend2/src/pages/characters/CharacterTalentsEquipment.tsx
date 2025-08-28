@@ -1,5 +1,6 @@
 import type React from "react";
 import type { Items } from "./CharacterPage";
+import { useState } from "react";
 
 type CharacterTalentsEqProps = {
   items: Items[];
@@ -10,6 +11,11 @@ export function CharacterTalentsEquipment({
   items,
   setItems,
 }: CharacterTalentsEqProps) {
+  const [newItem, setNewItem] = useState<Items>({
+    name: "",
+    description: "",
+  });
+
   const handleChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
@@ -23,6 +29,23 @@ export function CharacterTalentsEquipment({
       )
     );
   };
+
+  const handleNewItemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewItem((prevItem) => ({
+      ...prevItem,
+      [name]: value,
+    }));
+  };
+
+  const handleAddItem = () => {
+    if (!newItem.name) {
+      return;
+    }
+    setItems((prevItems) => [...prevItems, newItem]);
+    setNewItem({ name: "", description: "" });
+  };
+
   return (
     <div className="character-talents-eq-container">
       {items.map((item, idx) => {
@@ -49,6 +72,25 @@ export function CharacterTalentsEquipment({
           </div>
         );
       })}
+
+      <div className="add-item-form">
+        <input
+          type="text"
+          placeholder="Name"
+          name="name"
+          value={newItem.name}
+          onChange={handleNewItemChange}
+        />
+
+        <input
+          type="text"
+          placeholder="Description"
+          name="description"
+          value={newItem.description}
+          onChange={handleNewItemChange}
+        />
+        <button onClick={handleAddItem}>Add</button>
+      </div>
     </div>
   );
 }

@@ -20,14 +20,14 @@ export type Weapons = {
   name: string;
   category: string;
   strength: string;
-  range: number;
+  range: number | null;
   weaponAttributes: string;
 };
 
 export type Armors = {
-  aromrType: string;
+  armorType: string;
   location: string;
-  armorPoints: number;
+  armorPoints: number | null;
 };
 
 export function CharacterPage() {
@@ -117,6 +117,7 @@ export function CharacterPage() {
   return (
     <div className="charcter-card-page">
       <div className="character-card-container">
+        <img className="profile-picture" src={image} />
         <CharacterBasicInfo character={character} setCharacter={setCharacter} />
         <CharacterAttributes
           attributes={attributes}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Armors } from "./CharacterPage";
 
 type CharacterArmorProps = {
@@ -6,6 +7,12 @@ type CharacterArmorProps = {
 };
 
 export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
+  const [newArmor, setNewArmor] = useState<Armors>({
+    armorType: "",
+    location: "",
+    armorPoints: null,
+  });
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     idx: number
@@ -18,6 +25,22 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
     );
   };
 
+  const handleNewArmorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewArmor((prevArmor) => ({
+      ...prevArmor,
+      [name]: value,
+    }));
+  };
+
+  const handleAddNewArmor = () => {
+    if (!newArmor.armorType) {
+      return;
+    }
+    setArmors((prevArmors) => [...prevArmors, newArmor]);
+    setNewArmor({ armorType: "", location: "", armorPoints: 0 });
+  };
+
   return (
     <div className="character-armor-container">
       {armors.map((armor, idx) => {
@@ -27,7 +50,7 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
               <label>Armor type:</label>
               <input
                 type="text"
-                value={armor.aromrType}
+                value={armor.armorType}
                 name="aromrType"
                 onChange={(e) => handleChange(e, idx)}
               />
@@ -45,7 +68,7 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
               <label>Armor points:</label>
               <input
                 type="text"
-                value={armor.armorPoints}
+                value={armor.armorPoints ?? ""}
                 name="armorPoints"
                 onChange={(e) => handleChange(e, idx)}
               />
@@ -53,6 +76,33 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
           </div>
         );
       })}
+
+      <div className="new-armor-form">
+        <input
+          type="text"
+          name="armorType"
+          placeholder="Armor Type"
+          value={newArmor.armorType}
+          onChange={handleNewArmorChange}
+        />
+
+        <input
+          type="text"
+          name="location"
+          placeholder="location"
+          value={newArmor.location}
+          onChange={handleNewArmorChange}
+        />
+
+        <input
+          type="number"
+          name="armorPoints"
+          placeholder="Armor Points"
+          value={newArmor.armorPoints ?? ""}
+          onChange={handleNewArmorChange}
+        />
+        <button onClick={handleAddNewArmor}>Add Armor</button>
+      </div>
     </div>
   );
 }

@@ -1,20 +1,20 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { CharacterCard } from "./CharacterCard";
-import "./CharactersPage.css"
+import "./CharactersPage.css";
 
 type CharacterBasic = {
-  characterId: number,
-  name: String,
-  characterImage: string
-}
+  characterId: number;
+  name: string;
+  characterImage: string;
+};
 
 export function CharactersPage() {
   const [characters, setCharacters] = useState<CharacterBasic[]>([]);
 
   useEffect(() => {
-    fetchBasicCharacterData()
-  },[])
+    fetchBasicCharacterData();
+  }, []);
 
   const fetchBasicCharacterData = async () => {
     try {
