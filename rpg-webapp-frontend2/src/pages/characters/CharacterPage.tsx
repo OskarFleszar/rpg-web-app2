@@ -114,6 +114,36 @@ export function CharacterPage() {
     }
   };
 
+  const handleSaveChanges = async () => {
+    const characterData = {
+      ...character,
+      attributes,
+      skills,
+      weapons,
+      armors,
+      equipment,
+      talents,
+    };
+
+    try {
+      await axios.put(
+        `http://localhost:8080/api/character/${id}`,
+        characterData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error) {
+      console.error(
+        "There was a problem saving the changes in character card",
+        error
+      );
+    }
+  };
+
   return (
     <div className="charcter-card-page">
       <div className="character-card-container">
@@ -129,6 +159,7 @@ export function CharacterPage() {
         <CharacterArmor armors={armors} setArmors={setArmors} />
         <CharacterTalentsEquipment items={talents} setItems={setTalents} />
         <CharacterGoldNotes character={character} setCharacter={setCharacter} />
+        <button onClick={handleSaveChanges}>Save Changes</button>
       </div>
     </div>
   );
