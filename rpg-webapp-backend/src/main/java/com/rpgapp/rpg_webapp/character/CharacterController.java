@@ -67,8 +67,21 @@ public class CharacterController {
         return ResponseEntity.ok().contentType(MediaType.valueOf(character.getImageType())).body(image);
     }
 
-    @PostMapping("/uploadCharacterImage/{characterId}")
-    public void uploadCharacterImage(MultipartFile file,@PathVariable("characterId") Long characterId) throws IOException {
-        characterService.saveCharacterImage(file,characterId);
+    @PostMapping(
+            path = "/uploadCharacterImage/{characterId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<Void> uploadCharacterImage(
+            @PathVariable Long characterId,
+            @RequestPart("file") MultipartFile file   // lub @RequestParam("file")
+    ) throws IOException {
+
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        characterService.saveCharacterImage(file, characterId);
+        return ResponseEntity.noContent().build(); // 204
     }
+
 }

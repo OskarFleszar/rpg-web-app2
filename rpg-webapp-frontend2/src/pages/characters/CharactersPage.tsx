@@ -7,6 +7,7 @@ type CharacterBasic = {
   characterId: number;
   name: string;
   characterImage: string;
+  imageType: string;
 };
 
 export function CharactersPage() {
@@ -27,6 +28,7 @@ export function CharactersPage() {
         }
       );
       setCharacters(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Błąd przy pobieraniu postaci uzytkownika:", error);
     }

@@ -1,29 +1,53 @@
 import { Link } from "react-router";
 import "./CharacterCard.css";
+import defaultPfp from "../../assets/images/nig.jpg";
 
 type CharacterCardProps = {
   character: {
     characterId: number;
     name: string;
-    characterImage: string;
+    characterImage?: string | null;
+    imageType?: string | null;
   };
 };
 
+const toImgSrc = (val?: string | null, mime = "image/jpeg") => {
+  if (!val || val === "null" || val === "undefined" || val.trim() === "") {
+    return defaultPfp;
+  }
+  if (
+    val.startsWith("data:") ||
+    val.startsWith("http") ||
+    val.startsWith("blob:")
+  ) {
+    return val;
+  }
+  return `data:${mime};base64,${val}`;
+};
+
 export function CharacterCard({ character }: CharacterCardProps) {
+  const imgSrc = toImgSrc(
+    character.characterImage,
+    character.imageType || undefined
+  );
+
   return (
     <Link
       to={`/characters/${character.characterId}`}
       className="character-link"
     >
       <div className="character-card">
-        {character.characterImage ? (
-          <img className="img" src={character.characterImage} alt="Profile" />
-        ) : (
-          <h3></h3>
-        )}
-
+        <img
+          className="img"
+          src={imgSrc}
+          alt={`${character.name} profile`}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = defaultPfp;
+          }}
+        />
         <p>{character.name}</p>
-      </div>{" "}
+      </div>
     </Link>
   );
 }

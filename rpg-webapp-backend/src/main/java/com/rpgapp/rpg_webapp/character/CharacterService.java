@@ -63,7 +63,8 @@ public class CharacterService {
         .map(character -> new CharacterBasicDTO(
             character.getCharacterId(),
             character.getName(),
-            character.getCharacterImage()
+            character.getCharacterImage(),
+            character.getImageType()
         ))
         .toList(); 
 }
@@ -97,11 +98,10 @@ public class CharacterService {
         characterRepository.save(character);
     }
 
-    @Transactional
+   @Transactional
     public void updateCharacter(Long characterId, Character updatedCharacter) {
         Character existingCharacter = characterRepository.findById(characterId)
                 .orElseThrow(() -> new IllegalStateException("Character with id: " + characterId + " doesn't exist"));
-
 
         if (updatedCharacter.getName() != null) {
             existingCharacter.setName(updatedCharacter.getName());

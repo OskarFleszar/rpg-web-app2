@@ -57,13 +57,17 @@ export function CharacterPage() {
     bronze: 0,
     notes: "",
   });
+
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [weapons, setWeapons] = useState<Weapons[]>([]);
   const [attributes, setAttributes] = useState({});
   const [skills, setSkills] = useState({});
-  const [armors, setArmors] = useState<Armors[]>([]);
+  const [armor, setArmor] = useState<Armors[]>([]);
   const [equipment, setEquipment] = useState<Items[]>([]);
   const [talents, setTalents] = useState<Items[]>([]);
-  const [image, setImage] = useState<string | undefined>(undefined);
+  const [characterImage, setCharacterImage] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     fetchCharacterData();
@@ -83,11 +87,11 @@ export function CharacterPage() {
       );
 
       const imageUrl = URL.createObjectURL(response.data);
-      if (image) URL.revokeObjectURL(image);
-      setImage(imageUrl);
+      if (characterImage) URL.revokeObjectURL(characterImage);
+      setCharacterImage(imageUrl);
     } catch (error) {
       console.error("Błąd przy pobieraniu zdjęcia profilowego:", error);
-      setImage(defaultPfp);
+      setCharacterImage(defaultPfp);
     }
   };
 
@@ -103,14 +107,17 @@ export function CharacterPage() {
       );
       setCharacter(response.data);
       setWeapons(response.data.weapons);
-      setArmors(response.data.armor);
+      setArmor(response.data.armor);
       setEquipment(response.data.equipment);
       setTalents(response.data.talents);
       setAttributes(response.data.attributes);
       setSkills(response.data.skills);
       console.log(response.data);
     } catch (error) {
-      console.error("Błąd podczas ładowania danych postaci:", error);
+      console.error(
+        "An error occured while trying to upload the character picture",
+        error
+      );
     }
   };
 
@@ -120,11 +127,10 @@ export function CharacterPage() {
       attributes,
       skills,
       weapons,
-      armors,
+      armor,
       equipment,
       talents,
     };
-
     try {
       await axios.put(
         `http://localhost:8080/api/character/${id}`,
@@ -132,22 +138,60 @@ export function CharacterPage() {
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
           },
         }
       );
     } catch (error) {
-      console.error(
-        "There was a problem saving the changes in character card",
-        error
-      );
+      console.error("Problem przy zapisie karty postaci", error);
+    }
+
+    if (selectedImageFile) {
+      try {
+        const formData = new FormData();
+        formData.append("file", selectedImageFile);
+        await axios.post(
+          `http://localhost:8080/api/character/uploadCharacterImage/${id}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        await fetchCharacterImage();
+        setSelectedImageFile(null);
+      } catch (error) {
+        console.error(
+          `An error occured while trying to upload the character picture`,
+          error
+        );
+      }
+    }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImageFile(file);
+      setCharacterImage(URL.createObjectURL(file));
     }
   };
 
   return (
     <div className="charcter-card-page">
       <div className="character-card-container">
-        <img className="profile-picture" src={image} />
+        <img className="profile-picture" src={characterImage} />
+        <div className="custom-file-upload">
+          <label htmlFor="fileInput" className="file-label">
+            Choose File
+          </label>
+          <input
+            id="fileInput"
+            type="file"
+            style={{ display: "none" }}
+            onChange={handleImageChange}
+          />
+        </div>
         <CharacterBasicInfo character={character} setCharacter={setCharacter} />
         <CharacterAttributes
           attributes={attributes}
@@ -156,7 +200,7 @@ export function CharacterPage() {
         <CharacterSkills skills={skills} setSkills={setSkills} />
         <CharacterTalentsEquipment items={equipment} setItems={setEquipment} />
         <CharacterWeapons weapons={weapons} setWeapons={setWeapons} />
-        <CharacterArmor armors={armors} setArmors={setArmors} />
+        <CharacterArmor armors={armor} setArmors={setArmor} />
         <CharacterTalentsEquipment items={talents} setItems={setTalents} />
         <CharacterGoldNotes character={character} setCharacter={setCharacter} />
         <button onClick={handleSaveChanges}>Save Changes</button>
