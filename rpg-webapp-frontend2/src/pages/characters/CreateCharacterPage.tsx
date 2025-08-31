@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
 import defaultPfp from "../../assets/images/nig.jpg";
 import "./CharacterPage.css";
 import { CharacterBasicInfo } from "./CharacterBasicInfo";
@@ -10,29 +9,11 @@ import { CharacterTalentsEquipment } from "./CharacterTalentsEquipment";
 import { CharacterWeapons } from "./CharacterWeapons";
 import { CharacterArmor } from "./CharacterArmor";
 import { CharacterGoldNotes } from "./CharacterGoldNotes";
+import type { Armors, Items, Weapons } from "./CharacterPage";
+import { useNavigate } from "react-router";
 
-export type Items = {
-  name: string;
-  description: string;
-};
-
-export type Weapons = {
-  name: string;
-  category: string;
-  strength: string;
-  range: number | null;
-  weaponAttributes: string;
-};
-
-export type Armors = {
-  armorType: string;
-  location: string;
-  armorPoints: number | null;
-};
-
-export function CharacterPage() {
+export function CreateCharacterPage() {
   const navigate = useNavigate();
-  const { id } = useParams();
   const [character, setCharacter] = useState({
     name: "",
     race: "",
@@ -67,62 +48,40 @@ export function CharacterPage() {
   const [equipment, setEquipment] = useState<Items[]>([]);
   const [talents, setTalents] = useState<Items[]>([]);
   const [characterImage, setCharacterImage] = useState<string | undefined>(
-    undefined
+    defaultPfp
   );
 
   useEffect(() => {
-    fetchCharacterData();
-    fetchCharacterImage();
+    getDefaultSkillsAndAttributes();
   }, []);
 
-  const fetchCharacterImage = async () => {
+  const getDefaultSkillsAndAttributes = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/character/characterImage/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          responseType: "blob",
-        }
-      );
-
-      const imageUrl = URL.createObjectURL(response.data);
-      if (characterImage) URL.revokeObjectURL(characterImage);
-      setCharacterImage(imageUrl);
-    } catch (error) {
-      console.error("Błąd przy pobieraniu zdjęcia profilowego:", error);
-      setCharacterImage(defaultPfp);
-    }
-  };
-
-  const fetchCharacterData = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/character/${id}`,
+      const responseSkills = await axios.get(
+        "http://localhost:8080/api/character/default-skills",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      setCharacter(response.data);
-      setWeapons(response.data.weapons);
-      setArmor(response.data.armor);
-      setEquipment(response.data.equipment);
-      setTalents(response.data.talents);
-      setAttributes(response.data.attributes);
-      setSkills(response.data.skills);
-      console.log(response.data);
-    } catch (error) {
-      console.error(
-        "An error occured while trying to upload the character picture",
-        error
+      const responseAttributes = await axios.get(
+        "http://localhost:8080/api/character/default-attributes",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
+
+      setSkills(responseSkills.data);
+      setAttributes(responseAttributes.data);
+    } catch (error) {
+      console.error("An error occured fetching skills and attributes", error);
     }
   };
 
-  const handleSaveChanges = async () => {
+  const handleSaveCharacter = async () => {
     const characterData = {
       ...character,
       attributes,
@@ -133,8 +92,8 @@ export function CharacterPage() {
       talents,
     };
     try {
-      await axios.put(
-        `http://localhost:8080/api/character/${id}`,
+      const response = await axios.post(
+        `http://localhost:8080/api/character`,
         characterData,
         {
           headers: {
@@ -142,12 +101,9 @@ export function CharacterPage() {
           },
         }
       );
-    } catch (error) {
-      console.error("Problem przy zapisie karty postaci", error);
-    }
+      const id = response.data;
 
-    if (selectedImageFile) {
-      try {
+      if (selectedImageFile && id) {
         const formData = new FormData();
         formData.append("file", selectedImageFile);
         await axios.post(
@@ -159,25 +115,14 @@ export function CharacterPage() {
             },
           }
         );
-        await fetchCharacterImage();
         setSelectedImageFile(null);
-      } catch (error) {
-        console.error(
-          `An error occured while trying to upload the character picture`,
-          error
-        );
+        navigate("/characters");
       }
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      await axios.delete(`http://localhost:8080/api/character/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      navigate("/characters");
     } catch (error) {
-      console.error("An error occured while deleting the character:", error);
+      console.error(
+        `An error occured while trying to upload the character picture`,
+        error
+      );
     }
   };
 
@@ -215,8 +160,7 @@ export function CharacterPage() {
         <CharacterArmor armors={armor} setArmors={setArmor} />
         <CharacterTalentsEquipment items={talents} setItems={setTalents} />
         <CharacterGoldNotes character={character} setCharacter={setCharacter} />
-        <button onClick={handleSaveChanges}>Save Changes</button>
-        <button onClick={handleDelete}>Delete Character</button>
+        <button onClick={handleSaveCharacter}>Create Character</button>
       </div>
     </div>
   );

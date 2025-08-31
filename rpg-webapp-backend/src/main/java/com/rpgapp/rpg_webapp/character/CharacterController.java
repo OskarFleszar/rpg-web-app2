@@ -38,7 +38,8 @@ public class CharacterController {
     }
 
     @PostMapping
-    public void makeNewCharacter(@RequestBody Character character) {characterService.addNewCharacter(character);}
+    public Long makeNewCharacter(@RequestBody Character character) {characterService.addNewCharacter(character);
+    return characterService.getCharacterId(character);}
 
     @DeleteMapping(path ="{characterId}")
     public void deleteCharacter(@PathVariable("characterId") Long characterId) {characterService.deleteCharacter(characterId);}

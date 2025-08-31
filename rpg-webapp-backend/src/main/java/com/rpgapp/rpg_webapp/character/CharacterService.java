@@ -77,6 +77,11 @@ public class CharacterService {
         User user = getCurrentUser();
         character.setUser(user);
         characterRepository.save(character);
+        getCharacterId(character);
+    }
+
+    public Long getCharacterId (Character character) {
+        return character.getCharacterId();
     }
 
     public void deleteCharacter(Long characterId) {

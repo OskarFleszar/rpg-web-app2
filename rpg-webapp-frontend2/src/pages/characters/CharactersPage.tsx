@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { CharacterCard } from "./CharacterCard";
 import "./CharactersPage.css";
+import { NavLink } from "react-router";
 
 type CharacterBasic = {
   characterId: number;
@@ -39,6 +40,9 @@ export function CharactersPage() {
       {characters.map((character) => (
         <CharacterCard key={character.characterId} character={character} />
       ))}
+      <NavLink to={"/characters/create"}>
+        <button>Create Character</button>
+      </NavLink>
     </div>
   );
 }
