@@ -168,6 +168,7 @@ export function CharacterPage() {
         );
       }
     }
+    navigate("/characters");
   };
 
   const handleDelete = async () => {

@@ -116,8 +116,8 @@ export function CreateCharacterPage() {
           }
         );
         setSelectedImageFile(null);
-        navigate("/characters");
       }
+      navigate("/characters");
     } catch (error) {
       console.error(
         `An error occured while trying to upload the character picture`,
