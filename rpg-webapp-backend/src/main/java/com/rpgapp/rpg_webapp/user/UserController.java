@@ -1,6 +1,7 @@
 package com.rpgapp.rpg_webapp.user;
 
 import com.rpgapp.rpg_webapp.campaign.Campaign;
+import com.rpgapp.rpg_webapp.campaign.CampaignBasicDTO;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -53,6 +54,16 @@ public class UserController {
         User user = characterService.getCurrentUser();
 
         return userService.getUserCampaigns(user.getUserId());
+    }
+
+    @GetMapping(path="/campaigns/basic")
+    public Set<CampaignBasicDTO> getUserCampaignsBasic(){
+        User user = characterService.getCurrentUser();
+
+        return userService.getUserCampaigns(user.getUserId()).stream().map(campaigns -> new CampaignBasicDTO(
+                campaigns.getCampaignId(),
+                campaigns.getCampaignName()
+        )).collect(java.util.stream.Collectors.toSet()); 
     }
 
 

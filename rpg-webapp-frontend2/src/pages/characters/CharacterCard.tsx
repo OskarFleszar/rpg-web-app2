@@ -38,7 +38,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
     >
       <div className="character-card">
         <img
-          className="img"
+          className="character-image"
           src={imgSrc}
           alt={`${character.name} profile`}
           loading="lazy"

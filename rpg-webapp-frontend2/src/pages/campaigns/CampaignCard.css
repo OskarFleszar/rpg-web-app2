@@ -1,4 +1,4 @@
-.character-card {
+.campaign-card {
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -7,15 +7,15 @@
     
 }
 
-.character-link {
+.campaign-link {
     text-decoration: none;
 }
 
-.character-card p{
+.campaign-card p{
     
     color: white;
 }
 
-.character-image {
+.campaign-image {
     width: 160px;
 }

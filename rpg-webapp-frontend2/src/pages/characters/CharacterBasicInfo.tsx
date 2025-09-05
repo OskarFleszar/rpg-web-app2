@@ -33,7 +33,11 @@ export function CharacterBasicInfo({
   character,
   setCharacter,
 }: CharacterBasicInfoProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setCharacter((prevCharacter) => ({
       ...prevCharacter,
@@ -123,13 +127,15 @@ export function CharacterBasicInfo({
 
         <div className="character-form-field-container">
           <label className="character-form label">Gender:</label>
-          <input
-            type="text"
+          <select
             name="gender"
-            value={character.gender}
-            className="character-form-input"
+            className="character-form-select"
             onChange={handleChange}
-          />
+            value={character.gender}
+          >
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
         </div>
 
         <div className="character-form-field-container">

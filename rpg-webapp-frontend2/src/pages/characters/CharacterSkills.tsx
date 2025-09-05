@@ -1,5 +1,16 @@
 import { useState } from "react";
 
+type Level = SkillInfo["level"];
+
+const LEVELS: Level[] = ["NOT_PURCHASED", "PURCHASED", "PLUS_10", "PLUS_20"];
+
+const LEVEL_LABELS: Record<Level, string> = {
+  NOT_PURCHASED: "NOT PURCHASED",
+  PURCHASED: "PURCHASED",
+  PLUS_10: "+10",
+  PLUS_20: "+20",
+};
+
 type SkillInfo = {
   level: "NOT_PURCHASED" | "PURCHASED" | "PLUS_10" | "PLUS_20";
   type: "BASIC" | "ADVANCED";
@@ -57,22 +68,20 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
             <div className="single-skill-container" key={skillName}>
               <div className="skill-name">{skillName}</div>
 
-              {["NOT_PURCHASED", "PURCHASED", "PLUS_10", "PLUS_20"].map(
-                (level) => {
-                  return (
-                    <div className="skill-levels-container" key={level}>
-                      <label>{level}</label>
-                      <input
-                        type="radio"
-                        name={skillName}
-                        value={level}
-                        checked={skillInfo.level === level}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  );
-                }
-              )}
+              {LEVELS.map((level) => {
+                return (
+                  <div className="skill-levels-container" key={level}>
+                    <label>{LEVEL_LABELS[level]}</label>
+                    <input
+                      type="radio"
+                      name={skillName}
+                      value={level}
+                      checked={skillInfo.level === level}
+                      onChange={handleChange}
+                    />
+                  </div>
+                );
+              })}
             </div>
           );
         })}
@@ -84,22 +93,20 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
             <div className="single-skill-container" key={skillName}>
               <div className="skill-name">{skillName}</div>
 
-              {["NOT_PURCHASED", "PURCHASED", "PLUS_10", "PLUS_20"].map(
-                (level) => {
-                  return (
-                    <div className="skill-levels-container" key={level}>
-                      <label>{level}</label>
-                      <input
-                        type="radio"
-                        name={skillName}
-                        value={level}
-                        checked={skillInfo.level === level}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  );
-                }
-              )}
+              {LEVELS.map((level) => {
+                return (
+                  <div className="skill-levels-container" key={level}>
+                    <label>{LEVEL_LABELS[level]}</label>
+                    <input
+                      type="radio"
+                      name={skillName}
+                      value={level}
+                      checked={skillInfo.level === level}
+                      onChange={handleChange}
+                    />
+                  </div>
+                );
+              })}
             </div>
           );
         })}

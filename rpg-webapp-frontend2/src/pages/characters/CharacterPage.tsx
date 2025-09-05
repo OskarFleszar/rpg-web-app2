@@ -132,6 +132,7 @@ export function CharacterPage() {
       equipment,
       talents,
     };
+    console.log(character);
     try {
       await axios.put(
         `http://localhost:8080/api/character/${id}`,

@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router";
 import "./App.css";
 import { HomePage } from "./pages/HomePage";
 import { CharactersPage } from "./pages/characters/CharactersPage";
-import { CampaignsPage } from "./pages/CampaignsPage";
+import { CampaignsPage } from "./pages/campaigns/CampaignsPage";
 import { ProfilePage } from "./pages/profile/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -11,6 +11,7 @@ import axios from "axios";
 import { Header } from "./components/Header";
 import { CharacterPage } from "./pages/characters/CharacterPage";
 import { CreateCharacterPage } from "./pages/characters/CreateCharacterPage";
+import { CampaignPage } from "./pages/campaigns/CampaignPage";
 
 function App() {
   //const [userData, setUserData] = useState({});
@@ -62,6 +63,7 @@ function App() {
         <Route path="characters/:id" element={<CharacterPage />} />
         <Route path="characters/create" element={<CreateCharacterPage />} />
         <Route path="campaigns" element={<CampaignsPage />} />
+        <Route path="campaigns/:id" element={<CampaignPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route
           path="register"
