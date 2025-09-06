@@ -28,7 +28,6 @@ export function CharacterSelectScreen() {
         }
       );
       setCharacters(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error("Błąd przy pobieraniu postaci uzytkownika:", error);
     }
@@ -44,11 +43,12 @@ export function CharacterSelectScreen() {
         />
       ))}
       <button
-        onClick={() =>
+        onClick={() => {
           navigate(`/campaigns/${id}`, {
             state: { characterIds: charactersSelectedId },
-          })
-        }
+          });
+          setCharactersSelectedId([]);
+        }}
       >
         Confirm
       </button>

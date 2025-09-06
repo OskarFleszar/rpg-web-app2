@@ -8,14 +8,19 @@ export function CampaignPage() {
   const characterIds = (state?.characterIds as number[]) ?? [];
 
   useEffect(() => {
+    console.log(characterIds);
     fetchCharactersData();
   }, []);
 
   const fetchCharactersData = async () => {
-    const response = await axios.get("http://localhost:8080/api/character", {
-      params: { ids: characterIds.join(",") },
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+    const response = await axios.get(
+      "http://localhost:8080/api/character/chosencharacters",
+      {
+        params: { ids: characterIds.join(",") },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+    console.log(response.data);
     setCharacters(response.data);
   };
   return <div></div>;

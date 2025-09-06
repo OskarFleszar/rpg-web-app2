@@ -57,8 +57,7 @@ public class CharacterService {
     }
 
     public List<Character> getByIds(List<Long> ids) {
-        return characterRepository.findAllById(ids).stream()
-                .toList();
+        return characterRepository.findAllById(ids).stream().toList();
     }
 
     public List<CharacterBasicDTO> getCharactersBasic() {
