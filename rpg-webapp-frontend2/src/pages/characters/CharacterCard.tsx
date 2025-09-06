@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import "./CharacterCard.css";
 import defaultPfp from "../../assets/images/nig.jpg";
 
-type CharacterCardProps = {
+export type CharacterCardProps = {
   character: {
     characterId: number;
     name: string;
@@ -11,7 +11,7 @@ type CharacterCardProps = {
   };
 };
 
-const toImgSrc = (val?: string | null, mime = "image/jpeg") => {
+export const toImgSrc = (val?: string | null, mime = "image/jpeg") => {
   if (!val || val === "null" || val === "undefined" || val.trim() === "") {
     return defaultPfp;
   }

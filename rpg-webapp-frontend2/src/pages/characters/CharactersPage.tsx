@@ -4,7 +4,7 @@ import { CharacterCard } from "./CharacterCard";
 import "./CharactersPage.css";
 import { NavLink } from "react-router";
 
-type CharacterBasic = {
+export type CharacterBasic = {
   characterId: number;
   name: string;
   characterImage: string;
@@ -29,7 +29,6 @@ export function CharactersPage() {
         }
       );
       setCharacters(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error("Błąd przy pobieraniu postaci uzytkownika:", error);
     }

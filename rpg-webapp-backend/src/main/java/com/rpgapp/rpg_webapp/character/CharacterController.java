@@ -2,10 +2,12 @@ package com.rpgapp.rpg_webapp.character;
 
 import com.rpgapp.rpg_webapp.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,6 +37,14 @@ public class CharacterController {
     @GetMapping(path = "/basic")
     public List<CharacterBasicDTO> getCharacterBasic(){
         return characterService.getCharactersBasic();
+    }
+
+    @GetMapping
+    public List<Character> getCharactersByIds(@RequestParam List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametr 'ids' jest wymagany");
+        }
+        return characterService.getByIds(ids);
     }
 
     @PostMapping

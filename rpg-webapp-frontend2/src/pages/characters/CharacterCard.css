@@ -19,3 +19,9 @@
 .character-image {
     width: 160px;
 }
+
+.character-select-checkbox {
+    position: relative;
+    right: 80px;
+    top: 10px;
+}

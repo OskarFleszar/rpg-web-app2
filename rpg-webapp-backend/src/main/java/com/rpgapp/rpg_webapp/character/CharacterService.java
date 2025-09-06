@@ -56,6 +56,11 @@ public class CharacterService {
         return user.getCharacters();
     }
 
+    public List<Character> getByIds(List<Long> ids) {
+        return characterRepository.findAllById(ids).stream()
+                .toList();
+    }
+
     public List<CharacterBasicDTO> getCharactersBasic() {
     User user = getCurrentUser();
     return user.getCharacters()
