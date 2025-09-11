@@ -23,23 +23,23 @@ public class JwtService {
 
     public String generateToken(com.rpgapp.rpg_webapp.user.User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("email", user.getEmail());           // informacyjnie
+        claims.put("email", user.getEmail());
         claims.put("role", user.getRole().name());
-        claims.put("uid", String.valueOf(user.getId())); // wygodny claim
-        return buildToken(claims, String.valueOf(user.getId())); // sub = userId
+        claims.put("uid", String.valueOf(user.getId()));
+        return buildToken(claims, String.valueOf(user.getId()));
     }
 
-    // Zachowaj wersję z UserDetails, ale spróbuj zrzutować do Twojej encji
+
     public String generateToken(UserDetails userDetails) {
         if (userDetails instanceof com.rpgapp.rpg_webapp.user.User u) {
             return generateToken(u);
         }
-        // awaryjnie: sub = username (stare zachowanie)
+
         return buildToken(new HashMap<>(), userDetails.getUsername());
     }
 
     public String extractUserId(String token) {
-        return extractClaim(token, Claims::getSubject); // sub = userId (String)
+        return extractClaim(token, Claims::getSubject);
     }
 
     public String extractEmail(String token) {

@@ -52,6 +52,14 @@ export function CharacterSelectScreen() {
       >
         Confirm
       </button>
+      <button
+        onClick={() => {
+          navigate(`/campaigns/${id}`);
+          setCharactersSelectedId([]);
+        }}
+      >
+        Skip
+      </button>
     </div>
   );
 }

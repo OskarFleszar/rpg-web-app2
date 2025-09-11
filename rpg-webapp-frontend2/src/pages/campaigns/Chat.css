@@ -1,0 +1,19 @@
+.chat-container{
+  position: fixed;
+  right: 0;
+  top: 150px;
+  bottom: 0px;
+  height: 100%;
+  background-color: grey;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages-container{
+  background-color: lightgrey;
+  height: 700px;
+}
+
+.chat-input-section {
+  
+}
