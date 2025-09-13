@@ -10,7 +10,6 @@ export class WSBus {
   private client: Client;
   private subs: StompSubscription[] = [];
 
-  // kolejki do odpalenia po połączeniu
   private pendingSubs: Array<() => void> = [];
   private pendingPublishes: Array<{ destination: string; body: string }> = [];
   private connected = false;
@@ -18,18 +17,15 @@ export class WSBus {
   constructor(client: Client) {
     this.client = client;
 
-    // zachowaj ewentualne istniejące hooki
     const prevOnConnect = this.client.onConnect;
     const prevOnDisconnect = this.client.onDisconnect;
 
     this.client.onConnect = (frame: IFrame) => {
       this.connected = true;
 
-      // flush subskrypcji
       const toRun = this.pendingSubs.splice(0);
       toRun.forEach((fn) => fn());
 
-      // flush publikacji
       const toSend = this.pendingPublishes.splice(0);
       toSend.forEach(({ destination, body }) => {
         this.client.publish({ destination, body });
@@ -38,9 +34,9 @@ export class WSBus {
       prevOnConnect?.(frame);
     };
 
-    this.client.onDisconnect = () => {
+    this.client.onDisconnect = (frame: IFrame) => {
       this.connected = false;
-      prevOnDisconnect?.();
+      prevOnDisconnect?.(frame);
     };
   }
 
@@ -59,7 +55,6 @@ export class WSBus {
       }
     }
     this.subs = [];
-    // nie awaitujemy w cleanupie
     void this.client.deactivate();
   }
 
@@ -81,7 +76,7 @@ export class WSBus {
         try {
           parsed = JSON.parse(msg.body);
         } catch {
-          /* tekst / nie-JSON */
+          void 0;
         }
         handler(parsed as T, msg);
       });
@@ -94,17 +89,18 @@ export class WSBus {
     } else {
       this.pendingSubs.push(doSubscribe);
     }
-
-    // zwracamy bezpieczne unsubscribe (działa nawet zanim połączenie powstanie)
     return () => {
       cancelled = true;
       if (stompSub) {
         try {
           stompSub.unsubscribe();
-        } catch {}
+        } catch (err) {
+          if (typeof console !== "undefined") {
+            console.debug("[WSBus] unsubscribe failed (ignored)", err);
+          }
+        }
         this.subs = this.subs.filter((s) => s !== stompSub);
       } else {
-        // jeszcze nie zasubskrybowane -> usuń z kolejki
         this.pendingSubs = this.pendingSubs.filter((fn) => fn !== doSubscribe);
       }
     };

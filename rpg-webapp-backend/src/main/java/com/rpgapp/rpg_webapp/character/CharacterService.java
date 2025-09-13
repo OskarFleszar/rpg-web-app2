@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,13 +43,23 @@ public class CharacterService {
 }
 
 
-    public User getCurrentUserWS(SimpMessageHeaderAccessor headerAccessor) {
+    public User getCurrentUserWS(SimpMessageHeaderAccessor headers) {
+        Principal p = headers.getUser();
+        if (p == null) {
+            throw new IllegalStateException("No WS Principal on session");
+        }
 
-            UserDetails userDetails = (UserDetails) headerAccessor.getSessionAttributes().get("user");
-                 Long userId = Long.parseLong(userDetails.getUsername());
-                return userRepository.findById(userId)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found in WebSocket session"));
 
+        String name = p.getName();
+        Long userId;
+        try {
+            userId = Long.parseLong(name);
+        } catch (NumberFormatException ex) {
+            throw new IllegalStateException("WS Principal name is not a numeric userId: " + name, ex);
+        }
+
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: id=" + userId));
     }
 
     public List<Character> getCharacters() {

@@ -18,7 +18,7 @@ export function ProfilePage() {
   useEffect(() => {
     fetchProfileImage();
     loadBasicUserData();
-    console.log(localStorage.getItem("token"))
+    console.log(localStorage.getItem("token"));
   }, []);
 
   const loadBasicUserData = async () => {
@@ -33,7 +33,7 @@ export function ProfilePage() {
       }
     );
     setBasicUserData(response.data);
-    console.log(response.data)
+    console.log(response.data);
   };
 
   const fetchProfileImage = async () => {
