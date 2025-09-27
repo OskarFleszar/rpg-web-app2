@@ -33,7 +33,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/chatroom", "/topic")
                 .setTaskScheduler(brokerTaskScheduler())
-                .setHeartbeatValue(new long[]{10_000, 10_000}); // ~10s/10s
+                .setHeartbeatValue(new long[]{10_000, 10_000});
         config.setApplicationDestinationPrefixes("/app");
     }
 

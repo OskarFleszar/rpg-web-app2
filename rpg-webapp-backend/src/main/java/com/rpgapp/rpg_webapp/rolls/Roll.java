@@ -56,6 +56,7 @@ public class Roll {
     }
 
     public Roll(int rollResult, List<Integer> singleDiceResult, int numberOfDice, String rollType, String rollFor, String outcome, LocalDateTime rollTime, Long characterId, int bonus, User user, Campaign campaign) {
+
         this.rollResult = rollResult;
         this.singleDiceResult = singleDiceResult;
         this.numberOfDice = numberOfDice;

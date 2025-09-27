@@ -68,6 +68,7 @@ public class RollService {
             totalBonus = -30;
         }
 
+
         return switch (rollFor) {
             case "Disguise","Command","Gossip","Charm","Haggle" -> {
                 Attribute.Attributes FellowshipAttribute = character.getAttributes().getAttributes().get("Fellowship");

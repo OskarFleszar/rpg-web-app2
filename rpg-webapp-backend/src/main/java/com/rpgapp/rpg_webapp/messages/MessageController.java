@@ -36,12 +36,12 @@ public class MessageController {
         messageService.sendMessage(message);
     }
 
-    @MessageMapping("/message/{campaignId}")
+    /*@MessageMapping("/message/{campaignId}")
     public void sendMessage(@Payload Message message, @DestinationVariable long campaignId, SimpMessageHeaderAccessor headerAccessor) {
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new IllegalArgumentException("Campaign not found"));
         message.setCampaign(campaign);
 
         messageService.sendMessageWs(message, headerAccessor);
-    }
+    }*/
 }

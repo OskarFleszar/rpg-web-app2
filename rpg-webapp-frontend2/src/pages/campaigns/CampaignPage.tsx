@@ -21,14 +21,13 @@ export function CampaignPage() {
   const { id } = useParams();
   const [addingUser, setAddingUser] = useState(false);
   const [nicknameToAdd, setNicknameToAdd] = useState("");
-  const [characters, setCharacters] = useState();
+  const [characters, setCharacters] = useState([]);
   const { state } = useLocation();
   const characterIds = state?.characterIds as number[];
 
   useEffect(() => {
     if (characterIds) {
       fetchCharactersData();
-      console.log(characterIds);
     }
   }, []);
 
@@ -41,7 +40,6 @@ export function CampaignPage() {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      console.log(response.data);
       setCharacters(response.data);
     } catch (error) {
       console.error("An error occured while fetching character data", error);
@@ -86,7 +84,7 @@ export function CampaignPage() {
       )}
 
       <WSProvider baseUrl={baseUrl}>
-        <Chat campaignId={id} />
+        <Chat campaignId={id} characters={characters} />
       </WSProvider>
     </div>
   );

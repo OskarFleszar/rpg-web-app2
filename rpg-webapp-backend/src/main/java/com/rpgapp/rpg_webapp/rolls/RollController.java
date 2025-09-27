@@ -42,10 +42,10 @@ public class RollController {
         rollService.rollTheDice(roll, campaignId);
     }
 
-    @MessageMapping("/roll/{campaignId}")
+    /*@MessageMapping("/roll/{campaignId}")
     public void rollDice(@DestinationVariable long campaignId, @Payload Roll roll, SimpMessageHeaderAccessor headerAccessor) {
         rollService.rollTheDiceWs(roll, campaignId, headerAccessor);
-    }
+    }*/
 
     @PutMapping("/{rollId}/outcome")
     public ResponseEntity<?> updateOutcome(@PathVariable Long rollId, @RequestBody Map<String, String> payload) {
