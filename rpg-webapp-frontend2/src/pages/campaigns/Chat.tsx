@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Chat.css";
 import { useChannel, usePublish } from "../../ws/hooks";
 import axios from "axios";
@@ -40,20 +40,12 @@ type ChatProps = {
 
 export function Chat({ campaignId, characters }: ChatProps) {
   const publish = usePublish();
-  const handleIncoming = useCallback((msg: MessageItem) => {
-    setMessages((prev) => [...prev, msg]);
-  }, []);
   useChannel<MessageItem>(`/chatroom/${campaignId}`, (msg) => {
     setMessages((prev) => [...prev, msg]);
   });
 
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [basicUserData, setBasicUserData] = useState({
-    nickname: "",
-    email: "",
-    password: "",
-  });
   const [rollData, setRollData] = useState({
     rollType: "d100",
     numberOfDice: 1,
@@ -64,7 +56,6 @@ export function Chat({ campaignId, characters }: ChatProps) {
   >("");
 
   useEffect(() => {
-    loadBasicUserData();
     fetchChatHistory();
   }, [campaignId]);
 
@@ -76,20 +67,6 @@ export function Chat({ campaignId, characters }: ChatProps) {
     }
     setSelectedCharacterId(characters[0].characterId);
   }, [characters]);
-
-  const loadBasicUserData = async () => {
-    const response = await axios.get(
-      `http://localhost:8080/api/user/one/basic/${localStorage.getItem(
-        "userId"
-      )}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    setBasicUserData(response.data);
-  };
 
   const fetchChatHistory = async () => {
     try {
@@ -153,9 +130,9 @@ export function Chat({ campaignId, characters }: ChatProps) {
             </div>
           ) : (
             <div key={i} className="chat-message roll">
-              <strong>{m.nickname}</strong> rzuca {m.roll.numberOfDice}×
+              <strong>{m.nickname}</strong> Rolled {m.roll.numberOfDice}×
               {m.roll.rollType}
-              {m.roll.rollFor ? ` dla ${m.roll.rollFor}` : ""}:{" "}
+              {m.roll.rollFor ? ` for ${m.roll.rollFor}` : ""}:{" "}
               {m.roll.results?.join(", ") ?? "…"}{" "}
               {typeof m.roll.total === "number" ? (
                 <span
@@ -167,7 +144,7 @@ export function Chat({ campaignId, characters }: ChatProps) {
                         ? "red"
                         : "rhite",
                   }}
-                >{`(suma: ${m.roll.total})`}</span>
+                >{`(total: ${m.roll.total})`}</span>
               ) : (
                 ""
               )}
