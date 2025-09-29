@@ -22,10 +22,11 @@ type ChatEntryBase = {
   content: string;
 };
 
+type SystemEntry = ChatEntryBase & { type: "system" };
 type ChatMessage = ChatEntryBase & { type: "message" };
 type DiceRoll = ChatEntryBase & { type: "roll"; roll: RollInfo };
 
-type MessageItem = ChatMessage | DiceRoll;
+type MessageItem = SystemEntry | ChatMessage | DiceRoll;
 
 type CharacterOption = {
   characterId: number;
@@ -58,9 +59,9 @@ export function Chat({ campaignId, characters }: ChatProps) {
     numberOfDice: 1,
     rollFor: "Other",
   });
-  const [selectedCharacterId, setSelectedCharacterId] = useState<number | "">(
-    ""
-  );
+  const [selectedCharacterId, setSelectedCharacterId] = useState<
+    number | "" | null
+  >("");
 
   useEffect(() => {
     loadBasicUserData();
@@ -114,14 +115,14 @@ export function Chat({ campaignId, characters }: ChatProps) {
   };
 
   const sendRoll = () => {
-    if (selectedCharacterId === "") return;
+    if (selectedCharacterId === "") {
+      setSelectedCharacterId(null);
+    }
     publish(`/app/roll/${campaignId}`, {
       rollType: rollData.rollType,
       rollFor: rollData.rollFor,
       numberOfDice: Number(rollData.numberOfDice),
-      // bonus: ...
       characterId: Number(selectedCharacterId),
-      // clientId: opcjonalnie, gdy chcesz optymistycznie wyświetlać i potem podmienić
     });
   };
 
@@ -146,15 +147,30 @@ export function Chat({ campaignId, characters }: ChatProps) {
                 {new Date(m.timestamp).toLocaleTimeString()}
               </span>
             </div>
+          ) : m.type === "system" ? (
+            <div key={i} className="chat-message system">
+              <em>{m.content}</em>
+            </div>
           ) : (
             <div key={i} className="chat-message roll">
               <strong>{m.nickname}</strong> rzuca {m.roll.numberOfDice}×
               {m.roll.rollType}
               {m.roll.rollFor ? ` dla ${m.roll.rollFor}` : ""}:{" "}
               {m.roll.results?.join(", ") ?? "…"}{" "}
-              {typeof m.roll.total === "number"
-                ? `(suma: ${m.roll.total})`
-                : ""}
+              {typeof m.roll.total === "number" ? (
+                <span
+                  style={{
+                    color:
+                      m.roll.outcome === "success"
+                        ? "green"
+                        : m.roll.outcome === "failure"
+                        ? "red"
+                        : "rhite",
+                  }}
+                >{`(suma: ${m.roll.total})`}</span>
+              ) : (
+                ""
+              )}
               <span className="chat-ts">
                 {new Date(m.timestamp).toLocaleTimeString()}
               </span>
@@ -221,21 +237,28 @@ export function Chat({ campaignId, characters }: ChatProps) {
             <option value="Intimidate">Intimidate</option>
             <option value="Other">Other</option>
           </select>
-          {characters ? (
+          {(characters?.length ?? 0) > 0 ? (
             <select
               name="character"
-              value={selectedCharacterId}
-              onChange={(e) => setSelectedCharacterId(Number(e.target.value))}
+              value={selectedCharacterId ?? ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                setSelectedCharacterId(v === "" ? null : Number(v));
+              }}
             >
-              {characters.map((c) => (
+              <option value="">— no character —</option>
+              {characters!.map((c) => (
                 <option key={c.characterId} value={c.characterId}>
                   {c.name}
                 </option>
               ))}
             </select>
           ) : (
-            <></>
+            <select disabled>
+              <option>No characters selected</option>
+            </select>
           )}
+
           <button onClick={sendRoll}>Roll</button>
         </div>
       </div>
