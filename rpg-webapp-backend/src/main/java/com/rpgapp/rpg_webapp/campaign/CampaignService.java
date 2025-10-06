@@ -1,5 +1,7 @@
 package com.rpgapp.rpg_webapp.campaign;
 
+import com.rpgapp.rpg_webapp.board.entity.Board;
+import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
 import com.rpgapp.rpg_webapp.user.UserRepository;
@@ -15,11 +17,14 @@ public class CampaignService {
     private final CampaignRepository campaignRepository;
     private final CharacterService characterService;
     private final UserRepository userRepository;
+
+    private final BoardRepository boardRepository;
     @Autowired
-    public CampaignService(CampaignRepository campaignRepository, CharacterService characterService, UserRepository userRepository) {
+    public CampaignService(CampaignRepository campaignRepository, CharacterService characterService, UserRepository userRepository, BoardRepository boardRepository) {
         this.campaignRepository = campaignRepository;
         this.characterService = characterService;
         this.userRepository = userRepository;
+        this.boardRepository = boardRepository;
     }
 
 
@@ -31,8 +36,16 @@ public class CampaignService {
             campaign.setPlayers(new HashSet<>());
         }
 
-        campaign.getPlayers().add(user);
+
         campaignRepository.save(campaign);
+
+        campaign.getPlayers().add(user);
+        Board b = new Board();
+        b.setCampaign(campaign);
+        b.setName("Board 1");
+        b = boardRepository.save(b);
+
+        campaign.setActiveBoard(b);
     }
 
 

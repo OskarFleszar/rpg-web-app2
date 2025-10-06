@@ -1,15 +1,13 @@
 package com.rpgapp.rpg_webapp.campaign;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.rpgapp.rpg_webapp.board.entity.Board;
 import com.rpgapp.rpg_webapp.drawings.Drawing;
 import com.rpgapp.rpg_webapp.messages.Message;
 import com.rpgapp.rpg_webapp.rolls.Roll;
 import com.rpgapp.rpg_webapp.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 import java.util.List;
@@ -56,18 +54,19 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> message;
 
-    @JsonManagedReference("drawing_campaign")
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Drawing> drawing;
+    private List<Board> boards;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "active_board_id")
+    private Board activeBoard;
 
 
-
-    public Campaign(String campaignName, User gameMaster, Set<User> players, List<Roll> roll, List<Message> message, List<Drawing> drawing) {
+    public Campaign(String campaignName, User gameMaster, Set<User> players, List<Roll> roll, List<Board> boards) {
         this.campaignName = campaignName;
         this.gameMaster = gameMaster;
         this.players = players;
         this.roll = roll;
-        this.message = message;
-        this.drawing = drawing;
+        this.boards = boards;
     }
 }

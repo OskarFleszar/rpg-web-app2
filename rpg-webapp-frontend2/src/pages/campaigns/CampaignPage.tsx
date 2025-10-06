@@ -5,6 +5,7 @@ import "./CampaignPage.css";
 import { createStompClient } from "../../ws/client";
 import { Chat } from "./Chat";
 import { WSProvider } from "../../ws/WSProvider";
+import BoardCanvas from "./board/BoardCanvas";
 
 export function WsSmokeTest() {
   useEffect(() => {
@@ -85,6 +86,10 @@ export function CampaignPage() {
 
       <WSProvider baseUrl={baseUrl}>
         <Chat campaignId={id} characters={characters} />
+        <div style={{ marginTop: 16, height: 560 }}>
+          {/* jeżeli id z useParams jest string | undefined, zrób Number(...) z kontrolą */}
+          {id ? <BoardCanvas boardId={Number(id)} /> : null}
+        </div>
       </WSProvider>
     </div>
   );
