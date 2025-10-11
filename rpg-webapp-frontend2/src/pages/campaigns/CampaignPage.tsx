@@ -86,10 +86,7 @@ export function CampaignPage() {
 
       <WSProvider baseUrl={baseUrl}>
         <Chat campaignId={id} characters={characters} />
-        <div style={{ marginTop: 16, height: 560 }}>
-          {/* jeżeli id z useParams jest string | undefined, zrób Number(...) z kontrolą */}
-          {id ? <BoardCanvas boardId={Number(id)} /> : null}
-        </div>
+        <BoardCanvas boardId={Number(id)} />
       </WSProvider>
     </div>
   );

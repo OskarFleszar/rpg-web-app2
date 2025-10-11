@@ -13,7 +13,7 @@ import lombok.*;
 public class Board {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // albo SEQUENCE – jak u Ciebie
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

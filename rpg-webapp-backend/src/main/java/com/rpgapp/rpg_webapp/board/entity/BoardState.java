@@ -16,15 +16,15 @@ public class BoardState {
 
     @Id
     @Column(name = "board_id")
-    private Long boardId;            // UWAGA: typ obiektowy Long (nie 'long') i BEZ @GeneratedValue
+    private Long boardId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId                         // <-- współdziel klucz z Board.id
+    @MapsId
     @JoinColumn(name = "board_id")
     private Board board;
 
     @Version
-    private Long version;           // NIE ustawiaj ręcznie; JPA samo inkrementuje
+    private Long version;
 
     @Lob
     @Column(name = "state_json", nullable = false, columnDefinition = "TEXT")

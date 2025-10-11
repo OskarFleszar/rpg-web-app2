@@ -1,105 +1,79 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useChannel, usePublish } from "../../../ws/hooks"; // ścieżkę dostosuj do siebie
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "./BoardCanvas.css";
+import { Circle, Layer, Line, Stage } from "react-konva";
+import type Konva from "konva";
+import type { KonvaEventObject } from "konva/lib/Node";
 import type { BoardOp, Snapshot, StrokeAppendOp, StrokeStartOp } from "./ops";
+import { useChannel, usePublish } from "../../../ws/hooks";
+import axios from "axios";
 
-type Props = {
-  boardId: number; // ID tablicy (musi istnieć po stronie backendu)
-  layerId?: string; // np. "base"
-  initialColor?: string; // np. "#222222"
-  initialWidth?: number; // np. 3
+type BoardCanvasProps = {
+  boardId: number;
 };
 
-export default function BoardCanvas({
-  boardId,
-  layerId = "base",
-  initialColor = "#222222",
-  initialWidth = 3,
-}: Props) {
-  const publish = usePublish();
+type Tool = "hand" | "pencil";
 
-  // refs do canvasa i kontekstu
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+type Stroke = {
+  id: string;
+  points: number[];
+  color: string;
+  width: number;
+};
 
-  // stan narzędzia
-  const [color, setColor] = useState(initialColor);
-  const [width, setWidth] = useState<number>(initialWidth);
+export default function BoardCanvas({ boardId }: BoardCanvasProps) {
+  //WINDOW SIZE AND RESIZING
 
-  // czy aktualnie rysujemy
-  const drawingRef = useRef(false);
-  // identyfikator aktualnej ścieżki
-  const pathIdRef = useRef<string | null>(null);
-
-  // bufor punktów do wysyłki (append co ~40ms)
-  const pendingPointsRef = useRef<number[][]>([]);
-  const flushTimerRef = useRef<number | null>(null);
-
-  // stan zdalnych ścieżek (po to, by wiedzieć skąd prowadzić następną linię)
-  // pathId -> lastPoint + styl
-  const remoteStateRef = useRef<
-    Map<string, { last?: [number, number]; color: string; width: number }>
-  >(new Map());
-
-  // DPI scaling + resize
-  const fitToContainer = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = parent.getBoundingClientRect();
-
-    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
-    ctx.scale(dpr, dpr);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctxRef.current = ctx;
-    // Opcjonalnie: czyścić canvas przy resize (tu: czyści)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }, []);
+  const [size, setSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
 
   useEffect(() => {
-    fitToContainer();
-    window.addEventListener("resize", fitToContainer);
-    return () => window.removeEventListener("resize", fitToContainer);
-  }, [fitToContainer]);
+    function onResize() {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    onResize();
+    window.addEventListener("resize", onResize);
+    console.log(boardId);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
-  // Rysowanie linii od A do B (na lokalnym canvasie)
-  const drawSegment = useCallback(
-    (from: [number, number], to: [number, number], col: string, w: number) => {
-      const ctx = ctxRef.current;
-      if (!ctx) return;
-      ctx.strokeStyle = col;
-      ctx.lineWidth = w;
-      ctx.beginPath();
-      ctx.moveTo(from[0], from[1]);
-      ctx.lineTo(to[0], to[1]);
-      ctx.stroke();
-    },
+  //WS HANDLING
+
+  const publish = usePublish();
+
+  const clientId = useMemo(
+    () => (crypto as any).randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
     []
   );
 
-  // Flush bufora appendów do WS
+  const myActivePathsRef = useRef<Set<string>>(new Set());
+
+  const pendingPointsRef = useRef<number[][]>([]);
+  const flushTimerRef = useRef<number | null>(null);
+  const pathIdRef = useRef<string | null>(null);
+
+  const remoteStrokesRef = useRef<
+    Map<string, { last?: [number, number]; color: string; width: number }>
+  >(new Map());
+
   const flushAppend = useCallback(() => {
-    const points = pendingPointsRef.current;
-    if (points.length === 0) return;
-    const pid = pathIdRef.current;
-    if (!pid) return;
+    const pts = pendingPointsRef.current;
+    if (!pts.length || !pathIdRef.current) return;
+
     const op: StrokeAppendOp = {
       type: "stroke.append",
       boardId,
-      pathId: pid,
-      points: points.splice(0, points.length), // wyczyść bufor
+      pathId: pathIdRef.current,
+      points: pts.splice(0, pts.length),
+      clientId,
     };
     publish(`/app/board.${boardId}.op`, op);
   }, [boardId, publish]);
 
-  // start timera do flush co ~40ms
   const ensureFlushTimer = useCallback(() => {
     if (flushTimerRef.current != null) return;
     flushTimerRef.current = window.setInterval(() => {
@@ -114,79 +88,20 @@ export default function BoardCanvas({
     }
   }, []);
 
-  // Konwersja event -> współrzędne w CSS pixels (skalowanie już robi kontekst przez scale(dpr))
-  const getXY = (
-    e: React.PointerEvent<HTMLCanvasElement>
-  ): [number, number] => {
-    const canvas = canvasRef.current!;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    return [Math.round(x), Math.round(y)];
-  };
-
-  // Pointer down = stroke.start
-  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drawingRef.current = true;
-    const pid = (crypto as any).randomUUID
-      ? (crypto as any).randomUUID()
-      : `${Date.now()}-${Math.random()}`;
-    pathIdRef.current = pid;
-
-    const op: StrokeStartOp = {
-      type: "stroke.start",
-      boardId,
-      layerId,
-      pathId: pid,
-      color,
-      width,
-    };
-    publish(`/app/board.${boardId}.op`, op);
-
-    // dodaj pierwszy punkt do bufora append
-    pendingPointsRef.current.push(getXY(e));
-    ensureFlushTimer();
-  };
-
-  // Pointer move = lokalne rysowanie + dopisywanie punktów do bufora
-  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!drawingRef.current) return;
-    const pt = getXY(e);
-
-    // Dorysuj lokalnie (od ostatniego zapisanego punktu w buforze)
-    const buf = pendingPointsRef.current;
-    const prev = buf.length > 0 ? (buf[buf.length - 1] as number[]) : null;
-    if (prev) {
-      drawSegment([prev[0], prev[1]], [pt[0], pt[1]], color, width);
-    }
-    buf.push(pt);
-  };
-
-  // Pointer up = flush append + stroke.end
-  const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!drawingRef.current) return;
-    drawingRef.current = false;
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    // doślij ostatnie punkty
-    flushAppend();
-    clearFlushTimer();
-
-    const pid = pathIdRef.current;
-    pathIdRef.current = null;
-    if (!pid) return;
-
-    const endOp = { type: "stroke.end", boardId, pathId: pid };
-    publish(`/app/board.${boardId}.op`, endOp);
-  };
-
-  // Odbiór operacji z serwera (i od innych klientów)
   useChannel<BoardOp>(`/topic/board.${boardId}.op`, (op) => {
     if (!op || typeof (op as any).type !== "string") return;
+
+    if (
+      "pathId" in op &&
+      op.pathId &&
+      myActivePathsRef.current.has(op.pathId)
+    ) {
+      return;
+    }
+
     switch (op.type) {
       case "stroke.start": {
-        // zapamiętaj styl i wyczyść last point
-        remoteStateRef.current.set(op.pathId, {
+        remoteStrokesRef.current.set(op.pathId, {
           color: op.color,
           width: op.width,
           last: undefined,
@@ -194,37 +109,52 @@ export default function BoardCanvas({
         break;
       }
       case "stroke.append": {
-        const s = remoteStateRef.current.get(op.pathId);
+        const s = remoteStrokesRef.current.get(op.pathId);
         if (!s) {
-          // jeśli z jakiegoś powodu append przyszedł przed startem: załóż defaulty
-          remoteStateRef.current.set(op.pathId, {
+          remoteStrokesRef.current.set(op.pathId, {
             color: "#000",
             width: 2,
             last: undefined,
           });
         }
-        const state = remoteStateRef.current.get(op.pathId)!;
-        const pts = op.points ?? [];
-        // rysuj segmenty (last -> pierwszy punkt, potem kolejne)
-        let last = state.last;
-        for (const p of pts) {
-          const curr: [number, number] = [p[0], p[1]];
-          if (last) {
-            drawSegment(last, curr, state.color, state.width);
+        const state = remoteStrokesRef.current.get(op.pathId)!;
+
+        setStrokes((prev) => {
+          const idx = prev.findIndex((st) => st.id === op.pathId);
+          if (idx === -1) {
+            const firstPts = op.points ?? [];
+            const flat = firstPts.flat();
+            const newStroke: Stroke = {
+              id: op.pathId,
+              color: state.color,
+              width: state.width,
+              points: flat,
+            };
+            return [...prev, newStroke];
+          } else {
+            // dopnij punkty
+            const add = (op.points ?? []).flat();
+            if (add.length === 0) return prev;
+            const updated = {
+              ...prev[idx],
+              points: [...prev[idx].points, ...add],
+            };
+            const copy = prev.slice();
+            copy[idx] = updated;
+            return copy;
           }
-          last = curr;
+        });
+
+        const lastPts = op.points ?? [];
+        if (lastPts.length) {
+          const last = lastPts[lastPts.length - 1]!;
+          state.last = [last[0], last[1]];
         }
-        state.last = last;
         break;
       }
       case "stroke.end": {
-        // można posprzątać stan ścieżki
-        remoteStateRef.current.delete(op.pathId);
-        break;
-      }
-      case "object.remove": {
-        // proste demo: czyścimy cały canvas (w praktyce: trzeba by odtworzyć snapshot)
-        // Tu zostawiamy TODO – pełna rekonstrukcja to osobny temat.
+        // opcjonalnie sprzątanie
+        remoteStrokesRef.current.delete(op.pathId);
         break;
       }
       default:
@@ -234,14 +164,8 @@ export default function BoardCanvas({
 
   useEffect(() => {
     let cancelled = false;
-
-    async function loadSnapshot() {
-      const canvas = canvasRef.current;
-      const ctx = ctxRef.current;
-      if (!canvas || !ctx) return;
-
-      // 1) ściągnij JSON
-      const res = await fetch(
+    async function loadBoard() {
+      const res = await axios.get(
         `http://localhost:8080/api/board/${boardId}/state`,
         {
           headers: {
@@ -249,127 +173,244 @@ export default function BoardCanvas({
           },
         }
       );
-      if (!res.ok) return;
-      const snap: Snapshot = await res.json();
+      const snap: Snapshot = res.data;
       if (cancelled) return;
-
-      // 2) wyczyść canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 3) odrysuj warstwami
+      const all: Stroke[] = [];
       for (const layer of snap.layers ?? []) {
         for (const obj of layer.objects ?? []) {
-          if (obj.type === "stroke") {
-            drawStrokeFromPoints(ctx, obj.points, obj.color, obj.width);
-          }
-          // TODO: w przyszłości: image, rect, text, ...
+          if (obj.type !== "stroke") continue;
+          // w zależności od formatu: points może być number[][] albo flat number[]
+          const points = Array.isArray(obj.points?.[0])
+            ? (obj.points as number[][]).flat()
+            : (obj.points as number[]) ?? [];
+          all.push({
+            id: obj.pathId,
+            color: obj.color,
+            width: obj.width,
+            points,
+          });
         }
       }
+      setStrokes(all);
     }
-
-    loadSnapshot().catch(console.error);
+    loadBoard().catch(console.error);
     return () => {
       cancelled = true;
     };
   }, [boardId]);
 
-  function drawStrokeFromPoints(
-    ctx: CanvasRenderingContext2D,
-    pts: any, // może być number[] (spłaszczone) lub number[][] (append-y)
-    color: string,
-    width: number
-  ) {
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+  //DRAWING
 
-    // Obsłuż oba formaty:
-    if (Array.isArray(pts) && pts.length > 0) {
-      // 1) jeśli to [[x,y], [x,y], ...]
-      if (Array.isArray(pts[0])) {
-        const arr = pts as number[][];
-        ctx.beginPath();
-        ctx.moveTo(arr[0][0], arr[0][1]);
-        for (let i = 1; i < arr.length; i++) {
-          ctx.lineTo(arr[i][0], arr[i][1]);
-        }
-        ctx.stroke();
-        return;
-      }
+  const [strokes, setStrokes] = useState<Stroke[]>([]);
+  const [color, setColor] = useState("#222222");
+  const [width, setWidth] = useState(3);
 
-      // 2) jeśli to [x0, y0, x1, y1, ...] (spłaszczone)
-      const flat = pts as number[];
-      if (flat.length >= 4) {
-        ctx.beginPath();
-        ctx.moveTo(flat[0], flat[1]);
-        for (let i = 2; i < flat.length; i += 2) {
-          ctx.lineTo(flat[i], flat[i + 1]);
-        }
-        ctx.stroke();
+  const drawingRef = useRef(false);
+
+  const drawLayerRef = useRef<Konva.Layer | null>(null);
+
+  function getPointerOnDrawLayer(): { x: number; y: number } | null {
+    const stage = stageRef.current;
+    const layer = drawLayerRef.current;
+    if (!stage || !layer) return null;
+
+    const pos = stage.getPointerPosition();
+    if (!pos) return null;
+
+    const t = layer.getAbsoluteTransform().copy();
+    t.invert();
+    return t.point(pos);
+  }
+
+  function onStagePointerDown(e: Konva.KonvaEventObject<PointerEvent>) {
+    if (tool !== "pencil") return;
+
+    const pt = getPointerOnDrawLayer();
+    if (!pt) return;
+
+    drawingRef.current = true;
+    const id = crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+
+    pathIdRef.current = id;
+    myActivePathsRef.current.add(id);
+
+    const opStart: StrokeStartOp = {
+      type: "stroke.start",
+      boardId,
+      layerId: "base",
+      pathId: id,
+      color,
+      width,
+      clientId,
+    };
+    publish(`/app/board.${boardId}.op`, opStart);
+    pendingPointsRef.current.push([pt.x, pt.y]);
+    ensureFlushTimer();
+
+    setStrokes((prev) => [...prev, { id, points: [pt.x, pt.y], color, width }]);
+  }
+
+  function onStagePointerMove(e: Konva.KonvaEventObject<PointerEvent>) {
+    if (tool !== "pencil" || !drawingRef.current) return;
+
+    const pt = getPointerOnDrawLayer();
+    if (!pt) return;
+
+    setStrokes((prev) => {
+      if (prev.length === 0) return prev;
+      const last = prev[prev.length - 1];
+
+      const L = last.points.length;
+      if (L >= 2) {
+        const dx = pt.x - last.points[L - 2];
+        const dy = pt.y - last.points[L - 1];
+        if (dx * dx + dy * dy < 1) return prev;
       }
+      pendingPointsRef.current.push([pt.x, pt.y]);
+      const updated = { ...last, points: [...last.points, pt.x, pt.y] };
+      return [...prev.slice(0, -1), updated];
+    });
+  }
+
+  function onStagePointerUp(e: Konva.KonvaEventObject<PointerEvent>) {
+    if (tool !== "pencil") return;
+
+    flushAppend();
+    clearFlushTimer();
+
+    const pid = pathIdRef.current;
+    pathIdRef.current = null;
+    drawingRef.current = false;
+
+    if (pid) {
+      myActivePathsRef.current.delete(pid);
+      publish(`/app/board.${boardId}.op`, {
+        type: "stroke.end",
+        boardId,
+        pathId: pid,
+        clientId,
+      });
     }
   }
 
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateRows: "auto 1fr",
-        height: "100%",
-        gap: 8,
-      }}
-    >
-      {/* Panel narzędzi */}
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          Color:
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-          />
-        </label>
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          Width:
-          <input
-            type="number"
-            min={1}
-            max={50}
-            value={width}
-            onChange={(e) =>
-              setWidth(Math.max(1, Math.min(50, Number(e.target.value) || 1)))
-            }
-            style={{ width: 64 }}
-          />
-        </label>
-      </div>
+  //TOOLS WHEEL AND PANING
 
-      {/* Canvas */}
+  const [tool, setTool] = useState<Tool>("hand");
+
+  const stageRef = useRef<Konva.Stage | null>(null);
+  const [stageScale, setStageScale] = useState(1);
+  const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+
+  const onWheel = (e: KonvaEventObject<WheelEvent>) => {
+    e.evt.preventDefault();
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const scaleBy = 1.05;
+    const oldScale = stageScale;
+    const dir = e.evt.deltaY > 0 ? 1 : -1;
+    const next = dir > 0 ? oldScale / scaleBy : oldScale * scaleBy;
+    const newScale = Math.max(0.2, Math.min(5, next));
+
+    const mousePointTo = {
+      x: (pointer.x - stagePos.x) / oldScale,
+      y: (pointer.y - stagePos.y) / oldScale,
+    };
+
+    setStageScale(newScale);
+    setStagePos({
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    });
+  };
+
+  const onDragMove = (e: any) => setStagePos(e.target.position());
+  const onDragStart = () => setIsPanning(true);
+  const onDragEnd = () => setIsPanning(false);
+
+  const cursor =
+    tool === "hand" ? (isPanning ? "grabbing" : "grab") : "crosshair";
+
+  return (
+    <div className="canvas-container">
       <div
-        style={{
-          position: "relative",
-          border: "1px solid #ddd",
-          borderRadius: 8,
-          overflow: "hidden",
-        }}
+        className={`board-toolbar ${tool === "pencil" ? "pencil-open" : ""}`}
       >
-        <canvas
-          ref={canvasRef}
-          style={{
-            width: "100%",
-            height: "500px",
-            touchAction: "none",
-            cursor: "crosshair",
-            display: "block",
-          }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-          onPointerLeave={onPointerUp}
-        />
+        <button
+          className={`tool-button ${tool === "hand" ? "active" : ""}`}
+          title="Pan"
+          onClick={() => setTool("hand")}
+        >
+          ✋
+        </button>
+
+        <div className={`pencil-select ${tool === "pencil" ? "open" : ""}`}>
+          <button
+            className={`tool-button ${tool === "pencil" ? "active" : ""}`}
+            title="Pencil"
+            onClick={() => setTool(tool === "pencil" ? "hand" : "pencil")}
+          >
+            ✏️
+          </button>
+
+          <div className="drawing-settings">
+            <label className="tool-tile">
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+              />
+            </label>
+
+            <label className="tool-tile">
+              <input
+                type="number"
+                min={1}
+                value={width}
+                onChange={(e) => setWidth(Number(e.target.value))}
+              />
+            </label>
+          </div>
+        </div>
       </div>
+      <Stage
+        ref={stageRef}
+        width={size.width}
+        height={size.height}
+        x={stagePos.x}
+        y={stagePos.y}
+        scaleX={stageScale}
+        scaleY={stageScale}
+        draggable={tool === "hand"}
+        onDragStart={onDragStart}
+        onDragMove={onDragMove}
+        onDragEnd={onDragEnd}
+        onWheel={onWheel}
+        onPointerDown={onStagePointerDown}
+        onPointerMove={onStagePointerMove}
+        onPointerUp={onStagePointerUp}
+        onPointerLeave={onStagePointerUp}
+        onPointerCancel={onStagePointerUp}
+        style={{ cursor, background: "#fff" }}
+      >
+        <Layer ref={drawLayerRef}>
+          {strokes.map((s) => (
+            <Line
+              key={s.id}
+              points={s.points}
+              stroke={s.color}
+              strokeWidth={s.width}
+              lineCap="round"
+              lineJoin="round"
+            />
+          ))}
+          <Circle x={240} y={180} radius={60} fill="#4f46e5" shadowBlur={10} />
+        </Layer>
+      </Stage>
     </div>
   );
 }
