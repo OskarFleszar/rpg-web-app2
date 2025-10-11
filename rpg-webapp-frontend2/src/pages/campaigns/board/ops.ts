@@ -45,8 +45,35 @@ export type Snapshot = {
   }>;
 };
 
+export type EraseStartOp = {
+  type: "erase.start";
+  boardId: number;
+  layerId: string;
+  eraseId: string;
+  radius: number;
+  clientId?: string;
+};
+
+export type EraseAppendOp = {
+  type: "erase.append";
+  boardId: number;
+  eraseId: string;
+  points: number[][];
+  clientId?: string;
+};
+
+export type EraseEndOp = {
+  type: "erase.end";
+  boardId: number;
+  eraseId: string;
+  clientId?: string;
+};
+
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
   | StrokeEndOp
+  | EraseAppendOp
+  | EraseEndOp
+  | EraseStartOp
   | ObjectRemoveOp;

@@ -11,7 +11,7 @@ type BoardCanvasProps = {
   boardId: number;
 };
 
-type Tool = "hand" | "pencil";
+type Tool = "hand" | "pencil" | "eraser";
 
 type Stroke = {
   id: string;
@@ -55,6 +55,7 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
   const pendingPointsRef = useRef<number[][]>([]);
   const flushTimerRef = useRef<number | null>(null);
   const pathIdRef = useRef<string | null>(null);
+  const eraseIdRef = useRef<string | null>(null);
 
   const remoteStrokesRef = useRef<
     Map<string, { last?: [number, number]; color: string; width: number }>
@@ -153,7 +154,6 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
         break;
       }
       case "stroke.end": {
-        // opcjonalnie sprzątanie
         remoteStrokesRef.current.delete(op.pathId);
         break;
       }
@@ -179,7 +179,7 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
       for (const layer of snap.layers ?? []) {
         for (const obj of layer.objects ?? []) {
           if (obj.type !== "stroke") continue;
-          // w zależności od formatu: points może być number[][] albo flat number[]
+
           const points = Array.isArray(obj.points?.[0])
             ? (obj.points as number[][]).flat()
             : (obj.points as number[]) ?? [];
@@ -204,6 +204,7 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [color, setColor] = useState("#222222");
   const [width, setWidth] = useState(3);
+  const [eraserSize, setEraserSize] = useState(20);
 
   const drawingRef = useRef(false);
 
@@ -222,7 +223,7 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
     return t.point(pos);
   }
 
-  function onStagePointerDown(e: Konva.KonvaEventObject<PointerEvent>) {
+  function onPencilPointerDown(e: Konva.KonvaEventObject<PointerEvent>) {
     if (tool !== "pencil") return;
 
     const pt = getPointerOnDrawLayer();
@@ -250,11 +251,13 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
     setStrokes((prev) => [...prev, { id, points: [pt.x, pt.y], color, width }]);
   }
 
-  function onStagePointerMove(e: Konva.KonvaEventObject<PointerEvent>) {
+  function onPencilPointerMove(e: Konva.KonvaEventObject<PointerEvent>) {
     if (tool !== "pencil" || !drawingRef.current) return;
 
     const pt = getPointerOnDrawLayer();
     if (!pt) return;
+
+    if (pt) setPointerOnLayer({ x: pt.x, y: pt.y });
 
     setStrokes((prev) => {
       if (prev.length === 0) return prev;
@@ -272,7 +275,7 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
     });
   }
 
-  function onStagePointerUp(e: Konva.KonvaEventObject<PointerEvent>) {
+  function onPencilPointerUp(e: Konva.KonvaEventObject<PointerEvent>) {
     if (tool !== "pencil") return;
 
     flushAppend();
@@ -293,6 +296,25 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
     }
   }
 
+  function onStagePointerDown(e: Konva.KonvaEventObject<PointerEvent>) {
+    if (tool === "pencil") return onPencilPointerDown(e);
+    if (tool === "eraser") return onEraserPointerDown();
+  }
+
+  function onStagePointerMove(e: Konva.KonvaEventObject<PointerEvent>) {
+    // aktualizuj pozycję podglądu:
+    const pt = getPointerOnDrawLayer();
+    if (pt) setPointerOnLayer({ x: pt.x, y: pt.y });
+
+    if (tool === "pencil") return onPencilPointerMove(e);
+    if (tool === "eraser") return onEraserPointerMove();
+  }
+
+  function onStagePointerUp(e: Konva.KonvaEventObject<PointerEvent>) {
+    if (tool === "pencil") return onPencilPointerUp(e);
+    if (tool === "eraser") return onEraserPointerUp();
+  }
+
   //TOOLS WHEEL AND PANING
 
   const [tool, setTool] = useState<Tool>("hand");
@@ -301,6 +323,10 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
   const [stageScale, setStageScale] = useState(1);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
+  const [pointerOnLayer, setPointerOnLayer] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const onWheel = (e: KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
@@ -333,7 +359,59 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
   const onDragEnd = () => setIsPanning(false);
 
   const cursor =
-    tool === "hand" ? (isPanning ? "grabbing" : "grab") : "crosshair";
+    tool === "hand"
+      ? isPanning
+        ? "grabbing"
+        : "grab"
+      : tool === "eraser"
+      ? "none"
+      : "crosshair";
+
+  //ERASER
+
+  function onEraserPointerDown() {
+    const pt = getPointerOnDrawLayer();
+    if (!pt) return;
+
+    const id = crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+    eraseIdRef.current = id;
+
+    publish(`/app/board.${boardId}.op`, {
+      type: "erase.start",
+      boardId,
+      layerId: "base",
+      eraseId: id,
+      radius: eraserSize,
+      clientId,
+    } as const);
+
+    pendingPointsRef.current.push([pt.x, pt.y]);
+    ensureFlushTimer();
+  }
+
+  function onEraserPointerMove() {
+    if (!eraseIdRef.current) return;
+    const pt = getPointerOnDrawLayer();
+    if (!pt) return;
+    pendingPointsRef.current.push([pt.x, pt.y]);
+  }
+
+  function onEraserPointerUp() {
+    if (!eraseIdRef.current) return;
+
+    flushAppend();
+    clearFlushTimer();
+
+    const id = eraseIdRef.current;
+    eraseIdRef.current = null;
+
+    publish(`/app/board.${boardId}.op`, {
+      type: "erase.end",
+      boardId,
+      eraseId: id!,
+      clientId,
+    } as const);
+  }
 
   return (
     <div className="canvas-container">
@@ -347,6 +425,26 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
         >
           ✋
         </button>
+
+        <div className={`eraser-select ${tool === "eraser" ? "open" : ""}`}>
+          <button
+            className={`tool-button ${tool === "eraser" ? "active" : ""}`}
+            title="Eraser"
+            onClick={() => setTool("eraser")}
+          >
+            🩹
+          </button>
+          <div className="drawing-settings">
+            <label className="tool-tile">
+              <input
+                type="number"
+                min={1}
+                value={eraserSize}
+                onChange={(e) => setEraserSize(Number(e.target.value))}
+              />
+            </label>{" "}
+          </div>
+        </div>
 
         <div className={`pencil-select ${tool === "pencil" ? "open" : ""}`}>
           <button
@@ -409,6 +507,17 @@ export default function BoardCanvas({ boardId }: BoardCanvasProps) {
             />
           ))}
           <Circle x={240} y={180} radius={60} fill="#4f46e5" shadowBlur={10} />
+          {tool === "eraser" && pointerOnLayer && (
+            <Circle
+              x={pointerOnLayer.x}
+              y={pointerOnLayer.y}
+              radius={eraserSize / 2}
+              stroke="#3b82f6"
+              dash={[6, 4]}
+              opacity={0.9}
+              listening={false}
+            />
+          )}
         </Layer>
       </Stage>
     </div>
