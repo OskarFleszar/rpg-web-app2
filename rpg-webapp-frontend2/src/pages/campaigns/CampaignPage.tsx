@@ -5,7 +5,7 @@ import "./CampaignPage.css";
 import { createStompClient } from "../../ws/client";
 import { Chat } from "./Chat";
 import { WSProvider } from "../../ws/WSProvider";
-import BoardCanvas from "./board/BoardCanvas";
+import BoardCanvas from "../../components/board/BoardCanvas";
 
 export function WsSmokeTest() {
   useEffect(() => {
