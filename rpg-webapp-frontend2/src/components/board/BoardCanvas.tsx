@@ -9,6 +9,7 @@ import { usePencil } from "./hooks/usePencil";
 import { useEraser } from "./hooks/useEraser";
 import { getPointerOnLayer } from "./utils/konvaCoords";
 import type { Tool, Stroke } from "./types";
+import { useUndo } from "./hooks/useUndo";
 
 type Props = { boardId: number };
 
@@ -78,6 +79,14 @@ export default function BoardCanvas({ boardId }: Props) {
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
     useWsIncoming(boardId, setStrokes, clientId);
 
+  const undo = useUndo({
+    boardId,
+    clientId,
+    currentUserId,
+    strokes,
+    markPendingRemoval,
+  });
+
   const pencil = usePencil({
     boardId,
     stageRef,
@@ -100,10 +109,10 @@ export default function BoardCanvas({ boardId }: Props) {
     boardId,
     stageRef,
     layerRef: layerRef,
-    radius: eraserSize / 2, // to, co rysujesz w overlayu
+    radius: eraserSize / 2,
     clientId,
-    strokes, // Twój stan ze stroke’ami
-    setStrokes, // setter z useState
+    strokes,
+    setStrokes,
     markPendingRemoval,
     isMine,
   });
