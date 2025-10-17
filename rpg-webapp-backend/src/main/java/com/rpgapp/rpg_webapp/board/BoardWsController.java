@@ -1,5 +1,6 @@
 package com.rpgapp.rpg_webapp.board;
 
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rpgapp.rpg_webapp.board.dto.*;
 import com.rpgapp.rpg_webapp.board.entity.Board;
@@ -11,9 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 public class BoardWsController {
@@ -35,7 +34,7 @@ public class BoardWsController {
 
     @MessageMapping("/board.{id}.op")
     public void onOp(@DestinationVariable long id,
-                     @Payload Map<String,Object> body,
+                     @Payload Map<String, Object> body,
                      Principal principal) throws Exception {
 
         if (principal == null) return;
@@ -72,7 +71,11 @@ public class BoardWsController {
             case "object.remove" -> {
                 var dto = mapper.convertValue(body, ObjectRemoveDTO.class);
                 UUID oid;
-                try { oid = UUID.fromString(dto.objectId()); } catch (Exception e) { return; }
+                try {
+                    oid = UUID.fromString(dto.objectId());
+                } catch (Exception e) {
+                    return;
+                }
 
                 boolean isOwner = service.isOwner(oid, userId);
                 boolean isGm = false; // TODO: sprawdź rolę GM względem kampanii boarda
@@ -82,6 +85,35 @@ public class BoardWsController {
                     broker.convertAndSend("/topic/board." + id + ".op", body);
                 }
             }
+            case "erase.commit" -> {
+                EraseCommitDTO dto = mapper.convertValue( body, EraseCommitDTO.class);
+                if (dto.objectIds() == null || dto.objectIds().isEmpty()) return;
+
+                List<UUID> removed = new ArrayList<>();
+                for (String s : dto.objectIds()) {
+                    UUID oid;
+                    try {
+                        oid = UUID.fromString(s);
+                    } catch (Exception e) {
+                        continue;
+                    }
+
+                    boolean isOwner = service.isOwner(oid, userId);
+                    boolean isGm = false; // TODO: GM kampanii boarda
+                    if (!(isOwner || isGm)) continue;
+
+                    if (service.removeObject(id, oid)) {
+                        removed.add(oid);
+                    }
+                }
+                if (!removed.isEmpty()) {
+                    broker.convertAndSend("/topic/board." + id + ".op", Map.of(
+                            "type", "objects.removed",
+                            "objectIds", removed
+                    ));
+                }
+            }
+
             default -> { /* ignore unknown */ }
         }
     }

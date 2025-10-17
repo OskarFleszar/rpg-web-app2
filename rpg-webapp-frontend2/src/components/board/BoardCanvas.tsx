@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Circle, Layer, Line, Stage } from "react-konva";
 import type Konva from "konva";
 import Toolbar from "./Toolbar";
@@ -27,6 +27,23 @@ export default function BoardCanvas({ boardId }: Props) {
 
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   useSnapshot(boardId, setStrokes);
+  const currentUserId = localStorage.getItem("userId");
+
+  const strokesRef = useRef<Map<string, Stroke>>(new Map());
+  useEffect(() => {
+    const m = strokesRef.current;
+    m.clear();
+    for (const s of strokes) m.set(s.id, s);
+  }, [strokes]);
+
+  const isMine = useCallback(
+    (id: string) => {
+      const s = strokesRef.current.get(id);
+      console.log(!!s && s.ownerId === currentUserId);
+      return !!s && s.ownerId === currentUserId;
+    },
+    [currentUserId]
+  );
 
   const [tool, setTool] = useState<Tool>("hand");
   const [color, setColor] = useState("#222222");
@@ -58,11 +75,8 @@ export default function BoardCanvas({ boardId }: Props) {
     () => crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
     []
   );
-  const { addMyPath, removeMyPath } = useWsIncoming(
-    boardId,
-    setStrokes,
-    clientId
-  );
+  const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
+    useWsIncoming(boardId, setStrokes, clientId);
 
   const pencil = usePencil({
     boardId,
@@ -74,14 +88,24 @@ export default function BoardCanvas({ boardId }: Props) {
     addMyPath,
     removeMyPath,
     setStrokes,
+    currentUserId,
   });
 
-  const eraser = useEraser({
+  const {
+    onPointerDown: erDown,
+    onPointerMove: erMove,
+    onPointerUp: erUp,
+    erasePreview,
+  } = useEraser({
     boardId,
     stageRef,
-    layerRef,
-    radius: eraserSize,
+    layerRef: layerRef,
+    radius: eraserSize / 2, // to, co rysujesz w overlayu
     clientId,
+    strokes, // Twój stan ze stroke’ami
+    setStrokes, // setter z useState
+    markPendingRemoval,
+    isMine,
   });
 
   const [pointerOnLayer, setPointerOnLayer] = useState<{
@@ -95,16 +119,16 @@ export default function BoardCanvas({ boardId }: Props) {
 
   function onPointerDown() {
     if (tool === "pencil") return pencil.onPointerDown();
-    if (tool === "eraser") return eraser.onPointerDown();
+    if (tool === "eraser") return erDown();
   }
   function onPointerMove() {
     updatePointer();
     if (tool === "pencil") return pencil.onPointerMove();
-    if (tool === "eraser") return eraser.onPointerMove();
+    if (tool === "eraser") return erMove();
   }
   function onPointerUp() {
     if (tool === "pencil") return pencil.onPointerUp();
-    if (tool === "eraser") return eraser.onPointerUp();
+    if (tool === "eraser") return erUp();
   }
 
   return (
@@ -149,6 +173,12 @@ export default function BoardCanvas({ boardId }: Props) {
               strokeWidth={s.width}
               lineCap="round"
               lineJoin="round"
+              opacity={
+                (erasePreview.has(s.id) && isMine(s.id)) ||
+                pendingRemoval.has(s.id)
+                  ? 0
+                  : 1
+              }
             />
           ))}
 

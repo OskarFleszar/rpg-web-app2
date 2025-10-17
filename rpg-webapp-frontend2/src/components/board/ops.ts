@@ -5,6 +5,7 @@ export type StrokeStartOp = {
   pathId: string;
   color: string;
   width: number;
+  ownerId: string;
   clientId?: string;
 };
 
@@ -41,6 +42,7 @@ export type Snapshot = {
       color: string;
       width: number;
       points: number[][];
+      ownerId: number;
     }>;
   }>;
 };
@@ -69,11 +71,19 @@ export type EraseEndOp = {
   clientId?: string;
 };
 
+export type ObjectsRemovedOp = {
+  type: "objects.removed";
+  boardId: number;
+  objectIds: string[];
+  clientId?: string;
+};
+
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
   | StrokeEndOp
-  | EraseAppendOp
-  | EraseEndOp
+  | ObjectRemoveOp
+  | ObjectsRemovedOp
   | EraseStartOp
-  | ObjectRemoveOp;
+  | EraseAppendOp
+  | EraseEndOp;

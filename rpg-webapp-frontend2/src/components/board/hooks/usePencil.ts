@@ -15,6 +15,7 @@ export function usePencil(opts: {
   addMyPath: (id: string) => void;
   removeMyPath: (id: string) => void;
   setStrokes: React.Dispatch<React.SetStateAction<Stroke[]>>;
+  currentUserId: string;
 }) {
   const {
     boardId,
@@ -26,6 +27,7 @@ export function usePencil(opts: {
     addMyPath,
     removeMyPath,
     setStrokes,
+    currentUserId,
   } = opts;
   const publish = usePublish();
 
@@ -62,6 +64,7 @@ export function usePencil(opts: {
   }, []);
 
   const onPointerDown = useCallback(() => {
+    pendingPointsRef.current.length = 0;
     const pt = getPointerOnLayer(stageRef, layerRef);
     if (!pt) return;
 
@@ -77,13 +80,17 @@ export function usePencil(opts: {
       color,
       width,
       clientId,
+      ownerId: currentUserId,
     };
     publish(`/app/board.${boardId}.op`, opStart);
 
     pendingPointsRef.current.push([pt.x, pt.y]);
     ensureFlushTimer();
 
-    setStrokes((prev) => [...prev, { id, points: [pt.x, pt.y], color, width }]);
+    setStrokes((prev) => [
+      ...prev,
+      { id, points: [pt.x, pt.y], color, width, ownerId: currentUserId },
+    ]);
   }, [
     addMyPath,
     boardId,
@@ -95,6 +102,7 @@ export function usePencil(opts: {
     setStrokes,
     stageRef,
     width,
+    currentUserId,
   ]);
 
   const onPointerMove = useCallback(() => {
@@ -131,7 +139,7 @@ export function usePencil(opts: {
       pathId: pid,
       clientId,
     });
-  }, [boardId, clearFlushTimer, flushAppend, publish, removeMyPath]);
+  }, [boardId, clearFlushTimer, flushAppend, publish, removeMyPath, clientId]);
 
   return { onPointerDown, onPointerMove, onPointerUp };
 }

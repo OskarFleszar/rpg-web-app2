@@ -31,10 +31,13 @@ export function useSnapshot(
             color: obj.color,
             width: obj.width,
             points,
+            ownerId: String(obj.ownerId ?? ""),
           });
         }
       }
       setStrokes(all);
+
+      console.log(all);
     }
     loadBoard().catch(console.error);
     return () => {

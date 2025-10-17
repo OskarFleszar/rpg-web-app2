@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useChannel } from "../../../ws/hooks";
 import type { BoardOp } from "../ops";
 import type { Stroke } from "../types";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export function useWsIncoming(
   boardId: number,
@@ -9,24 +10,35 @@ export function useWsIncoming(
   clientId: string
 ) {
   const myActivePathsRef = useRef<Set<string>>(new Set());
+  const remoteStrokesRef = useRef(
+    new Map<
+      string,
+      { last?: [number, number]; color: string; width: number; ownerId: string }
+    >()
+  );
 
-  const addMyPath = (id: string) => myActivePathsRef.current.add(id);
-  const removeMyPath = (id: string) => myActivePathsRef.current.delete(id);
+  const [pendingRemoval, setPendingRemoval] = useState<Set<string>>(new Set());
 
-  const remoteStrokesRef = useRef<
-    Map<string, { last?: [number, number]; color: string; width: number }>
-  >(new Map());
+  const markPendingRemoval = (ids: string[]) => {
+    setPendingRemoval((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
+  };
 
   useChannel<BoardOp>(`/topic/board.${boardId}.op`, (op) => {
     if (!op || typeof (op as any).type !== "string") return;
 
-    if ((op as any).clientId === clientId) {
-      if (
-        "pathId" in op &&
-        op.pathId &&
-        myActivePathsRef.current.has(op.pathId)
-      )
-        return;
+    const isOwnActivePath =
+      (op as any).clientId === clientId &&
+      "pathId" in op &&
+      !!(op as any).pathId &&
+      myActivePathsRef.current.has((op as any).pathId as string);
+    if (isOwnActivePath) return;
+
+    if ("pathId" in op && op.pathId && pendingRemoval.has(op.pathId)) {
+      return;
     }
 
     switch (op.type) {
@@ -34,33 +46,30 @@ export function useWsIncoming(
         remoteStrokesRef.current.set(op.pathId, {
           color: op.color,
           width: op.width,
+          ownerId: String(op.ownerId ?? ""),
           last: undefined,
         });
         break;
       }
       case "stroke.append": {
-        const s = remoteStrokesRef.current.get(op.pathId);
-        if (!s) {
-          remoteStrokesRef.current.set(op.pathId, {
-            color: "#000",
-            width: 2,
-            last: undefined,
-          });
-        }
+        if (pendingRemoval.has(op.pathId)) return;
+
         const state = remoteStrokesRef.current.get(op.pathId)!;
 
         setStrokes((prev) => {
           const idx = prev.findIndex((st) => st.id === op.pathId);
           if (idx === -1) {
-            const firstPts = op.points ?? [];
-            const flat = firstPts.flat();
-            const newStroke: Stroke = {
-              id: op.pathId,
-              color: state.color,
-              width: state.width,
-              points: flat,
-            };
-            return [...prev, newStroke];
+            const flat = (op.points ?? []).flat();
+            return [
+              ...prev,
+              {
+                id: op.pathId,
+                color: state.color,
+                width: state.width,
+                points: flat,
+                ownerId: state.ownerId,
+              },
+            ];
           } else {
             const add = (op.points ?? []).flat();
             if (!add.length) return prev;
@@ -82,13 +91,39 @@ export function useWsIncoming(
         break;
       }
       case "stroke.end": {
+        if ((op as any).clientId === clientId && op.pathId) {
+          myActivePathsRef.current.delete(op.pathId);
+        }
         remoteStrokesRef.current.delete(op.pathId);
         break;
       }
-      default:
+
+      case "object.remove": {
+        setPendingRemoval((prev) => {
+          const next = new Set(prev);
+          next.delete(op.objectId);
+          return next;
+        });
+        setStrokes((prev) => prev.filter((s) => s.id !== op.objectId));
         break;
+      }
+      case "objects.removed": {
+        const removed = new Set((op.objectIds ?? []).map(String));
+        setPendingRemoval((prev) => {
+          const next = new Set(prev);
+          removed.forEach((id) => next.delete(id));
+          return next;
+        });
+        setStrokes((prev) => prev.filter((s) => !removed.has(s.id)));
+        break;
+      }
     }
   });
 
-  return { addMyPath, removeMyPath };
+  return {
+    addMyPath: (id: string) => myActivePathsRef.current.add(id),
+    removeMyPath: (id: string) => myActivePathsRef.current.delete(id),
+    markPendingRemoval,
+    pendingRemoval,
+  };
 }
