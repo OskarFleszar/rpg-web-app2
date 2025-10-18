@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { usePublish } from "../../../ws/hooks";
-import type { Stroke } from "../types";
+import type { Drawable, Stroke } from "../types";
 import type Konva from "konva";
 import { getPointerOnLayer } from "../utils/konvaCoords";
 import { eraserHitsStroke } from "../utils/geometry";
@@ -12,7 +12,7 @@ export function useEraser(opts: {
   radius: number;
   clientId: string;
   strokes: Stroke[];
-  setStrokes: React.Dispatch<React.SetStateAction<Stroke[]>>;
+  setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>;
   markPendingRemoval: (ids: string[]) => void;
   isMine: (id: string) => boolean;
 }) {

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useChannel } from "../../../ws/hooks";
 import type { BoardOp } from "../ops";
-import type { Stroke } from "../types";
+import { isStroke, type Drawable, type Stroke } from "../types";
 import { useRef, useState } from "react";
 
 export function useWsIncoming(
   boardId: number,
-  setStrokes: React.Dispatch<React.SetStateAction<Stroke[]>>,
+  setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>,
   clientId: string
 ) {
   const myActivePathsRef = useRef<Set<string>>(new Set());
@@ -54,47 +54,56 @@ export function useWsIncoming(
       case "stroke.append": {
         if (pendingRemoval.has(op.pathId)) return;
 
-        const state = remoteStrokesRef.current.get(op.pathId)!;
+        // 1) pobierz / zainicjalizuj stan:
+        let state = remoteStrokesRef.current.get(op.pathId);
+        if (!state) {
+          // append dotarł przed startem – zasiej bezpieczne domyślne wartości
+          state = {
+            color: "#000",
+            width: 2,
+            ownerId: "",
+            last: undefined,
+          };
+          remoteStrokesRef.current.set(op.pathId, state);
+        }
 
-        setStrokes((prev) => {
-          const idx = prev.findIndex((st) => st.id === op.pathId);
+        // 2) punkty do dopięcia
+        const add = (op.points ?? []).flat();
+        if (!add.length) break;
+
+        // 3) aktualizacja store'u obiektów
+        setObjects((prev) => {
+          const idx = prev.findIndex((o) => o.id === op.pathId);
           if (idx === -1) {
-            const flat = (op.points ?? []).flat();
-            return [
-              ...prev,
-              {
-                id: op.pathId,
-                color: state.color,
-                width: state.width,
-                points: flat,
-                ownerId: state.ownerId,
-              },
-            ];
-          } else {
-            const add = (op.points ?? []).flat();
-            if (!add.length) return prev;
-            const updated = {
-              ...prev[idx],
-              points: [...prev[idx].points, ...add],
+            const newStroke: Stroke = {
+              type: "stroke",
+              id: op.pathId,
+              color: state.color,
+              width: state.width,
+              points: add,
+              ownerId: state.ownerId,
             };
-            const copy = prev.slice();
-            copy[idx] = updated;
-            return copy;
+            return [...prev, newStroke];
           }
+
+          const existing = prev[idx];
+          if (!isStroke(existing)) return prev; // zabezpieczenie
+
+          const updated: Stroke = {
+            ...existing,
+            points: [...existing.points, ...add],
+          };
+          const copy = prev.slice();
+          copy[idx] = updated;
+          return copy;
         });
 
+        // 4) aktualizacja ostatniego punktu w stanie pomocniczym
         const lastPts = op.points ?? [];
         if (lastPts.length) {
           const last = lastPts[lastPts.length - 1]!;
           state.last = [last[0], last[1]];
         }
-        break;
-      }
-      case "stroke.end": {
-        if ((op as any).clientId === clientId && op.pathId) {
-          myActivePathsRef.current.delete(op.pathId);
-        }
-        remoteStrokesRef.current.delete(op.pathId);
         break;
       }
 
@@ -104,7 +113,7 @@ export function useWsIncoming(
           next.delete(op.objectId);
           return next;
         });
-        setStrokes((prev) => prev.filter((s) => s.id !== op.objectId));
+        setObjects((prev) => prev.filter((s) => s.id !== op.objectId));
         break;
       }
       case "objects.removed": {
@@ -114,7 +123,7 @@ export function useWsIncoming(
           removed.forEach((id) => next.delete(id));
           return next;
         });
-        setStrokes((prev) => prev.filter((s) => !removed.has(s.id)));
+        setObjects((prev) => prev.filter((s) => !removed.has(s.id)));
         break;
       }
     }

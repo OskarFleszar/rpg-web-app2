@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import axios from "axios";
-import type { Stroke } from "../types";
+import type { Drawable, Stroke } from "../types";
 import type { Snapshot } from "../ops";
 
 export function useSnapshot(
   boardId: number,
-  setStrokes: (s: Stroke[]) => void
+  setObjects: (s: Drawable[]) => void
 ) {
   useEffect(() => {
     let cancelled = false;
@@ -27,6 +27,7 @@ export function useSnapshot(
             ? (obj.points as number[][]).flat()
             : (obj.points as number[]) ?? [];
           all.push({
+            type: "stroke",
             id: obj.pathId,
             color: obj.color,
             width: obj.width,
@@ -35,7 +36,7 @@ export function useSnapshot(
           });
         }
       }
-      setStrokes(all);
+      setObjects(all);
 
       console.log(all);
     }
@@ -43,5 +44,5 @@ export function useSnapshot(
     return () => {
       cancelled = true;
     };
-  }, [boardId, setStrokes]);
+  }, [boardId, setObjects]);
 }

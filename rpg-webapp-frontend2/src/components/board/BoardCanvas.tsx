@@ -8,7 +8,7 @@ import { useWsIncoming } from "./hooks/useWsIncoming";
 import { usePencil } from "./hooks/usePencil";
 import { useEraser } from "./hooks/useEraser";
 import { getPointerOnLayer } from "./utils/konvaCoords";
-import type { Tool, Stroke } from "./types";
+import { type Tool, type Stroke, type Drawable, isStroke } from "./types";
 import { useUndo } from "./hooks/useUndo";
 
 type Props = { boardId: number };
@@ -26,9 +26,12 @@ export default function BoardCanvas({ boardId }: Props) {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const [strokes, setStrokes] = useState<Stroke[]>([]);
-  useSnapshot(boardId, setStrokes);
-  const currentUserId = localStorage.getItem("userId");
+  const [objects, setObjects] = useState<Drawable[]>([]);
+
+  // Adapter dla starego kodu (jeśli gdzieś potrzebujesz „strokes”):
+  const strokes = useMemo(() => objects.filter(isStroke), [objects]);
+  useSnapshot(boardId, setObjects);
+  const currentUserId: string = localStorage.getItem("userId")!;
 
   const strokesRef = useRef<Map<string, Stroke>>(new Map());
   useEffect(() => {
@@ -77,7 +80,7 @@ export default function BoardCanvas({ boardId }: Props) {
     []
   );
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
-    useWsIncoming(boardId, setStrokes, clientId);
+    useWsIncoming(boardId, setObjects, clientId);
 
   const undo = useUndo({
     boardId,
@@ -96,7 +99,7 @@ export default function BoardCanvas({ boardId }: Props) {
     clientId,
     addMyPath,
     removeMyPath,
-    setStrokes,
+    setObjects,
     currentUserId,
   });
 
@@ -112,7 +115,7 @@ export default function BoardCanvas({ boardId }: Props) {
     radius: eraserSize / 2,
     clientId,
     strokes,
-    setStrokes,
+    setObjects,
     markPendingRemoval,
     isMine,
   });
@@ -174,22 +177,24 @@ export default function BoardCanvas({ boardId }: Props) {
         style={{ cursor, background: "#fff" }}
       >
         <Layer ref={layerRef}>
-          {strokes.map((s) => (
-            <Line
-              key={s.id}
-              points={s.points}
-              stroke={s.color}
-              strokeWidth={s.width}
-              lineCap="round"
-              lineJoin="round"
-              opacity={
-                (erasePreview.has(s.id) && isMine(s.id)) ||
-                pendingRemoval.has(s.id)
-                  ? 0
-                  : 1
-              }
-            />
-          ))}
+          {objects.map((o) =>
+            o.type === "stroke" ? (
+              <Line
+                key={o.id}
+                points={o.points}
+                stroke={o.color}
+                strokeWidth={o.width}
+                lineCap="round"
+                lineJoin="round"
+                opacity={
+                  (erasePreview.has(o.id) && isMine(o.id)) ||
+                  pendingRemoval.has(o.id)
+                    ? 0
+                    : 1
+                }
+              />
+            ) : null
+          )}
 
           {tool === "eraser" && pointerOnLayer && (
             <Circle

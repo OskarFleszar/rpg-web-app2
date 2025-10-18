@@ -1,5 +1,6 @@
 import type { Tool } from "./types";
 import "./BoardCanvas.css";
+import { DrawingSettings } from "./DrawingSettings";
 
 type Props = {
   tool: Tool;
@@ -57,29 +58,51 @@ export default function Toolbar(props: Props) {
         <button
           className={`tool-button ${tool === "pencil" ? "active" : ""}`}
           title="Pencil"
-          onClick={() => setTool(tool === "pencil" ? "hand" : "pencil")}
+          onClick={() => setTool("pencil")}
         >
           ✏️
         </button>
 
-        <div className="drawing-settings">
-          <label className="tool-tile">
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-            />
-          </label>
+        <DrawingSettings
+          color={color}
+          setColor={setColor}
+          width={width}
+          setWidth={setWidth}
+        />
+      </div>
 
-          <label className="tool-tile">
-            <input
-              type="number"
-              min={1}
-              value={width}
-              onChange={(e) => setWidth(Number(e.target.value))}
-            />
-          </label>
-        </div>
+      <div className={`pencil-select ${tool === "ellipse" ? "open" : ""}`}>
+        <button
+          className={`tool-button ${tool === "ellipse" ? "active" : ""}`}
+          title="Ellipse"
+          onClick={() => setTool("ellipse")}
+        >
+          ⚪
+        </button>
+
+        <DrawingSettings
+          color={color}
+          setColor={setColor}
+          width={width}
+          setWidth={setWidth}
+        />
+      </div>
+
+      <div className={`pencil-select ${tool === "rect" ? "open" : ""}`}>
+        <button
+          className={`tool-button ${tool === "rect" ? "active" : ""}`}
+          title="Rect"
+          onClick={() => setTool("rect")}
+        >
+          ⬛
+        </button>
+
+        <DrawingSettings
+          color={color}
+          setColor={setColor}
+          width={width}
+          setWidth={setWidth}
+        />
       </div>
     </div>
   );

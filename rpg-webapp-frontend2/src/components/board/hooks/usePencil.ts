@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { usePublish } from "../../../ws/hooks";
 import type Konva from "konva";
 import type { StrokeAppendOp, StrokeStartOp } from "../ops";
-import type { Stroke } from "../types";
+import { isStroke, type Drawable } from "../types";
 import { getPointerOnLayer } from "../utils/konvaCoords";
 
 export function usePencil(opts: {
@@ -14,7 +14,7 @@ export function usePencil(opts: {
   clientId: string;
   addMyPath: (id: string) => void;
   removeMyPath: (id: string) => void;
-  setStrokes: React.Dispatch<React.SetStateAction<Stroke[]>>;
+  setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>;
   currentUserId: string;
 }) {
   const {
@@ -26,7 +26,7 @@ export function usePencil(opts: {
     clientId,
     addMyPath,
     removeMyPath,
-    setStrokes,
+    setObjects,
     currentUserId,
   } = opts;
   const publish = usePublish();
@@ -87,9 +87,16 @@ export function usePencil(opts: {
     pendingPointsRef.current.push([pt.x, pt.y]);
     ensureFlushTimer();
 
-    setStrokes((prev) => [
+    setObjects((prev) => [
       ...prev,
-      { id, points: [pt.x, pt.y], color, width, ownerId: currentUserId },
+      {
+        type: "stroke",
+        id,
+        points: [pt.x, pt.y],
+        color,
+        width,
+        ownerId: currentUserId,
+      },
     ]);
   }, [
     addMyPath,
@@ -99,7 +106,7 @@ export function usePencil(opts: {
     ensureFlushTimer,
     layerRef,
     publish,
-    setStrokes,
+    setObjects,
     stageRef,
     width,
     currentUserId,
@@ -109,9 +116,10 @@ export function usePencil(opts: {
     const pt = getPointerOnLayer(stageRef, layerRef);
     if (!pt || !pathIdRef.current) return;
 
-    setStrokes((prev) => {
+    setObjects((prev) => {
       if (prev.length === 0) return prev;
       const last = prev[prev.length - 1];
+      if (!isStroke(last)) return prev;
       const L = last.points.length;
       if (L >= 2) {
         const dx = pt.x - last.points[L - 2];
@@ -122,7 +130,7 @@ export function usePencil(opts: {
       const updated = { ...last, points: [...last.points, pt.x, pt.y] };
       return [...prev.slice(0, -1), updated];
     });
-  }, [layerRef, setStrokes, stageRef]);
+  }, [layerRef, setObjects, stageRef]);
 
   const onPointerUp = useCallback(() => {
     const pid = pathIdRef.current;
