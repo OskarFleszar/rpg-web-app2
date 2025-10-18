@@ -1,7 +1,34 @@
 import { useEffect } from "react";
 import axios from "axios";
-import type { Drawable, Stroke } from "../types";
-import type { Snapshot } from "../ops";
+import type { Drawable } from "../types";
+
+// --- typy odpowiedzi API (to co zwraca backend) ---
+type ApiStroke = {
+  type: "stroke";
+  objectId: string;
+  points: number[] | number[][]; // backend bywa, że zwraca zagnieżdżone
+  color: string;
+  width: number; // grubość linii
+  ownerId: string | number;
+};
+
+type ApiShape = {
+  type: "shape" | null; // w starszych snapach bywa null
+  shape: "rect" | "ellipse";
+  objectId: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  strokeWidth: number | null;
+  ownerId: string | number;
+};
+
+type ApiObject = ApiStroke | ApiShape;
+type ApiLayer = { id: string; locked: boolean; objects: ApiObject[] };
+type ApiSnapshot = { version: number; layers: ApiLayer[] };
+// ----------------------------------------------------
 
 export function useSnapshot(
   boardId: number,
@@ -9,6 +36,7 @@ export function useSnapshot(
 ) {
   useEffect(() => {
     let cancelled = false;
+
     async function loadBoard() {
       const res = await axios.get(
         `http://localhost:8080/api/board/${boardId}/state`,
@@ -16,58 +44,61 @@ export function useSnapshot(
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      const snap: Snapshot = res.data;
+
       if (cancelled) return;
 
-      const all: Stroke[] = [];
-      for (const layer of snap.layers ?? []) {
-        for (const obj of layer.objects ?? []) {
-          if (obj.type === "stroke") {
-            const points = Array.isArray(obj.points?.[0])
-              ? (obj.points as number[][]).flat()
-              : (obj.points as number[]) ?? [];
+      const snap = res.data as ApiSnapshot;
+      const all: Drawable[] = [];
+
+      for (const layer of snap.layers) {
+        for (const o of layer.objects) {
+          if (o.type === "stroke") {
+            const pts = Array.isArray((o.points as any)[0])
+              ? (o.points as number[][]).flat()
+              : (o.points as number[]);
             all.push({
               type: "stroke",
-              id: obj.pathId,
-              color: obj.color,
-              strokeWidth: obj.width,
-              points,
-              ownerId: String(obj.ownerId ?? ""),
+              id: o.objectId,
+              points: pts,
+              color: o.color,
+              strokeWidth: o.width, // w API: width = grubość
+              ownerId: String(o.ownerId),
             });
-          }
-          if (obj.type === "rect") {
-            all.push({
-              type: "rect",
-              id: obj.id,
-              x: obj.x,
-              y: obj.y,
-              width: obj.width,
-              height: obj.height,
-              color: obj.color,
-              strokeWidth: obj.strokeWidth,
-              ownerId: obj.ownerId,
-            });
-          }
-
-          if (obj.type === "ellipse") {
-            all.push({
-              type: "ellipse",
-              id: obj.id,
-              x: obj.x,
-              y: obj.y,
-              width: obj.width,
-              height: obj.height,
-              color: obj.color,
-              strokeWidth: obj.strokeWidth,
-              ownerId: obj.ownerId,
-            });
+          } else {
+            // ApiShape (type może być null)
+            const s = o as ApiShape;
+            if (s.shape === "rect") {
+              all.push({
+                type: "rect",
+                id: s.objectId,
+                x: s.x,
+                y: s.y,
+                width: s.width,
+                height: s.height,
+                color: s.color,
+                strokeWidth: s.strokeWidth ?? 1,
+                ownerId: String(s.ownerId),
+              });
+            } else if (s.shape === "ellipse") {
+              all.push({
+                type: "ellipse",
+                id: s.objectId,
+                x: s.x,
+                y: s.y,
+                width: s.width,
+                height: s.height,
+                color: s.color,
+                strokeWidth: s.strokeWidth ?? 1,
+                ownerId: String(s.ownerId),
+              });
+            }
           }
         }
       }
-      setObjects(all);
 
-      console.log(all);
+      setObjects(all);
     }
+
     loadBoard().catch(console.error);
     return () => {
       cancelled = true;

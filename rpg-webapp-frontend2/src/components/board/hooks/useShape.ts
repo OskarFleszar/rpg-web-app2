@@ -103,13 +103,20 @@ export function useShape(opts: {
       const obj = prev.find((o) => o.id === id);
       if (!obj) return prev;
 
-      publish(`/app/board.${boardId}.op`, {
+      const toSend = {
         type: "shape.add",
         boardId,
         layerId: "base",
         clientId,
         shape: obj,
-      } as const);
+      };
+      console.log("[shape.add SEND]", {
+        when: new Date().toISOString(),
+        clientId,
+        shapeId: obj.id,
+      });
+
+      publish(`/app/board.${boardId}.op`, toSend);
 
       return prev;
     });

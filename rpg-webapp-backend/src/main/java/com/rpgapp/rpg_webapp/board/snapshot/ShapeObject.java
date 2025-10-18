@@ -5,13 +5,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ShapeObject {
-    private String type = "shape";        // stałe: to jest obiekt-kształt w snapshotcie
-    private String objectId;              // = dto.id().toString()
-    private String shape;                 // "rect" | "ellipse"
+public class ShapeObject extends BoardObject{
+
+    private String objectId;
+    private String shape;
 
     private String color;
-    private int strokeWidth;                    // grubość konturu (uwaga: nazwa "width" = stroke width)
+    private int strokeWidth;
     private double x;
     private double y;
 
@@ -20,8 +20,8 @@ public class ShapeObject {
     private Double height;
 
     private Double rotation;              // opcjonalnie
-    private Long ownerId;
-    private java.time.LocalDateTime createdAt;
+
+
 
     // gettery/settery
 }

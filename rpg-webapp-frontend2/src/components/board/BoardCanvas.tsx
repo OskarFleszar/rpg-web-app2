@@ -157,7 +157,10 @@ export default function BoardCanvas({ boardId }: Props) {
   function onPointerUp() {
     if (tool === "pencil") return pencil.onPointerUp();
     if (tool === "eraser") return erUp();
-    if (tool === "rect" || tool === "ellipse") return shapes.onPointerUp();
+    if (tool === "rect" || tool === "ellipse") {
+      console.log("pointerup");
+      return shapes.onPointerUp();
+    }
   }
 
   return (

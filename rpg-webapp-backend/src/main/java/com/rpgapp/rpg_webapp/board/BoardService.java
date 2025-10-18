@@ -78,7 +78,19 @@ public class BoardService {
         BoardState st = getOrCreateState(dto.boardId());
         Snapshot snap = readSnapshot(st);
 
-        var stroke = new StrokeObject("stroke", dto.pathId(), dto.pathId(),  dto.color(), dto.width(), new ArrayList<>(), owner.getId(), LocalDateTime.now());
+        var stroke = StrokeObject.builder()
+                .pathId(dto.pathId())
+                .build();
+
+        stroke.setType("stroke");
+        stroke.setObjectId(dto.pathId());
+        stroke.setColor(dto.color());
+        stroke.setWidth((int) dto.width());
+        stroke.setOwnerId(owner.getId());
+        stroke.setCreatedAt(java.time.LocalDateTime.now());
+// points list should be initialized in the field declaration or via setter
+        if (stroke.getPoints() == null) stroke.setPoints(new java.util.ArrayList<>());
+
 
         snap.addStroke(dto.layerId(), stroke);
         writeSnapshot(st, snap);
@@ -153,6 +165,8 @@ public class BoardService {
 
         String shapeType = dto.type().toLowerCase();
 
+
+
         // Walidacja geometrii wg typu
         switch (shapeType) {
             case "rect" -> {
@@ -174,29 +188,30 @@ public class BoardService {
 
 
         ShapeObject obj = new ShapeObject();
+        obj.setType("shape");                 // ← KLUCZOWE (dla loadera po refreshu)
         obj.setObjectId(dto.id().toString());
-        obj.setShape(shapeType);
+        obj.setShape(shapeType);              // "rect" / "ellipse"
         obj.setColor(dto.color());
-        obj.setWidth(Double.valueOf(dto.strokeWidth()));            // mapujemy strokeWidth -> width (grubość konturu)
+        obj.setStrokeWidth(dto.strokeWidth()); // ← zamiast obj.setWidth(dto.strokeWidth())
         obj.setX(dto.x() != null ? dto.x() : 0.0);
         obj.setY(dto.y() != null ? dto.y() : 0.0);
         obj.setRotation(dto.rotation());
-        obj.setOwnerId(owner.getId());
-        obj.setCreatedAt(java.time.LocalDateTime.now());
 
         if ("rect".equals(shapeType)) {
             obj.setWidth(dto.width());
             obj.setHeight(dto.height());
-        } else { // ellipse
+        } else if ("ellipse".equals(shapeType)) {
             obj.setWidth(dto.width());
             obj.setHeight(dto.height());
         }
 
-        //snap.addShape(dto.layerId(), obj);
+        obj.setOwnerId(owner.getId());
+        obj.setCreatedAt(LocalDateTime.now());
+
+        snap.addShape(dto.layerId(), obj);
         writeSnapshot(st, snap);
         states.save(st);
 
-        // indeks (jak przy stroke)
         var idx = new BoardObjectIndex();
         idx.setObjectId(dto.id());
         idx.setBoard(st.getBoard());
@@ -206,7 +221,6 @@ public class BoardService {
         idx.setCreatedAt(java.time.LocalDateTime.now());
         indexRepo.save(idx);
     }
-
 
 
 }

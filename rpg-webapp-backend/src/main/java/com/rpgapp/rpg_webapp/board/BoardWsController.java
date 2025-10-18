@@ -113,16 +113,25 @@ public class BoardWsController {
                     ));
                 }
             }
-//            case "shape.add" -> {
-//                var dto = mapper.convertValue(body.get("shape"), ShapeDTO.class);
-//                if (dto == null || dto.getId() == null || dto.getType() == null) return;
-//
-//                User owner = users.findUserById(userId).orElse(null);
-//                if (owner == null) return;
-//
-//                service.addShape(id, dto, owner);
-//                broker.convertAndSend("topic/board." + id + ".op", body);
-//            }
+            case "shape.add" -> {
+                var dto = mapper.convertValue(body.get("shape"), ShapeDTO.class);
+                if (dto == null) return;
+
+                var lid = (String) body.get("layerId");
+                if (dto.layerId() == null && lid != null) {
+                    dto = new ShapeDTO(
+                            dto.id(), lid, dto.type(), dto.color(), dto.strokeWidth(),
+                            dto.x(), dto.y(), dto.width(), dto.height(), dto.rotation()
+                    );
+                }
+
+                var owner = users.findUserById(userId).orElse(null);
+                if (owner == null) return;
+
+                service.addShape(id, dto, owner);
+                broker.convertAndSend("/topic/board." + id + ".op", body);
+            }
+
 
             default -> { /* ignore unknown */ }
         }

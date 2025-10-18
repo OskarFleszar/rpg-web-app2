@@ -4,10 +4,11 @@ package com.rpgapp.rpg_webapp.board.snapshot;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter; import lombok.Setter; import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @SuperBuilder
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")   // kluczowe!
 @JsonSubTypes({
         @JsonSubTypes.Type(value = StrokeObject.class, name = "stroke"),
