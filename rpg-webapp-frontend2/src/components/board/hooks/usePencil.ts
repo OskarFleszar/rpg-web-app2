@@ -10,7 +10,7 @@ export function usePencil(opts: {
   stageRef: React.RefObject<Konva.Stage | null>;
   layerRef: React.RefObject<Konva.Layer | null>;
   color: string;
-  width: number;
+  strokeWidth: number;
   clientId: string;
   addMyPath: (id: string) => void;
   removeMyPath: (id: string) => void;
@@ -22,7 +22,7 @@ export function usePencil(opts: {
     stageRef,
     layerRef,
     color,
-    width,
+    strokeWidth,
     clientId,
     addMyPath,
     removeMyPath,
@@ -78,7 +78,7 @@ export function usePencil(opts: {
       layerId: "base",
       pathId: id,
       color,
-      width,
+      width: strokeWidth,
       clientId,
       ownerId: currentUserId,
     };
@@ -94,7 +94,7 @@ export function usePencil(opts: {
         id,
         points: [pt.x, pt.y],
         color,
-        width,
+        strokeWidth,
         ownerId: currentUserId,
       },
     ]);
@@ -108,7 +108,7 @@ export function usePencil(opts: {
     publish,
     setObjects,
     stageRef,
-    width,
+    strokeWidth,
     currentUserId,
   ]);
 

@@ -13,7 +13,12 @@ export function useWsIncoming(
   const remoteStrokesRef = useRef(
     new Map<
       string,
-      { last?: [number, number]; color: string; width: number; ownerId: string }
+      {
+        last?: [number, number];
+        color: string;
+        strokeWidth: number;
+        ownerId: string;
+      }
     >()
   );
 
@@ -45,7 +50,7 @@ export function useWsIncoming(
       case "stroke.start": {
         remoteStrokesRef.current.set(op.pathId, {
           color: op.color,
-          width: op.width,
+          strokeWidth: op.width,
           ownerId: String(op.ownerId ?? ""),
           last: undefined,
         });
@@ -60,7 +65,7 @@ export function useWsIncoming(
           // append dotarł przed startem – zasiej bezpieczne domyślne wartości
           state = {
             color: "#000",
-            width: 2,
+            strokeWidth: 2,
             ownerId: "",
             last: undefined,
           };
@@ -79,7 +84,7 @@ export function useWsIncoming(
               type: "stroke",
               id: op.pathId,
               color: state.color,
-              width: state.width,
+              strokeWidth: state.strokeWidth,
               points: add,
               ownerId: state.ownerId,
             };
@@ -124,6 +129,13 @@ export function useWsIncoming(
           return next;
         });
         setObjects((prev) => prev.filter((s) => !removed.has(s.id)));
+        break;
+      }
+      case "shape.add": {
+        const s = op.shape;
+        setObjects((prev) =>
+          prev.some((o) => o.id === s.id) ? prev : [...prev, s]
+        );
         break;
       }
     }

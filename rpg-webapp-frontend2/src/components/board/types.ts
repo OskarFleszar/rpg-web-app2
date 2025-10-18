@@ -5,7 +5,7 @@ export type Stroke = {
   id: string;
   points: number[];
   color: string;
-  width: number;
+  strokeWidth: number;
   ownerId: string;
 };
 
@@ -30,7 +30,7 @@ export type Ellipse = {
   width: number;
   height: number;
   color: string;
-  strokeWidth: string;
+  strokeWidth: number;
   ownerId: string;
 };
 

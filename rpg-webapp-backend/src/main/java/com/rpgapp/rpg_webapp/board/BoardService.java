@@ -1,6 +1,7 @@
 package com.rpgapp.rpg_webapp.board;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rpgapp.rpg_webapp.board.dto.ShapeDTO;
 import com.rpgapp.rpg_webapp.board.dto.StrokeAppendDTO;
 import com.rpgapp.rpg_webapp.board.dto.StrokeEndDTO;
 import com.rpgapp.rpg_webapp.board.dto.StrokeStartDTO;
@@ -10,6 +11,7 @@ import com.rpgapp.rpg_webapp.board.entity.BoardState;
 import com.rpgapp.rpg_webapp.board.repositories.BoardObjectIndexRepository;
 import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.board.repositories.BoardStateRepository;
+import com.rpgapp.rpg_webapp.board.snapshot.ShapeObject;
 import com.rpgapp.rpg_webapp.board.snapshot.Snapshot;
 import com.rpgapp.rpg_webapp.board.snapshot.StrokeObject;
 import com.rpgapp.rpg_webapp.user.User;
@@ -59,10 +61,10 @@ public class BoardService {
                     .orElseThrow(() -> new IllegalArgumentException("Board not found: " + boardId));
 
             BoardState st = new BoardState();
-            st.setBoard(board);                               // @MapsId zaciągnie PK z Board
-            st.setStateJson("{\"version\":0,\"layers\":[]}"); // startowy JSON
+            st.setBoard(board);
+            st.setStateJson("{\"version\":0,\"layers\":[]}");
 
-            return states.save(st); // ← od razu PERSIST i zwracamy „managed” encję
+            return states.save(st);
         });
     }
 
@@ -139,4 +141,72 @@ public class BoardService {
         BoardState st = getOrCreateState(boardId);
         return st.getStateJson();
     }
+
+    @Transactional
+    public void addShape(long boardId, ShapeDTO dto, User owner) throws Exception {
+        if (dto == null || dto.id() == null || dto.type() == null || dto.layerId() == null) {
+            throw new IllegalArgumentException("shape.id, type i layerId są wymagane");
+        }
+        if (dto.color() == null || dto.strokeWidth() == null) {
+            throw new IllegalArgumentException("shape.color i strokeWidth są wymagane");
+        }
+
+        String shapeType = dto.type().toLowerCase();
+
+        // Walidacja geometrii wg typu
+        switch (shapeType) {
+            case "rect" -> {
+                if (dto.width() == null || dto.height() == null) {
+                    throw new IllegalArgumentException("rect wymaga width i height");
+                }
+            }
+            case "ellipse" -> {
+                if (dto.width() == null || dto.height() == null) {
+                    throw new IllegalArgumentException("ellipse wymaga radiusX i radiusY");
+                }
+            }
+            default -> throw new IllegalArgumentException("Nieobsługiwany shape.type: " + dto.type());
+        }
+
+        BoardState st = getOrCreateState(boardId);
+        Snapshot snap = readSnapshot(st);
+
+
+
+        ShapeObject obj = new ShapeObject();
+        obj.setObjectId(dto.id().toString());
+        obj.setShape(shapeType);
+        obj.setColor(dto.color());
+        obj.setWidth(Double.valueOf(dto.strokeWidth()));            // mapujemy strokeWidth -> width (grubość konturu)
+        obj.setX(dto.x() != null ? dto.x() : 0.0);
+        obj.setY(dto.y() != null ? dto.y() : 0.0);
+        obj.setRotation(dto.rotation());
+        obj.setOwnerId(owner.getId());
+        obj.setCreatedAt(java.time.LocalDateTime.now());
+
+        if ("rect".equals(shapeType)) {
+            obj.setWidth(dto.width());
+            obj.setHeight(dto.height());
+        } else { // ellipse
+            obj.setWidth(dto.width());
+            obj.setHeight(dto.height());
+        }
+
+        //snap.addShape(dto.layerId(), obj);
+        writeSnapshot(st, snap);
+        states.save(st);
+
+        // indeks (jak przy stroke)
+        var idx = new BoardObjectIndex();
+        idx.setObjectId(dto.id());
+        idx.setBoard(st.getBoard());
+        idx.setOwner(owner);
+        idx.setType(shapeType);                 // "rect" lub "ellipse"
+        idx.setLayerId(dto.layerId());
+        idx.setCreatedAt(java.time.LocalDateTime.now());
+        indexRepo.save(idx);
+    }
+
+
+
 }

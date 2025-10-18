@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Circle, Layer, Line, Stage } from "react-konva";
+import { Circle, Ellipse, Layer, Line, Rect, Stage } from "react-konva";
 import type Konva from "konva";
 import Toolbar from "./Toolbar";
 import { usePanZoom } from "./hooks/usePanZoom";
@@ -10,6 +10,7 @@ import { useEraser } from "./hooks/useEraser";
 import { getPointerOnLayer } from "./utils/konvaCoords";
 import { type Tool, type Stroke, type Drawable, isStroke } from "./types";
 import { useUndo } from "./hooks/useUndo";
+import { useShape } from "./hooks/useShape";
 
 type Props = { boardId: number };
 
@@ -51,7 +52,7 @@ export default function BoardCanvas({ boardId }: Props) {
 
   const [tool, setTool] = useState<Tool>("hand");
   const [color, setColor] = useState("#222222");
-  const [width, setWidth] = useState(3);
+  const [strokeWidth, setStrokeWidth] = useState(3);
   const [eraserSize, setEraserSize] = useState(20);
 
   const stageRef = useRef<Konva.Stage | null>(null);
@@ -82,6 +83,7 @@ export default function BoardCanvas({ boardId }: Props) {
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
     useWsIncoming(boardId, setObjects, clientId);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const undo = useUndo({
     boardId,
     clientId,
@@ -95,12 +97,24 @@ export default function BoardCanvas({ boardId }: Props) {
     stageRef,
     layerRef,
     color,
-    width,
+    strokeWidth,
     clientId,
     addMyPath,
     removeMyPath,
     setObjects,
     currentUserId,
+  });
+
+  const shapes = useShape({
+    kind: tool === "rect" ? "rect" : "ellipse",
+    boardId,
+    stageRef,
+    layerRef,
+    color,
+    strokeWidth,
+    clientId,
+    currentUserId,
+    setObjects,
   });
 
   const {
@@ -132,15 +146,18 @@ export default function BoardCanvas({ boardId }: Props) {
   function onPointerDown() {
     if (tool === "pencil") return pencil.onPointerDown();
     if (tool === "eraser") return erDown();
+    if (tool === "rect" || tool === "ellipse") return shapes.onPointerDown();
   }
   function onPointerMove() {
     updatePointer();
     if (tool === "pencil") return pencil.onPointerMove();
     if (tool === "eraser") return erMove();
+    if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
   }
   function onPointerUp() {
     if (tool === "pencil") return pencil.onPointerUp();
     if (tool === "eraser") return erUp();
+    if (tool === "rect" || tool === "ellipse") return shapes.onPointerUp();
   }
 
   return (
@@ -150,8 +167,8 @@ export default function BoardCanvas({ boardId }: Props) {
         setTool={setTool}
         color={color}
         setColor={setColor}
-        width={width}
-        setWidth={setWidth}
+        width={strokeWidth}
+        setWidth={setStrokeWidth}
         eraserSize={eraserSize}
         setEraserSize={setEraserSize}
       />
@@ -177,24 +194,55 @@ export default function BoardCanvas({ boardId }: Props) {
         style={{ cursor, background: "#fff" }}
       >
         <Layer ref={layerRef}>
-          {objects.map((o) =>
-            o.type === "stroke" ? (
-              <Line
-                key={o.id}
-                points={o.points}
-                stroke={o.color}
-                strokeWidth={o.width}
-                lineCap="round"
-                lineJoin="round"
-                opacity={
-                  (erasePreview.has(o.id) && isMine(o.id)) ||
-                  pendingRemoval.has(o.id)
-                    ? 0
-                    : 1
-                }
-              />
-            ) : null
-          )}
+          {objects.map((o) => {
+            if (o.type === "stroke") {
+              return (
+                <Line
+                  key={o.id}
+                  points={o.points}
+                  stroke={o.color}
+                  strokeWidth={o.strokeWidth}
+                  lineCap="round"
+                  lineJoin="round"
+                  opacity={
+                    (erasePreview.has(o.id) && isMine(o.id)) ||
+                    pendingRemoval.has(o.id)
+                      ? 0
+                      : 1
+                  }
+                />
+              );
+            }
+            if (o.type === "rect") {
+              return (
+                <Rect
+                  key={o.id}
+                  x={o.x}
+                  y={o.y}
+                  width={o.width}
+                  height={o.height}
+                  stroke={o.color}
+                  strokeWidth={o.strokeWidth}
+                />
+              );
+            }
+            if (o.type === "ellipse") {
+              const cx = o.x + o.width / 2;
+              const cy = o.y + o.height / 2;
+              return (
+                <Ellipse
+                  key={o.id}
+                  x={cx}
+                  y={cy}
+                  radiusX={o.width / 2}
+                  radiusY={o.height / 2}
+                  stroke={o.color}
+                  strokeWidth={o.strokeWidth}
+                />
+              );
+            }
+            return null;
+          })}
 
           {tool === "eraser" && pointerOnLayer && (
             <Circle

@@ -32,6 +32,11 @@ public class Snapshot {
         l.getObjects().add(s);
     }
 
+//    public void addShape(String layerId, ShapeObject obj) {
+//        var layer = getOrCreateLayer(layerId); // tak jak przy stroke
+//        layer.getObjects().add(obj);
+//    }
+
     public boolean appendPoints(String pathId, List<int[]> pts){
         for (Layer l : layers){
             for (var obj : l.getObjects()) {

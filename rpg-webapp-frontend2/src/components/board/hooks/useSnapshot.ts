@@ -22,18 +22,46 @@ export function useSnapshot(
       const all: Stroke[] = [];
       for (const layer of snap.layers ?? []) {
         for (const obj of layer.objects ?? []) {
-          if (obj.type !== "stroke") continue;
-          const points = Array.isArray(obj.points?.[0])
-            ? (obj.points as number[][]).flat()
-            : (obj.points as number[]) ?? [];
-          all.push({
-            type: "stroke",
-            id: obj.pathId,
-            color: obj.color,
-            width: obj.width,
-            points,
-            ownerId: String(obj.ownerId ?? ""),
-          });
+          if (obj.type === "stroke") {
+            const points = Array.isArray(obj.points?.[0])
+              ? (obj.points as number[][]).flat()
+              : (obj.points as number[]) ?? [];
+            all.push({
+              type: "stroke",
+              id: obj.pathId,
+              color: obj.color,
+              strokeWidth: obj.width,
+              points,
+              ownerId: String(obj.ownerId ?? ""),
+            });
+          }
+          if (obj.type === "rect") {
+            all.push({
+              type: "rect",
+              id: obj.id,
+              x: obj.x,
+              y: obj.y,
+              width: obj.width,
+              height: obj.height,
+              color: obj.color,
+              strokeWidth: obj.strokeWidth,
+              ownerId: obj.ownerId,
+            });
+          }
+
+          if (obj.type === "ellipse") {
+            all.push({
+              type: "ellipse",
+              id: obj.id,
+              x: obj.x,
+              y: obj.y,
+              width: obj.width,
+              height: obj.height,
+              color: obj.color,
+              strokeWidth: obj.strokeWidth,
+              ownerId: obj.ownerId,
+            });
+          }
         }
       }
       setObjects(all);

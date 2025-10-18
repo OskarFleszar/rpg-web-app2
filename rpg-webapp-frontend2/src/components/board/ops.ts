@@ -1,3 +1,5 @@
+import type { Ellipse, Rect } from "./types";
+
 export type StrokeStartOp = {
   type: "stroke.start";
   boardId: number;
@@ -35,15 +37,19 @@ export type Snapshot = {
   version: number;
   layers: Array<{
     id: string;
-    objects: Array<{
-      type: "stroke";
-      objectId: string;
-      pathId: string;
-      color: string;
-      width: number;
-      points: number[][];
-      ownerId: number;
-    }>;
+    objects: Array<
+      | {
+          type: "stroke";
+          objectId: string;
+          pathId: string;
+          color: string;
+          width: number;
+          points: number[][];
+          ownerId: number;
+        }
+      | Rect
+      | Ellipse
+    >;
   }>;
 };
 
@@ -78,6 +84,37 @@ export type ObjectsRemovedOp = {
   clientId?: string;
 };
 
+export type RectShape = {
+  type: "rect";
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  color: string;
+  width: number;
+  ownerId: string;
+};
+export type CircleShape = {
+  type: "circle";
+  id: string;
+  x: number;
+  y: number;
+  radius: number;
+  color: string;
+  width: number;
+  ownerId: string;
+};
+export type ShapePayload = RectShape | CircleShape;
+
+export type ShapeAddOp = {
+  type: "shape.add";
+  boardId: number;
+  layerId: string;
+  shape: Rect | Ellipse;
+  clientId?: string;
+};
+
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
@@ -86,4 +123,5 @@ export type BoardOp =
   | ObjectsRemovedOp
   | EraseStartOp
   | EraseAppendOp
-  | EraseEndOp;
+  | EraseEndOp
+  | ShapeAddOp;
