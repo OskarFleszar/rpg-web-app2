@@ -1,26 +1,26 @@
 import { useCallback, useEffect } from "react";
 import { usePublish } from "../../../ws/hooks";
-import type { Stroke } from "../types";
+import type { Drawable, Stroke } from "../types";
 
 type Args = {
   boardId: number;
   clientId: string;
   currentUserId: string;
-  strokes: Stroke[];
+  objects: Drawable[];
   markPendingRemoval: (ids: string[]) => void;
 };
 export function useUndo({
   boardId,
   clientId,
   currentUserId,
-  strokes,
+  objects,
   markPendingRemoval,
 }: Args) {
   const publish = usePublish();
 
   const undoLastStroke = useCallback(() => {
-    for (let i = strokes.length - 1; i >= 0; i--) {
-      const s = strokes[i];
+    for (let i = objects.length - 1; i >= 0; i--) {
+      const s = objects[i];
       if (s.ownerId === currentUserId) {
         const lastStrokeId = [s.id];
 
@@ -36,7 +36,7 @@ export function useUndo({
         break;
       }
     }
-  }, [boardId, clientId, strokes, currentUserId, markPendingRemoval, publish]);
+  }, [boardId, clientId, objects, currentUserId, markPendingRemoval, publish]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

@@ -34,18 +34,18 @@ export default function BoardCanvas({ boardId }: Props) {
   useSnapshot(boardId, setObjects);
   const currentUserId: string = localStorage.getItem("userId")!;
 
-  const strokesRef = useRef<Map<string, Stroke>>(new Map());
+  const objectsRef = useRef<Map<string, Drawable>>(new Map());
   useEffect(() => {
-    const m = strokesRef.current;
+    const m = objectsRef.current;
     m.clear();
-    for (const s of strokes) m.set(s.id, s);
+    for (const s of objects) m.set(s.id, s);
   }, [strokes]);
 
   const isMine = useCallback(
     (id: string) => {
-      const s = strokesRef.current.get(id);
-      console.log(!!s && s.ownerId === currentUserId);
-      return !!s && s.ownerId === currentUserId;
+      const o = objectsRef.current.get(id);
+      console.log(!!o && o.ownerId === currentUserId);
+      return !!o && o.ownerId === currentUserId;
     },
     [currentUserId]
   );
@@ -88,7 +88,7 @@ export default function BoardCanvas({ boardId }: Props) {
     boardId,
     clientId,
     currentUserId,
-    strokes,
+    objects,
     markPendingRemoval,
   });
 
@@ -128,7 +128,7 @@ export default function BoardCanvas({ boardId }: Props) {
     layerRef: layerRef,
     radius: eraserSize / 2,
     clientId,
-    strokes,
+    objects,
     setObjects,
     markPendingRemoval,
     isMine,

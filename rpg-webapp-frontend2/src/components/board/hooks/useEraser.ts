@@ -3,7 +3,7 @@ import { usePublish } from "../../../ws/hooks";
 import type { Drawable, Stroke } from "../types";
 import type Konva from "konva";
 import { getPointerOnLayer } from "../utils/konvaCoords";
-import { eraserHitsStroke } from "../utils/geometry";
+import { circleHitsEllipseStroke, circleHitsRectStroke, eraserHitsStroke } from "../utils/geometry";
 
 export function useEraser(opts: {
   boardId: number;
@@ -11,7 +11,7 @@ export function useEraser(opts: {
   layerRef: React.RefObject<Konva.Layer | null>;
   radius: number;
   clientId: string;
-  strokes: Stroke[];
+  objects: Drawable[];
   setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>;
   markPendingRemoval: (ids: string[]) => void;
   isMine: (id: string) => boolean;
@@ -22,7 +22,7 @@ export function useEraser(opts: {
     layerRef,
     radius,
     clientId,
-    strokes,
+    objects,
     markPendingRemoval,
     isMine,
   } = opts;
@@ -55,16 +55,20 @@ export function useEraser(opts: {
     }
 
     const next = new Set(hitsRef.current);
-    for (const s of strokes) {
-      if (next.has(s.id)) continue;
-      if (eraserHitsStroke(s.points, pt.x, pt.y, radius) && isMine(s.id))
-        next.add(s.id);
+    for (const o of objects) {
+      if (next.has(o.id)) continue;
+      if(!isMine(o.id)) continue;
+
+      if (o. type === "stroke" && eraserHitsStroke(o.points, pt.x, pt.y, radius))
+        next.add(o.id);
+      else if (o. type === "rect" && circleHitsRectStroke(pt.x, pt.y,radius, o.x, o.y, o.width, o.height,o.strokeWidth)) next.add(o.id)
+      else if (o. type === "ellipse" && circleHitsRectStroke(pt.x, pt.y,radius, o.x, o.y, o.width, o.height,o.  strokeWidth)) next.add(o.id)
     }
     if (next.size !== hitsRef.current.size) {
       hitsRef.current = next;
       setErasePreview(new Set(next));
     }
-  }, [layerRef, stageRef, strokes, radius, isMine]);
+  }, [layerRef, stageRef, objects, radius, isMine]);
 
   const onPointerUp = useCallback(() => {
     if (!isErasingRef.current) return;
@@ -73,12 +77,16 @@ export function useEraser(opts: {
     const trail = trailRef.current;
     const touched = new Set<string>();
 
-    for (const s of strokes) {
+    for (const o of objects) {
       for (const [x, y] of trail) {
-        if (eraserHitsStroke(s.points, x, y, radius)) {
-          touched.add(s.id);
+        if (o.type == "stroke" && eraserHitsStroke(o.points, x, y, radius)) {
+          touched.add(o.id);
           break;
         }
+        else if (o. type === "rect" && circleHitsRectStroke(x, y,radius, o.x, o.y, o.width, o.height,o.strokeWidth))
+           touched.add(o.id)
+        else if (o. type === "ellipse" && circleHitsEllipseStroke(x, y,radius, o.x, o.y, o.width, o.height,o.  strokeWidth))
+           touched.add(o.id)
       }
     }
 
@@ -97,7 +105,7 @@ export function useEraser(opts: {
       objectIds: ownIds,
       clientId,
     } as const);
-  }, [boardId, clientId, publish, strokes, radius, isMine, markPendingRemoval]);
+  }, [boardId, clientId, publish, objects, radius, isMine, markPendingRemoval]);
 
   return { onPointerDown, onPointerMove, onPointerUp, erasePreview };
 }
