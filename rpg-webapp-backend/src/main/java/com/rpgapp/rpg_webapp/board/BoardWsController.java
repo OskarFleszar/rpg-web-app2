@@ -86,32 +86,40 @@ public class BoardWsController {
                 }
             }
             case "erase.commit" -> {
-                EraseCommitDTO dto = mapper.convertValue( body, EraseCommitDTO.class);
-                if (dto.objectIds() == null || dto.objectIds().isEmpty()) return;
+                var ids = (List<String>) body.get("objectIds");
+                var uuids = ids.stream().map(UUID::fromString).toList();
+                var owner = users.findUserById(userId).orElseThrow();
 
-                List<UUID> removed = new ArrayList<>();
-                for (String s : dto.objectIds()) {
-                    UUID oid;
-                    try {
-                        oid = UUID.fromString(s);
-                    } catch (Exception e) {
-                        continue;
-                    }
+                var removed = service.eraseCommit(id, uuids, owner);
 
-                    boolean isOwner = service.isOwner(oid, userId);
-                    boolean isGm = false; // TODO: GM kampanii boarda
-                    if (!(isOwner || isGm)) continue;
+                var out = Map.of(
+                        "type", "erase.applied",
+                        "boardId", id,
+                        "removed", removed.stream().map(r -> Map.of(
+                                "layerId", r.layerId(),
+                                "object", r.object()
+                        )).toList(),
+                        "clientId", body.get("clientId")
+                );
+                broker.convertAndSend("/topic/board." + id + ".op", out);
+            }
+            case "erase.undo" -> {
+                var ids = (List<String>) body.get("objectIds");
+                var uuids = ids.stream().map(UUID::fromString).toList();
+                var owner = users.findUserById(userId).orElseThrow();
 
-                    if (service.removeObject(id, oid)) {
-                        removed.add(oid);
-                    }
-                }
-                if (!removed.isEmpty()) {
-                    broker.convertAndSend("/topic/board." + id + ".op", Map.of(
-                            "type", "objects.removed",
-                            "objectIds", removed
-                    ));
-                }
+                var restored = service.eraseUndo(id, uuids, owner);
+
+                var out = Map.of(
+                        "type", "erase.undo.applied",
+                        "boardId", id,
+                        "restored", restored.stream().map(r -> Map.of(
+                                "layerId", r.layerId(),
+                                "object", r.object()
+                        )).toList(),
+                        "clientId", body.get("clientId")
+                );
+                broker.convertAndSend("/topic/board." + id + ".op", out);
             }
             case "shape.add" -> {
                 var dto = mapper.convertValue(body.get("shape"), ShapeDTO.class);

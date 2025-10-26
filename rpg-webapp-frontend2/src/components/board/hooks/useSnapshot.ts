@@ -1,19 +1,19 @@
 import { useEffect } from "react";
 import axios from "axios";
 import type { Drawable } from "../types";
+import { apiObjectToDrawable } from "../utils/apiToDrawable";
 
-// --- typy odpowiedzi API (to co zwraca backend) ---
 type ApiStroke = {
   type: "stroke";
   objectId: string;
-  points: number[] | number[][]; // backend bywa, że zwraca zagnieżdżone
+  points: number[] | number[][];
   color: string;
-  width: number; // grubość linii
+  width: number;
   ownerId: string | number;
 };
 
 type ApiShape = {
-  type: "shape" | null; // w starszych snapach bywa null
+  type: "shape" | null;
   shape: "rect" | "ellipse";
   objectId: string;
   x: number;
@@ -28,7 +28,6 @@ type ApiShape = {
 type ApiObject = ApiStroke | ApiShape;
 type ApiLayer = { id: string; locked: boolean; objects: ApiObject[] };
 type ApiSnapshot = { version: number; layers: ApiLayer[] };
-// ----------------------------------------------------
 
 export function useSnapshot(
   boardId: number,
@@ -52,47 +51,8 @@ export function useSnapshot(
 
       for (const layer of snap.layers) {
         for (const o of layer.objects) {
-          if (o.type === "stroke") {
-            const pts = Array.isArray((o.points as any)[0])
-              ? (o.points as number[][]).flat()
-              : (o.points as number[]);
-            all.push({
-              type: "stroke",
-              id: o.objectId,
-              points: pts,
-              color: o.color,
-              strokeWidth: o.width, // w API: width = grubość
-              ownerId: String(o.ownerId),
-            });
-          } else {
-            // ApiShape (type może być null)
-            const s = o as ApiShape;
-            if (s.shape === "rect") {
-              all.push({
-                type: "rect",
-                id: s.objectId,
-                x: s.x,
-                y: s.y,
-                width: s.width,
-                height: s.height,
-                color: s.color,
-                strokeWidth: s.strokeWidth ?? 1,
-                ownerId: String(s.ownerId),
-              });
-            } else if (s.shape === "ellipse") {
-              all.push({
-                type: "ellipse",
-                id: s.objectId,
-                x: s.x,
-                y: s.y,
-                width: s.width,
-                height: s.height,
-                color: s.color,
-                strokeWidth: s.strokeWidth ?? 1,
-                ownerId: String(s.ownerId),
-              });
-            }
-          }
+          const d = apiObjectToDrawable(o);
+          if (d) all.push(d);
         }
       }
 

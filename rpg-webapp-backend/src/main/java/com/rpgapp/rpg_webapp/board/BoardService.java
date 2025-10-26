@@ -11,6 +11,7 @@ import com.rpgapp.rpg_webapp.board.entity.BoardState;
 import com.rpgapp.rpg_webapp.board.repositories.BoardObjectIndexRepository;
 import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.board.repositories.BoardStateRepository;
+import com.rpgapp.rpg_webapp.board.snapshot.BoardObject;
 import com.rpgapp.rpg_webapp.board.snapshot.ShapeObject;
 import com.rpgapp.rpg_webapp.board.snapshot.Snapshot;
 import com.rpgapp.rpg_webapp.board.snapshot.StrokeObject;
@@ -19,14 +20,15 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class BoardService {
+
+    public record RemoveObject (String layerId, BoardObject object){}
+    public record RestoredObject (String layerId, BoardObject object){}
 
     private final BoardRepository boards;
     private final BoardStateRepository states;
@@ -165,9 +167,6 @@ public class BoardService {
 
         String shapeType = dto.type().toLowerCase();
 
-
-
-        // Walidacja geometrii wg typu
         switch (shapeType) {
             case "rect" -> {
                 if (dto.width() == null || dto.height() == null) {
@@ -185,14 +184,12 @@ public class BoardService {
         BoardState st = getOrCreateState(boardId);
         Snapshot snap = readSnapshot(st);
 
-
-
         ShapeObject obj = new ShapeObject();
-        obj.setType("shape");                 // ← KLUCZOWE (dla loadera po refreshu)
+        obj.setType("shape");
         obj.setObjectId(dto.id().toString());
-        obj.setShape(shapeType);              // "rect" / "ellipse"
+        obj.setShape(shapeType);
         obj.setColor(dto.color());
-        obj.setStrokeWidth(dto.strokeWidth()); // ← zamiast obj.setWidth(dto.strokeWidth())
+        obj.setStrokeWidth(dto.strokeWidth());
         obj.setX(dto.x() != null ? dto.x() : 0.0);
         obj.setY(dto.y() != null ? dto.y() : 0.0);
         obj.setRotation(dto.rotation());
@@ -216,10 +213,79 @@ public class BoardService {
         idx.setObjectId(dto.id());
         idx.setBoard(st.getBoard());
         idx.setOwner(owner);
-        idx.setType(shapeType);                 // "rect" lub "ellipse"
+        idx.setType(shapeType);
         idx.setLayerId(dto.layerId());
         idx.setCreatedAt(java.time.LocalDateTime.now());
         indexRepo.save(idx);
+    }
+    @Transactional
+    public List<RemoveObject> eraseCommit(long boardId, List<UUID> ids, User who) throws Exception {
+
+        var st = getOrCreateState(boardId);
+        var snap = readSnapshot(st);
+
+        var removed  = new ArrayList<RemoveObject>();
+        var idSet = ids.stream().map(UUID::toString).collect(Collectors.toSet());
+
+
+        for (var layer : snap.getLayers()){
+            var it = layer.getObjects().iterator();
+            while (it.hasNext()){
+                var obj = it.next();
+                if(!idSet.contains(obj.getObjectId())) continue;;
+
+                if (!Objects.equals(obj.getOwnerId(), who.getId())) continue;
+
+                it.remove();
+
+                var e = new Snapshot.TrashEntry();
+                e.layerId = layer.getId();
+                e.object = obj;
+                e.deletedAt = java.time.LocalDateTime.now();
+                e.ownerId = obj.getOwnerId();
+                snap.getTrash().put(obj.getObjectId(), e);
+
+                removed.add(new RemoveObject(layer.getId(), obj));
+            }
+        }
+
+        if (!removed.isEmpty()) {
+            writeSnapshot(st, snap);
+            states.save(st);
+        }
+        return removed;
+    }
+
+    @Transactional
+    public List<RestoredObject> eraseUndo (long boardId, List<UUID> ids, User who) throws Exception {
+
+        var st = getOrCreateState(boardId);
+        var snap = readSnapshot(st);
+
+        var restored  =new ArrayList<RestoredObject>();
+
+        for (var id : ids) {
+            var key = id.toString();
+            var e = snap.getTrash().get(key);
+            if (e == null) continue;
+
+            if (!Objects.equals(e.object.getOwnerId(), who.getId())) continue;
+
+            var layer = snap.getLayers().stream()
+                    .filter(l -> l.getId().equals(e.layerId))
+                    .findFirst().orElse(null);
+            if (layer == null) continue;
+
+            layer.getObjects().add(e.object);
+            snap.getTrash().remove(key);
+            restored.add(new RestoredObject(e.layerId, e.object));
+        }
+
+        if (!restored.isEmpty()) {
+            writeSnapshot(st, snap);
+            states.save(st);
+        }
+        return restored;
     }
 
 

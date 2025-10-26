@@ -1,4 +1,4 @@
-import type { Ellipse, Rect } from "./types";
+import type { Ellipse, Rect, Stroke } from "./types";
 
 export type StrokeStartOp = {
   type: "stroke.start";
@@ -115,6 +115,20 @@ export type ShapeAddOp = {
   clientId?: string;
 };
 
+export type EraseAppliedOp = {
+  type: "erase.applied";
+  boardId: number;
+  clientId?: string;
+  removed: { layerId: string; object: Rect | Ellipse | Stroke }[];
+};
+
+export type EraseUndoAppliedOp = {
+  type: "erase.undo.applied";
+  boardId: number;
+  clientId?: string;
+  restored: { layerId: string; object: Rect | Ellipse | Stroke }[];
+};
+
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
@@ -124,4 +138,6 @@ export type BoardOp =
   | EraseStartOp
   | EraseAppendOp
   | EraseEndOp
-  | ShapeAddOp;
+  | ShapeAddOp
+  | EraseAppliedOp
+  | EraseUndoAppliedOp;

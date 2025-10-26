@@ -3,11 +3,18 @@ import { useChannel } from "../../../ws/hooks";
 import type { BoardOp } from "../ops";
 import { isStroke, type Drawable, type Stroke } from "../types";
 import { useRef, useState } from "react";
+import { apiObjectToDrawable } from "../utils/apiToDrawable";
+
+type PushUndo = (
+  a: { kind: "draw"; objectId: string } | { kind: "erase"; objectIds: string[] }
+) => void;
+type ShouldIgnoreErase = (ids: string[]) => boolean;
 
 export function useWsIncoming(
   boardId: number,
   setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>,
-  clientId: string
+  clientId: string,
+  opts?: { pushUndo?: PushUndo; shouldIgnoreEraseApplied?: ShouldIgnoreErase }
 ) {
   const myActivePathsRef = useRef<Set<string>>(new Set());
   const remoteStrokesRef = useRef(
@@ -35,16 +42,13 @@ export function useWsIncoming(
   useChannel<BoardOp>(`/topic/board.${boardId}.op`, (op) => {
     if (!op || typeof (op as any).type !== "string") return;
 
-    const isOwnActivePath =
+    const isOwnLiveAppend =
+      op.type === "stroke.append" &&
       (op as any).clientId === clientId &&
       "pathId" in op &&
       !!(op as any).pathId &&
       myActivePathsRef.current.has((op as any).pathId as string);
-    if (isOwnActivePath) return;
-
-    if ("pathId" in op && op.pathId && pendingRemoval.has(op.pathId)) {
-      return;
-    }
+    if (isOwnLiveAppend) return;
 
     switch (op.type) {
       case "stroke.start": {
@@ -56,13 +60,12 @@ export function useWsIncoming(
         });
         break;
       }
+
       case "stroke.append": {
         if (pendingRemoval.has(op.pathId)) return;
 
-        // 1) pobierz / zainicjalizuj stan:
         let state = remoteStrokesRef.current.get(op.pathId);
         if (!state) {
-          // append dotarł przed startem – zasiej bezpieczne domyślne wartości
           state = {
             color: "#000",
             strokeWidth: 2,
@@ -72,28 +75,24 @@ export function useWsIncoming(
           remoteStrokesRef.current.set(op.pathId, state);
         }
 
-        // 2) punkty do dopięcia
         const add = (op.points ?? []).flat();
         if (!add.length) break;
 
-        // 3) aktualizacja store'u obiektów
         setObjects((prev) => {
           const idx = prev.findIndex((o) => o.id === op.pathId);
           if (idx === -1) {
             const newStroke: Stroke = {
               type: "stroke",
               id: op.pathId,
-              color: state.color,
-              strokeWidth: state.strokeWidth,
+              color: state!.color,
+              strokeWidth: state!.strokeWidth,
               points: add,
-              ownerId: state.ownerId,
+              ownerId: state!.ownerId,
             };
             return [...prev, newStroke];
           }
-
           const existing = prev[idx];
-          if (!isStroke(existing)) return prev; // zabezpieczenie
-
+          if (!isStroke(existing)) return prev;
           const updated: Stroke = {
             ...existing,
             points: [...existing.points, ...add],
@@ -103,11 +102,27 @@ export function useWsIncoming(
           return copy;
         });
 
-        // 4) aktualizacja ostatniego punktu w stanie pomocniczym
         const lastPts = op.points ?? [];
         if (lastPts.length) {
           const last = lastPts[lastPts.length - 1]!;
           state.last = [last[0], last[1]];
+        }
+        break;
+      }
+      case "stroke.end": {
+        if (op.clientId === clientId && op.pathId && opts?.pushUndo) {
+          opts.pushUndo({ kind: "draw", objectId: op.pathId });
+        }
+        break;
+      }
+
+      case "shape.add": {
+        const s = op.shape;
+        setObjects((prev) =>
+          prev.some((o) => o.id === s.id) ? prev : [...prev, s]
+        );
+        if (op.clientId === clientId && s?.id && opts?.pushUndo) {
+          opts.pushUndo({ kind: "draw", objectId: s.id });
         }
         break;
       }
@@ -131,11 +146,43 @@ export function useWsIncoming(
         setObjects((prev) => prev.filter((s) => !removed.has(s.id)));
         break;
       }
-      case "shape.add": {
-        const s = op.shape;
-        setObjects((prev) =>
-          prev.some((o) => o.id === s.id) ? prev : [...prev, s]
-        );
+
+      case "erase.applied": {
+        const removedIds = (op.removed ?? [])
+          .map((r: any) => String(r.object?.objectId ?? ""))
+          .filter(Boolean);
+
+        setPendingRemoval((prev) => {
+          const next = new Set(prev);
+          removedIds.forEach((id) => next.delete(id));
+          return next;
+        });
+        setObjects((prev) => prev.filter((s) => !removedIds.includes(s.id)));
+
+        if (
+          op.clientId === clientId &&
+          removedIds.length &&
+          !opts?.shouldIgnoreEraseApplied?.(removedIds) &&
+          opts?.pushUndo
+        ) {
+          opts.pushUndo({ kind: "erase", objectIds: removedIds });
+        }
+        break;
+      }
+
+      case "erase.undo.applied": {
+        const toAdd: Drawable[] = [];
+        for (const r of op.restored ?? []) {
+          const d = apiObjectToDrawable(r.object);
+          if (d) toAdd.push(d);
+        }
+        if (toAdd.length) {
+          setObjects((prev) => {
+            const existing = new Set(prev.map((o) => o.id));
+            const fresh = toAdd.filter((o) => !existing.has(o.id));
+            return fresh.length ? [...prev, ...fresh] : prev;
+          });
+        }
         break;
       }
     }

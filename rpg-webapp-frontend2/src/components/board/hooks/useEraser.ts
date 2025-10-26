@@ -1,9 +1,13 @@
 import { useCallback, useRef, useState } from "react";
 import { usePublish } from "../../../ws/hooks";
-import type { Drawable, Stroke } from "../types";
+import type { Drawable } from "../types";
 import type Konva from "konva";
 import { getPointerOnLayer } from "../utils/konvaCoords";
-import { circleHitsEllipseStroke, circleHitsRectStroke, eraserHitsStroke } from "../utils/geometry";
+import {
+  circleHitsEllipseStroke,
+  circleHitsRectStroke,
+  eraserHitsStroke,
+} from "../utils/geometry";
 
 export function useEraser(opts: {
   boardId: number;
@@ -57,12 +61,38 @@ export function useEraser(opts: {
     const next = new Set(hitsRef.current);
     for (const o of objects) {
       if (next.has(o.id)) continue;
-      if(!isMine(o.id)) continue;
+      if (!isMine(o.id)) continue;
 
-      if (o. type === "stroke" && eraserHitsStroke(o.points, pt.x, pt.y, radius))
+      if (o.type === "stroke" && eraserHitsStroke(o.points, pt.x, pt.y, radius))
         next.add(o.id);
-      else if (o. type === "rect" && circleHitsRectStroke(pt.x, pt.y,radius, o.x, o.y, o.width, o.height,o.strokeWidth)) next.add(o.id)
-      else if (o. type === "ellipse" && circleHitsRectStroke(pt.x, pt.y,radius, o.x, o.y, o.width, o.height,o.  strokeWidth)) next.add(o.id)
+      else if (
+        o.type === "rect" &&
+        circleHitsRectStroke(
+          pt.x,
+          pt.y,
+          radius,
+          o.x,
+          o.y,
+          o.width,
+          o.height,
+          o.strokeWidth
+        )
+      )
+        next.add(o.id);
+      else if (
+        o.type === "ellipse" &&
+        circleHitsRectStroke(
+          pt.x,
+          pt.y,
+          radius,
+          o.x,
+          o.y,
+          o.width,
+          o.height,
+          o.strokeWidth
+        )
+      )
+        next.add(o.id);
     }
     if (next.size !== hitsRef.current.size) {
       hitsRef.current = next;
@@ -82,11 +112,34 @@ export function useEraser(opts: {
         if (o.type == "stroke" && eraserHitsStroke(o.points, x, y, radius)) {
           touched.add(o.id);
           break;
-        }
-        else if (o. type === "rect" && circleHitsRectStroke(x, y,radius, o.x, o.y, o.width, o.height,o.strokeWidth))
-           touched.add(o.id)
-        else if (o. type === "ellipse" && circleHitsEllipseStroke(x, y,radius, o.x, o.y, o.width, o.height,o.  strokeWidth))
-           touched.add(o.id)
+        } else if (
+          o.type === "rect" &&
+          circleHitsRectStroke(
+            x,
+            y,
+            radius,
+            o.x,
+            o.y,
+            o.width,
+            o.height,
+            o.strokeWidth
+          )
+        )
+          touched.add(o.id);
+        else if (
+          o.type === "ellipse" &&
+          circleHitsEllipseStroke(
+            x,
+            y,
+            radius,
+            o.x,
+            o.y,
+            o.width,
+            o.height,
+            o.strokeWidth
+          )
+        )
+          touched.add(o.id);
       }
     }
 

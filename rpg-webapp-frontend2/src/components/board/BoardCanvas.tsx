@@ -8,11 +8,15 @@ import { useWsIncoming } from "./hooks/useWsIncoming";
 import { usePencil } from "./hooks/usePencil";
 import { useEraser } from "./hooks/useEraser";
 import { getPointerOnLayer } from "./utils/konvaCoords";
-import { type Tool, type Stroke, type Drawable, isStroke } from "./types";
+import { type Tool, type Drawable } from "./types";
 import { useUndo } from "./hooks/useUndo";
 import { useShape } from "./hooks/useShape";
 
 type Props = { boardId: number };
+
+type PushUndo = (
+  a: { kind: "draw"; objectId: string } | { kind: "erase"; objectIds: string[] }
+) => void;
 
 export default function BoardCanvas({ boardId }: Props) {
   const [size, setSize] = useState({
@@ -28,9 +32,10 @@ export default function BoardCanvas({ boardId }: Props) {
   }, []);
 
   const [objects, setObjects] = useState<Drawable[]>([]);
-
-  // Adapter dla starego kodu (jeśli gdzieś potrzebujesz „strokes”):
-  const strokes = useMemo(() => objects.filter(isStroke), [objects]);
+  const pushUndoRef = useRef<PushUndo | null>(null);
+  const shouldIgnoreEraseAppliedRef = useRef<
+    ((ids: string[]) => boolean) | null
+  >(null);
   useSnapshot(boardId, setObjects);
   const currentUserId: string = localStorage.getItem("userId")!;
 
@@ -39,7 +44,7 @@ export default function BoardCanvas({ boardId }: Props) {
     const m = objectsRef.current;
     m.clear();
     for (const s of objects) m.set(s.id, s);
-  }, [strokes]);
+  }, [objects]);
 
   const isMine = useCallback(
     (id: string) => {
@@ -81,16 +86,23 @@ export default function BoardCanvas({ boardId }: Props) {
     []
   );
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
-    useWsIncoming(boardId, setObjects, clientId);
+    useWsIncoming(boardId, setObjects, clientId, {
+      pushUndo: (a) => pushUndoRef.current?.(a),
+      shouldIgnoreEraseApplied: (ids) =>
+        !!shouldIgnoreEraseAppliedRef.current?.(ids),
+    });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const undo = useUndo({
+  const { undo, pushUndo, shouldIgnoreEraseApplied } = useUndo({
     boardId,
     clientId,
-    currentUserId,
     objects,
     markPendingRemoval,
   });
+
+  useEffect(() => {
+    pushUndoRef.current = pushUndo;
+    shouldIgnoreEraseAppliedRef.current = shouldIgnoreEraseApplied;
+  }, [pushUndo, shouldIgnoreEraseApplied]);
 
   const pencil = usePencil({
     boardId,

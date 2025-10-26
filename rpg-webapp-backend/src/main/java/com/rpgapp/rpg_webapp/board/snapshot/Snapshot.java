@@ -8,6 +8,14 @@ import java.util.*;
 public class Snapshot {
     private long version = 0;
     private List<Layer> layers = new ArrayList<>();
+    Map<String, TrashEntry> trash = new HashMap<>();
+    @Getter @Setter @NoArgsConstructor
+     public static class TrashEntry {
+        public String layerId;
+        public BoardObject object;
+        public java.time.LocalDateTime deletedAt;
+        public Long ownerId;
+    }
 
     public Layer getOrCreateLayer(String id, int z) {
         for (Layer l : layers) if (Objects.equals(l.getId(), id)) return l;
@@ -19,7 +27,7 @@ public class Snapshot {
         layers.add(l);
         return l;
     }
-    // ⬇️ brakujące przeciążenie
+
     public Layer getOrCreateLayer(String id) {
         return getOrCreateLayer(id, 0);
     }
