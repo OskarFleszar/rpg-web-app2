@@ -2,34 +2,26 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import "./CampaignPage.css";
-import { createStompClient } from "../../ws/client";
+
 import { Chat } from "./Chat";
 import { WSProvider } from "../../ws/WSProvider";
 import BoardCanvas from "../../components/board/BoardCanvas";
-
-export function WsSmokeTest() {
-  useEffect(() => {
-    const client = createStompClient("http://localhost:8080");
-    client.activate();
-    return () => void client.deactivate();
-  }, []);
-
-  return null;
-}
+import { GMPanel } from "../../components/GMPanel";
 
 export function CampaignPage() {
   const baseUrl = "http://localhost:8080";
   const { id } = useParams();
-  const [addingUser, setAddingUser] = useState(false);
-  const [nicknameToAdd, setNicknameToAdd] = useState("");
+
   const [characters, setCharacters] = useState([]);
   const { state } = useLocation();
   const characterIds = state?.characterIds as number[];
+  const [isGM, setIsGM] = useState(false);
 
   useEffect(() => {
     if (characterIds) {
       fetchCharactersData();
     }
+    fetchiSGM();
   }, []);
 
   const fetchCharactersData = async () => {
@@ -47,42 +39,32 @@ export function CampaignPage() {
     }
   };
 
-  const handleAddUser = async () => {
+  const fetchiSGM = async () => {
     try {
-      await axios.post(
-        `http://localhost:8080/api/campaign/${id}/add`,
-        { nickname: nicknameToAdd },
+      const response = await axios.get(
+        `http://localhost:8080/api/campaign/${id}/GM`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
+      if (response.data === Number(localStorage.getItem("userId")))
+        setIsGM(true);
 
-      setNicknameToAdd("");
-      setAddingUser(false);
+      console.log(
+        `Backend gm: ${response.data}, localsotrage id: ${localStorage.getItem(
+          "userId"
+        )} ${isGM}`
+      );
     } catch (error) {
-      console.error("An error occured while adding user", error);
+      console.error("An error occured while fethcing gamemaster", error);
     }
   };
+
   return (
     <div className="campaign-page">
-      {addingUser ? (
-        <div>
-          <input
-            type="text"
-            placeholder="Nickname"
-            value={nicknameToAdd}
-            onChange={(e) => {
-              setNicknameToAdd(e.target.value);
-            }}
-          />
-          <button onClick={handleAddUser}>Add</button>
-          <button onClick={() => setAddingUser(false)}>Cancel</button>
-        </div>
-      ) : (
-        <button onClick={() => setAddingUser(true)}>Add a new user</button>
-      )}
+      {isGM ? <GMPanel campaignId={id} isGM={isGM} /> : <></>}
 
       <WSProvider baseUrl={baseUrl}>
         <Chat campaignId={id} characters={characters} />

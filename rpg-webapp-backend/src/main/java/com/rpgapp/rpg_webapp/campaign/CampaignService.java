@@ -5,6 +5,7 @@ import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
 import com.rpgapp.rpg_webapp.user.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,5 +75,12 @@ public class CampaignService {
 
     public Optional<Campaign> getCampaignData(Long campaignId) {
         return campaignRepository.findById(campaignId);
+    }
+
+    public Long getGM (Long campaignId) {
+      Campaign campaign = campaignRepository.findById(campaignId).orElseThrow(() -> new EntityNotFoundException("Campaign " + campaignId + " not found"));
+
+     return campaign.getGameMaster().getId();
+
     }
 }

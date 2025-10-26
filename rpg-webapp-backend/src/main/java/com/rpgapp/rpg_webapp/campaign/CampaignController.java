@@ -19,6 +19,10 @@ public class CampaignController {
     public Optional<Campaign> getCampaignData (@PathVariable("campaignId") Long campaignId) {
         return campaignService.getCampaignData(campaignId);
     }
+    @GetMapping(path="/{campaignId}/GM")
+    public Long getGameMasterId (@PathVariable("campaignId") Long campaignId) {
+        return campaignService.getGM(campaignId);
+    }
 
     @PostMapping("/create")
     public void createNewCampaign (@RequestBody Campaign campaign) {
