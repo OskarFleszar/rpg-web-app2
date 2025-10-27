@@ -12,13 +12,13 @@ import { type Tool, type Drawable } from "./types";
 import { useUndo } from "./hooks/useUndo";
 import { useShape } from "./hooks/useShape";
 
-type Props = { boardId: number };
+type Props = { boardId: number; isGM: boolean };
 
 type PushUndo = (
   a: { kind: "draw"; objectId: string } | { kind: "erase"; objectIds: string[] }
 ) => void;
 
-export default function BoardCanvas({ boardId }: Props) {
+export default function BoardCanvas({ boardId, isGM }: Props) {
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -145,6 +145,7 @@ export default function BoardCanvas({ boardId }: Props) {
     setObjects,
     markPendingRemoval,
     isMine,
+    isGM,
   });
 
   const [pointerOnLayer, setPointerOnLayer] = useState<{

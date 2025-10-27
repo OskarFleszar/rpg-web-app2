@@ -19,6 +19,7 @@ export function useEraser(opts: {
   setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>;
   markPendingRemoval: (ids: string[]) => void;
   isMine: (id: string) => boolean;
+  isGM: boolean;
 }) {
   const {
     boardId,
@@ -29,6 +30,7 @@ export function useEraser(opts: {
     objects,
     markPendingRemoval,
     isMine,
+    isGM,
   } = opts;
   const publish = usePublish();
 
@@ -147,7 +149,14 @@ export function useEraser(opts: {
     hitsRef.current.clear();
     setErasePreview(new Set());
 
-    const ownIds = [...touched].filter(isMine);
+    let ownIds;
+
+    if (isGM) {
+      ownIds = [...touched];
+    } else {
+      ownIds = [...touched].filter(isMine);
+    }
+
     if (ownIds.length === 0) return;
 
     markPendingRemoval(ownIds);
@@ -157,8 +166,18 @@ export function useEraser(opts: {
       boardId,
       objectIds: ownIds,
       clientId,
+      isGM,
     } as const);
-  }, [boardId, clientId, publish, objects, radius, isMine, markPendingRemoval]);
+  }, [
+    boardId,
+    clientId,
+    publish,
+    objects,
+    radius,
+    isMine,
+    markPendingRemoval,
+    isGM,
+  ]);
 
   return { onPointerDown, onPointerMove, onPointerUp, erasePreview };
 }

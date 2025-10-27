@@ -223,7 +223,7 @@ public class BoardService {
         indexRepo.save(idx);
     }
     @Transactional
-    public List<RemoveObject> eraseCommit(long boardId, List<UUID> ids, User who) throws Exception {
+    public List<RemoveObject> eraseCommit(long boardId, List<UUID> ids, User who, boolean isGM) throws Exception {
 
         var st = getOrCreateState(boardId);
         var snap = readSnapshot(st);
@@ -238,8 +238,10 @@ public class BoardService {
                 var obj = it.next();
                 if(!idSet.contains(obj.getObjectId())) continue;;
 
-                if (!Objects.equals(obj.getOwnerId(), who.getId())) continue;
 
+                if(!isGM) {
+                    if (!Objects.equals(obj.getOwnerId(), who.getId())) continue;
+                }
                 it.remove();
 
                 var e = new Snapshot.TrashEntry();

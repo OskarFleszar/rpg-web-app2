@@ -72,7 +72,7 @@ export function CampaignPage() {
         )}
 
         <Chat campaignId={id} characters={characters} />
-        <BoardCanvas boardId={Number(id)} />
+        <BoardCanvas boardId={Number(id)} isGM={isGM} />
       </WSProvider>
     </div>
   );
