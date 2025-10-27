@@ -263,7 +263,7 @@ public class BoardService {
     }
 
     @Transactional
-    public List<RestoredObject> eraseUndo (long boardId, List<UUID> ids, User who) throws Exception {
+    public List<RestoredObject> eraseUndo (long boardId, List<UUID> ids, User who, boolean isGM) throws Exception {
 
         var st = getOrCreateState(boardId);
         var snap = readSnapshot(st);
@@ -274,8 +274,9 @@ public class BoardService {
             var key = id.toString();
             var e = snap.getTrash().get(key);
             if (e == null) continue;
-
-            if (!Objects.equals(e.object.getOwnerId(), who.getId())) continue;
+            if(!isGM) {
+                if (!Objects.equals(e.object.getOwnerId(), who.getId())) continue;
+            }
 
             var layer = snap.getLayers().stream()
                     .filter(l -> l.getId().equals(e.layerId))

@@ -108,8 +108,9 @@ public class BoardWsController {
                 var ids = (List<String>) body.get("objectIds");
                 var uuids = ids.stream().map(UUID::fromString).toList();
                 var owner = users.findUserById(userId).orElseThrow();
+                var isGM = body.get("isGM");
 
-                var restored = service.eraseUndo(id, uuids, owner);
+                var restored = service.eraseUndo(id, uuids, owner, (Boolean) isGM);
 
                 var out = Map.of(
                         "type", "erase.undo.applied",

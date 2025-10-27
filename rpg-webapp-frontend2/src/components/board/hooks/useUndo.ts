@@ -12,9 +12,10 @@ type Args = {
   clientId: string;
   objects: Drawable[];
   markPendingRemoval?: (ids: string[]) => void;
+  isGM: boolean;
 };
 
-export function useUndo({ boardId, clientId, markPendingRemoval }: Args) {
+export function useUndo({ boardId, clientId, markPendingRemoval, isGM }: Args) {
   const publish = usePublish();
   const undoStackRef = useRef<UndoAction[]>([]);
 
@@ -48,6 +49,7 @@ export function useUndo({ boardId, clientId, markPendingRemoval }: Args) {
         boardId,
         objectIds: [last.objectId],
         clientId,
+        isGM,
       } as const);
       return;
     }
@@ -58,6 +60,7 @@ export function useUndo({ boardId, clientId, markPendingRemoval }: Args) {
         boardId,
         objectIds: last.objectIds,
         clientId,
+        isGM,
       } as const);
       return;
     }
