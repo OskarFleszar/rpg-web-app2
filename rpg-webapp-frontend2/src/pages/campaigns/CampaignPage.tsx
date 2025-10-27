@@ -64,9 +64,13 @@ export function CampaignPage() {
 
   return (
     <div className="campaign-page">
-      {isGM ? <GMPanel campaignId={id} isGM={isGM} /> : <></>}
-
       <WSProvider baseUrl={baseUrl}>
+        {isGM ? (
+          <GMPanel campaignId={id} isGM={isGM} boardId={Number(id)} />
+        ) : (
+          <></>
+        )}
+
         <Chat campaignId={id} characters={characters} />
         <BoardCanvas boardId={Number(id)} />
       </WSProvider>

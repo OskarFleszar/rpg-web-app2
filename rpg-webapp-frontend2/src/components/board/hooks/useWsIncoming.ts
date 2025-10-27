@@ -185,6 +185,15 @@ export function useWsIncoming(
         }
         break;
       }
+
+      case "board.cleared": {
+        setObjects([]);
+        setPendingRemoval(new Set());
+        remoteStrokesRef.current.clear();
+        myActivePathsRef.current.clear();
+
+        break;
+      }
     }
   });
 

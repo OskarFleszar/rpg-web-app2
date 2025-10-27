@@ -14,7 +14,9 @@ public interface BoardObjectIndexRepository extends JpaRepository<BoardObjectInd
     void deleteByObjectId(UUID objectId);
 
 
-
+    @Modifying
+    @Query("delete from BoardObjectIndex i where i.board.id = :boardId")
+    void deleteByBoardId(@Param("boardId") long boardId);
 
 
 }

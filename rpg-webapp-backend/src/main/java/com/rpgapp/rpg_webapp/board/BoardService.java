@@ -15,10 +15,12 @@ import com.rpgapp.rpg_webapp.board.snapshot.BoardObject;
 import com.rpgapp.rpg_webapp.board.snapshot.ShapeObject;
 import com.rpgapp.rpg_webapp.board.snapshot.Snapshot;
 import com.rpgapp.rpg_webapp.board.snapshot.StrokeObject;
+import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,14 +36,16 @@ public class BoardService {
     private final BoardStateRepository states;
     private final BoardObjectIndexRepository indexRepo;
     private final ObjectMapper mapper;
+    private final CharacterService characterService;
 
     private final Map<Long, Map<String, List<int[]>>> tempPaths = new ConcurrentHashMap<>();
 
-    public BoardService(BoardRepository boards, BoardStateRepository states, BoardObjectIndexRepository indexRepo, ObjectMapper mapper) {
+    public BoardService(BoardRepository boards, BoardStateRepository states, BoardObjectIndexRepository indexRepo, ObjectMapper mapper, CharacterService characterService) {
         this.boards = boards;
         this.states = states;
         this.indexRepo = indexRepo;
         this.mapper = mapper;
+        this.characterService = characterService;
     }
 
     private Snapshot readSnapshot(BoardState st) throws Exception {
@@ -286,6 +290,24 @@ public class BoardService {
             states.save(st);
         }
         return restored;
+    }
+
+    @Transactional
+    public void clearBoardHard(long boardId, User who) throws Exception {
+
+
+        var st = getOrCreateState(boardId);
+        var snap = readSnapshot(st);
+
+        snap.getLayers().forEach(l -> l.getObjects().clear());
+        if (snap.getTrash() != null) snap.getTrash().clear();
+
+
+        snap.setVersion(snap.getVersion() + 1);
+        writeSnapshot(st, snap);
+        states.save(st);
+
+        indexRepo.deleteByBoardId(boardId);
     }
 
 

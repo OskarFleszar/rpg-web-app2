@@ -122,6 +122,12 @@ export type EraseAppliedOp = {
   removed: { layerId: string; object: Rect | Ellipse | Stroke }[];
 };
 
+export type BoardClearedOp = {
+  type: "board.cleared";
+  boardId: number;
+  clientId?: string;
+};
+
 export type EraseUndoAppliedOp = {
   type: "erase.undo.applied";
   boardId: number;
@@ -140,4 +146,5 @@ export type BoardOp =
   | EraseEndOp
   | ShapeAddOp
   | EraseAppliedOp
-  | EraseUndoAppliedOp;
+  | EraseUndoAppliedOp
+  | BoardClearedOp;

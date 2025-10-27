@@ -139,6 +139,19 @@ public class BoardWsController {
                 service.addShape(id, dto, owner);
                 broker.convertAndSend("/topic/board." + id + ".op", body);
             }
+            case "board.clearAll" -> {
+                var who = users.findById(userId).orElse(null);
+                service.clearBoardHard(board.getId(), who);
+
+                var out = new HashMap<String, Object>();
+                out.put("type", "board.cleared");
+                out.put("boardId", id);
+                var clientId = (String) body.get("clientId");
+                if (clientId != null && !clientId.isBlank()) out.put("clientId", clientId);
+
+                broker.convertAndSend("/topic/board." + id + ".op", out);
+            }
+
 
 
             default -> { /* ignore unknown */ }

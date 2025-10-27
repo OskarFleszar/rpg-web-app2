@@ -1,16 +1,20 @@
 import axios from "axios";
 import { useState } from "react";
 import "./GMPanel.css";
+import { usePublish } from "../ws/hooks";
 
 type GMPanelProps = {
   campaignId?: string;
   isGM: boolean;
+  boardId: number;
 };
 
-export function GMPanel({ campaignId, isGM }: GMPanelProps) {
+export function GMPanel({ campaignId, isGM, boardId }: GMPanelProps) {
+  const publish = usePublish();
   const [addingUser, setAddingUser] = useState(false);
   const [nicknameToAdd, setNicknameToAdd] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const userId = localStorage.getItem("userId");
 
   const handleAddUser = async () => {
     try {
@@ -50,7 +54,20 @@ export function GMPanel({ campaignId, isGM }: GMPanelProps) {
         ) : (
           <button onClick={() => setAddingUser(true)}>👤➕</button>
         )}
-        <button>Clear</button>
+        <button
+          onClick={() => {
+            if (!confirm("Are you sure you want to clear the board?")) return;
+            publish(`/app/board.${boardId}.op`, {
+              type: "board.clearAll",
+              boardId,
+              userId,
+            } as const);
+          }}
+          className="btn btn-danger"
+          title="Clear the whole board"
+        >
+          Clear
+        </button>
       </div>
       <button
         className="GM-panel-open-button"

@@ -40,6 +40,7 @@ export default function BoardCanvas({ boardId }: Props) {
   const currentUserId: string = localStorage.getItem("userId")!;
 
   const objectsRef = useRef<Map<string, Drawable>>(new Map());
+
   useEffect(() => {
     const m = objectsRef.current;
     m.clear();
