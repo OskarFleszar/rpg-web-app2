@@ -20,6 +20,7 @@ type ApiShape = {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
   color: string;
   strokeWidth: number | null;
   ownerId: string | number;

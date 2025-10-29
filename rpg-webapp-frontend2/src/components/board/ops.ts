@@ -135,6 +135,37 @@ export type EraseUndoAppliedOp = {
   restored: { layerId: string; object: Rect | Ellipse | Stroke }[];
 };
 
+export type TransformChangedStroke = {
+  id: string;
+  kind: "stroke";
+  points: number[];
+};
+
+export type TransformChangedShape = {
+  id: string;
+  kind: "rect" | "ellipse";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number | null;
+};
+
+export type TransformAppliedOp = {
+  type: "transform.applied";
+  boardId: number;
+  changed: (TransformChangedStroke | TransformChangedShape)[];
+  clientId?: string;
+};
+
+// (opcjonalnie – to wysyłasz z frontu, nie odbierasz)
+export type TransformApplyOp = {
+  type: "transform.apply";
+  boardId: number;
+  clientId: string;
+  changed: (TransformChangedStroke | TransformChangedShape)[];
+};
+
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
@@ -147,4 +178,5 @@ export type BoardOp =
   | ShapeAddOp
   | EraseAppliedOp
   | EraseUndoAppliedOp
-  | BoardClearedOp;
+  | BoardClearedOp
+  | TransformAppliedOp;

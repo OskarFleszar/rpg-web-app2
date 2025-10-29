@@ -1,10 +1,7 @@
 package com.rpgapp.rpg_webapp.board;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rpgapp.rpg_webapp.board.dto.ShapeDTO;
-import com.rpgapp.rpg_webapp.board.dto.StrokeAppendDTO;
-import com.rpgapp.rpg_webapp.board.dto.StrokeEndDTO;
-import com.rpgapp.rpg_webapp.board.dto.StrokeStartDTO;
+import com.rpgapp.rpg_webapp.board.dto.*;
 import com.rpgapp.rpg_webapp.board.entity.Board;
 import com.rpgapp.rpg_webapp.board.entity.BoardObjectIndex;
 import com.rpgapp.rpg_webapp.board.entity.BoardState;
@@ -312,6 +309,61 @@ public class BoardService {
 
         indexRepo.deleteByBoardId(boardId);
     }
+
+    public List<TransformChangeDTO> applyTransforms(
+            long boardId,
+            List<TransformChangeDTO> changes,
+            User who,
+            boolean isGM
+    ) throws Exception {
+        if (changes == null || changes.isEmpty()) return List.of();
+
+        var st   = getOrCreateState(boardId);
+        var snap = readSnapshot(st);
+
+        var applied = new ArrayList<TransformChangeDTO>();
+
+        for (var ch : changes) {
+            if (ch == null || ch.id() == null || ch.kind() == null) continue;
+            var objectId = ch.id();
+
+            // znajdź obiekt w snapshotcie (zrób helpery jeśli nie masz)
+            var obj = snap.findObjectById(objectId); // → patrz sekcja „Snapshot – helpery”
+            if (obj == null) continue;
+
+            // uprawnienia: właściciel lub GM
+            Long ownerId = obj.ownerId();            // dopasuj do Twojego modelu
+            if (!isGM && (ownerId == null || !Objects.equals(ownerId, who.getId()))) {
+                continue;
+            }
+
+            switch (ch.kind()) {
+                case "stroke" -> {
+                    var pts = ch.points();
+                    if (pts == null || pts.isEmpty()) continue;
+                    snap.updateStrokePoints(objectId, pts); // helper w Snapshot
+                    applied.add(ch);
+                }
+                case "rect", "ellipse" -> {
+                    if (ch.x() == null || ch.y() == null || ch.width() == null || ch.height() == null) continue;
+                    snap.updateShapeGeometry(
+                            objectId,
+                            ch.x(), ch.y(),
+                            ch.width(), ch.height(),
+                            ch.rotation()
+                    ); // helper w Snapshot
+                    applied.add(ch);
+                }
+                default -> { /* ignore */ }
+            }
+        }
+
+        writeSnapshot(st, snap);
+        states.save(st);
+
+        return applied;
+    }
+
 
 
 }

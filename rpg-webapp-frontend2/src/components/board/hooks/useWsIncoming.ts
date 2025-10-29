@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useChannel } from "../../../ws/hooks";
-import type { BoardOp } from "../ops";
-import { isStroke, type Drawable, type Stroke } from "../types";
+import type { BoardOp, TransformAppliedOp } from "../ops";
+import {
+  isEllipse,
+  isRect,
+  isStroke,
+  type Drawable,
+  type Stroke,
+} from "../types";
 import { useRef, useState } from "react";
 import { apiObjectToDrawable } from "../utils/apiToDrawable";
 
@@ -9,12 +15,17 @@ type PushUndo = (
   a: { kind: "draw"; objectId: string } | { kind: "erase"; objectIds: string[] }
 ) => void;
 type ShouldIgnoreErase = (ids: string[]) => boolean;
+type OnBoardCleared = () => void;
 
 export function useWsIncoming(
   boardId: number,
   setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>,
   clientId: string,
-  opts?: { pushUndo?: PushUndo; shouldIgnoreEraseApplied?: ShouldIgnoreErase }
+  opts?: {
+    pushUndo?: PushUndo;
+    shouldIgnoreEraseApplied?: ShouldIgnoreErase;
+    OnBoardCleared?: OnBoardCleared;
+  }
 ) {
   const myActivePathsRef = useRef<Set<string>>(new Set());
   const remoteStrokesRef = useRef(
@@ -191,6 +202,49 @@ export function useWsIncoming(
         setPendingRemoval(new Set());
         remoteStrokesRef.current.clear();
         myActivePathsRef.current.clear();
+        opts?.OnBoardCleared?.();
+
+        break;
+      }
+      case "transform.applied": {
+        const changed = (op as TransformAppliedOp).changed ?? [];
+
+        setObjects((prev) => {
+          const byId = new Map(prev.map((o) => [o.id, o]));
+
+          for (const ch of changed) {
+            const id = String(ch.id);
+            const cur = byId.get(id);
+            if (!cur) continue;
+
+            if (ch.kind === "stroke") {
+              if (!isStroke(cur)) continue; // zawężenie typu
+              byId.set(id, { ...cur, points: ch.points } as Stroke);
+            } else if (ch.kind === "rect") {
+              if (!isRect(cur)) continue;
+              byId.set(id, {
+                ...cur,
+                x: ch.x,
+                y: ch.y,
+                width: ch.width,
+                height: ch.height,
+                rotation: ch.rotation ?? 0,
+              });
+            } else if (ch.kind === "ellipse") {
+              if (!isEllipse(cur)) continue;
+              byId.set(id, {
+                ...cur,
+                x: ch.x,
+                y: ch.y,
+                width: ch.width,
+                height: ch.height,
+                rotation: ch.rotation ?? 0,
+              });
+            }
+          }
+
+          return Array.from(byId.values());
+        });
 
         break;
       }

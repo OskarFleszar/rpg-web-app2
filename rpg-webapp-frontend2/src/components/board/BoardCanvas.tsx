@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Circle, Ellipse, Layer, Line, Rect, Stage } from "react-konva";
+import {
+  Circle,
+  Ellipse,
+  Layer,
+  Line,
+  Rect,
+  Stage,
+  Transformer,
+} from "react-konva";
 import type Konva from "konva";
 import Toolbar from "./Toolbar";
 import { usePanZoom } from "./hooks/usePanZoom";
@@ -11,6 +19,7 @@ import { getPointerOnLayer } from "./utils/konvaCoords";
 import { type Tool, type Drawable } from "./types";
 import { useUndo } from "./hooks/useUndo";
 import { useShape } from "./hooks/useShape";
+import { usePointer } from "./hooks/usePointer";
 
 type Props = { boardId: number; isGM: boolean };
 
@@ -50,7 +59,6 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
   const isMine = useCallback(
     (id: string) => {
       const o = objectsRef.current.get(id);
-      console.log(!!o && o.ownerId === currentUserId);
       return !!o && o.ownerId === currentUserId;
     },
     [currentUserId]
@@ -86,14 +94,27 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
     () => crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
     []
   );
+
+  const pointer = usePointer({
+    active: tool === "pointer",
+    boardId,
+    clientId,
+    objects,
+    setObjects,
+    currentUserId,
+    isGM,
+    layerRef,
+  });
+
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
     useWsIncoming(boardId, setObjects, clientId, {
       pushUndo: (a) => pushUndoRef.current?.(a),
       shouldIgnoreEraseApplied: (ids) =>
         !!shouldIgnoreEraseAppliedRef.current?.(ids),
+      OnBoardCleared: () => pointer.clearSelection(),
     });
 
-  const { undo, pushUndo, shouldIgnoreEraseApplied } = useUndo({
+  const { pushUndo, shouldIgnoreEraseApplied } = useUndo({
     boardId,
     clientId,
     objects,
@@ -149,6 +170,10 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
     isGM,
   });
 
+  useEffect(() => {
+    if (tool !== "pointer") pointer.clearSelection();
+  }, [tool, pointer]);
+
   const [pointerOnLayer, setPointerOnLayer] = useState<{
     x: number;
     y: number;
@@ -158,16 +183,18 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
     if (pt) setPointerOnLayer(pt);
   };
 
-  function onPointerDown() {
+  function onPointerDown(e: any) {
     if (tool === "pencil") return pencil.onPointerDown();
     if (tool === "eraser") return erDown();
     if (tool === "rect" || tool === "ellipse") return shapes.onPointerDown();
+    if (tool === "pointer") return pointer.onStagePointerDown(e);
   }
   function onPointerMove() {
     updatePointer();
     if (tool === "pencil") return pencil.onPointerMove();
     if (tool === "eraser") return erMove();
     if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
+    if (tool === "pointer") return;
   }
   function onPointerUp() {
     if (tool === "pencil") return pencil.onPointerUp();
@@ -176,7 +203,31 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
       console.log("pointerup");
       return shapes.onPointerUp();
     }
+    if (tool === "pointer") return;
   }
+
+  const selectableProps = (o: Drawable) => ({
+    name: "selectable",
+    ref: pointer.bindNodeRef(o.id),
+    id: o.id,
+
+    onPointerDown:
+      tool === "pointer"
+        ? (e: Konva.KonvaEventObject<PointerEvent>) =>
+            pointer.onNodePointerDown(e, o.id)
+        : undefined,
+
+    // tylko wybrany obiekt może być przeciągany
+    draggable:
+      tool === "pointer" &&
+      pointer.selectedId === o.id &&
+      (isMine(o.id) || isGM),
+
+    onDragStart: tool === "pointer" ? pointer.onDragStart : undefined,
+    onDragEnd: tool === "pointer" ? pointer.onDragEnd : undefined,
+    onTransformStart: tool === "pointer" ? pointer.onTransformStart : undefined,
+    onTransformEnd: tool === "pointer" ? pointer.onTransformEnd : undefined,
+  });
 
   return (
     <div className="canvas-container">
@@ -217,6 +268,7 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
               return (
                 <Line
                   key={o.id}
+                  {...selectableProps(o)}
                   points={o.points}
                   stroke={o.color}
                   strokeWidth={o.strokeWidth}
@@ -231,36 +283,78 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
                 />
               );
             }
+
             if (o.type === "rect") {
+              // ⬇ rysujemy w oparciu o środek + offset, żeby rotacja działała naturalnie z Transformerem
+              const cx = o.x + o.width / 2;
+              const cy = o.y + o.height / 2;
               return (
                 <Rect
                   key={o.id}
-                  x={o.x}
-                  y={o.y}
+                  {...selectableProps(o)}
+                  x={cx}
+                  y={cy}
                   width={o.width}
                   height={o.height}
                   stroke={o.color}
                   strokeWidth={o.strokeWidth}
+                  rotation={o.rotation ?? 0}
+                  offsetX={o.width / 2}
+                  offsetY={o.height / 2}
                 />
               );
             }
+
             if (o.type === "ellipse") {
               const cx = o.x + o.width / 2;
               const cy = o.y + o.height / 2;
               return (
                 <Ellipse
                   key={o.id}
+                  {...selectableProps(o)}
                   x={cx}
                   y={cy}
                   radiusX={o.width / 2}
                   radiusY={o.height / 2}
                   stroke={o.color}
                   strokeWidth={o.strokeWidth}
+                  rotation={o.rotation ?? 0}
                 />
               );
             }
+
             return null;
           })}
+
+          {/* ⬇ prostokąt ramki zaznaczenia (pointer hook go steruje) */}
+          <Rect
+            visible={false}
+            listening={false}
+            fill="rgba(59,130,246,0.15)"
+            stroke="#3b82f6"
+            dash={[4, 4]}
+          />
+
+          {/* ⬇ Transformer do rotacji/przesuwania wybranych nodów */}
+          <Transformer
+            ref={pointer.trRef}
+            rotateEnabled
+            // pełne skalowanie (bez blokady proporcji — chcesz proporcje: keepRatio)
+            enabledAnchors={[
+              "top-left",
+              "top-center",
+              "top-right",
+              "middle-left",
+              "middle-right",
+              "bottom-left",
+              "bottom-center",
+              "bottom-right",
+            ]}
+            // prosta walidacja minimalnego rozmiaru
+            boundBoxFunc={(oldBox, newBox) =>
+              newBox.width < 5 || newBox.height < 5 ? oldBox : newBox
+            }
+          />
 
           {tool === "eraser" && pointerOnLayer && (
             <Circle

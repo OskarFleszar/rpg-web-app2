@@ -83,4 +83,56 @@ public class Snapshot {
         }
         return false;
     }
+
+
+    public static final class ObjView {
+        private final String layerId;
+        private final Long ownerId;
+        private final Object object;
+        public ObjView(String layerId, Long ownerId, Object object) {
+            this.layerId = layerId; this.ownerId = ownerId; this.object = object;
+        }
+        public String layerId() { return layerId; }
+        public Long ownerId() { return ownerId; }
+        public Object object() { return object; }
+    }
+
+    public ObjView findObjectById(String objectId) {
+        for (var layer : this.layers) {
+            for (var o : layer.getObjects()) {
+                if (objectId.equals(o.getObjectId())) {
+                    return new ObjView(layer.getId(), o.getOwnerId(), o);
+                }
+            }
+        }
+        return null;
+    }
+
+    public void updateStrokePoints(String objectId, List<Integer> points) {
+        for (var layer : this.layers) {
+            for (var o : layer.getObjects()) {
+                if (objectId.equals(o.getObjectId()) && "stroke".equals(o.getType())) {
+                    ((StrokeObject)o).setPoints(points);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void updateShapeGeometry(String objectId,
+                                    double x, double y, double width, double height,
+                                    Double rotation) {
+        for (var layer : this.layers) {
+            for (var o : layer.getObjects()) {
+                if (objectId.equals(o.getObjectId()) && "shape".equals(o.getType())) {
+                    var so = (ShapeObject)o;
+                    so.setX(x); so.setY(y);
+                    so.setWidth(width); so.setHeight(height);
+                    if (rotation != null) so.setRotation(rotation);
+                    return;
+                }
+            }
+        }
+    }
+
 }

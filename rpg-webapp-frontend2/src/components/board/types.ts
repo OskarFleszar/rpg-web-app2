@@ -1,4 +1,10 @@
-export type Tool = "hand" | "pencil" | "eraser" | "rect" | "ellipse";
+export type Tool =
+  | "hand"
+  | "pencil"
+  | "eraser"
+  | "rect"
+  | "ellipse"
+  | "pointer";
 
 export type Stroke = {
   type: "stroke";
@@ -16,9 +22,9 @@ export type Rect = {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
   color: string;
   strokeWidth: number;
-
   ownerId: string;
 };
 
@@ -29,6 +35,7 @@ export type Ellipse = {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
   color: string;
   strokeWidth: number;
   ownerId: string;

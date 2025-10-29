@@ -154,6 +154,47 @@ public class BoardWsController {
                 broker.convertAndSend("/topic/board." + id + ".op", out);
             }
 
+            case "transform.apply" -> {
+
+                var dto = mapper.convertValue(body, TransformApplyDTO.class);
+                if (dto == null || dto.changed() == null || dto.changed().isEmpty()) return;
+
+                var who  = users.findUserById(userId).orElseThrow();
+                // bezpieczne pobranie flagi GM (może nie być w payloadzie)
+                boolean isGM = Boolean.TRUE.equals(body.get("isGM"));
+
+                // zastosuj zmiany w snapshotcie
+                var applied = service.applyTransforms(id, dto.changed(), who, isGM);
+
+                // build odpowiedzi BEZ Map.of (bo clientId może być null)
+                var out = new HashMap<String, Object>();
+                out.put("type", "transform.applied");
+                out.put("boardId", id);
+                out.put("changed", applied.stream().map(ch -> {
+                    var m = new HashMap<String, Object>();
+                    m.put("id", ch.id());
+                    m.put("kind", ch.kind());
+                    if ("stroke".equals(ch.kind())) {
+                        m.put("points", ch.points());
+                    } else {
+                        m.put("x", ch.x());
+                        m.put("y", ch.y());
+                        m.put("width", ch.width());
+                        m.put("height", ch.height());
+                        if (ch.rotation() != null) m.put("rotation", ch.rotation());
+                    }
+                    return m;
+                }).toList());
+
+                if (dto.clientId() != null && !dto.clientId().isBlank()) {
+                    out.put("clientId", dto.clientId());
+                }
+
+                broker.convertAndSend("/topic/board." + id + ".op", out);
+            }
+
+
+
 
 
             default -> { /* ignore unknown */ }

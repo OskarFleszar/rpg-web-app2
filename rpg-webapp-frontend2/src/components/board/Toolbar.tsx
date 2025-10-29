@@ -34,6 +34,16 @@ export default function Toolbar(props: Props) {
         ✋
       </button>
 
+      <div className={`eraser-select ${tool === "pointer" ? "open" : ""}`}>
+        <button
+          className={`tool-button ${tool === "pointer" ? "active" : ""}`}
+          title="Pointer"
+          onClick={() => setTool("pointer")}
+        >
+          ↖
+        </button>
+      </div>
+
       <div className={`eraser-select ${tool === "eraser" ? "open" : ""}`}>
         <button
           className={`tool-button ${tool === "eraser" ? "active" : ""}`}
