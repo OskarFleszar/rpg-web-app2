@@ -1,14 +1,24 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { KonvaEventObject } from "konva/lib/Node";
+
 
 export function usePanZoom() {
   const [stageScale, setStageScale] = useState(1);
   const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
 
+ 
+  const [enabled, setEnabledState] = useState(true);
+  const enabledRef = useRef(true);
+  const setEnabled = useCallback((v: boolean) => {
+    enabledRef.current = v;
+    setEnabledState(v);
+  }, []);
+
   const onWheel = useCallback(
     (e: KonvaEventObject<WheelEvent>) => {
       e.evt.preventDefault();
+
       const stage = e.target.getStage();
       if (!stage) return;
 
@@ -35,15 +45,28 @@ export function usePanZoom() {
     [stagePos, stageScale]
   );
 
-  const onDragMove = (e: any) => setStagePos(e.target.position());
-  const onDragStart = () => setIsPanning(true);
-  const onDragEnd = () => setIsPanning(false);
+  const onDragStart = useCallback(() => {
+    if (!enabledRef.current) return; 
+    setIsPanning(true);
+  }, []);
+
+  const onDragMove = useCallback((e: any) => {
+    if (!enabledRef.current) return; 
+    setStagePos(e.target.position());
+  }, []);
+
+  const onDragEnd = useCallback(() => {
+    if (!enabledRef.current) return; 
+    setIsPanning(false);
+  }, []);
 
   return {
     stageScale,
     stagePos,
-    setStagePos,
     isPanning,
+    enabled,       
+    setEnabled,     
+    setStagePos,
     onWheel,
     onDragMove,
     onDragStart,

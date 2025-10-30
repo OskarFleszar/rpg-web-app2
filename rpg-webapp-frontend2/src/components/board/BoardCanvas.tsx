@@ -8,7 +8,7 @@ import {
   Stage,
   Transformer,
 } from "react-konva";
-import type Konva from "konva";
+import  Konva from "konva";
 import Toolbar from "./Toolbar";
 import { usePanZoom } from "./hooks/usePanZoom";
 import { useSnapshot } from "./hooks/useSnapshot";
@@ -73,14 +73,18 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
   const layerRef = useRef<Konva.Layer | null>(null);
 
   const {
-    stageScale,
-    stagePos,
-    isPanning,
-    onWheel,
-    onDragMove,
-    onDragStart,
-    onDragEnd,
-  } = usePanZoom();
+  stageScale,
+  stagePos,
+  isPanning,
+  onWheel,
+  onDragMove,
+  onDragStart,
+  onDragEnd,
+  enabled,
+  setEnabled,          
+} = usePanZoom();
+
+
   const cursor =
     tool === "hand"
       ? isPanning
@@ -96,15 +100,16 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
   );
 
   const pointer = usePointer({
-    active: tool === "pointer",
-    boardId,
-    clientId,
-    objects,
-    setObjects,
-    currentUserId,
-    isGM,
-    layerRef,
-  });
+  active: tool === "pointer",
+  boardId,
+  clientId,
+  objects,
+  setObjects,
+  currentUserId,
+  isGM,
+  layerRef,
+  setPanZoomEnabled: setEnabled,  
+});
 
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
     useWsIncoming(boardId, setObjects, clientId, {
@@ -183,6 +188,7 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
     if (pt) setPointerOnLayer(pt);
   };
 
+
   function onPointerDown(e: any) {
     if (tool === "pencil") return pencil.onPointerDown();
     if (tool === "eraser") return erDown();
@@ -190,12 +196,16 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
     if (tool === "pointer") return pointer.onStagePointerDown(e);
   }
   function onPointerMove() {
+  
+  if (tool === "eraser" || tool === "pencil" || tool === "rect" || tool === "ellipse") {
     updatePointer();
-    if (tool === "pencil") return pencil.onPointerMove();
-    if (tool === "eraser") return erMove();
-    if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
-    if (tool === "pointer") return;
   }
+  if (tool === "pencil") return pencil.onPointerMove();
+  if (tool === "eraser") return erMove();
+  if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
+  if (tool === "pointer") return; 
+}
+
   function onPointerUp() {
     if (tool === "pencil") return pencil.onPointerUp();
     if (tool === "eraser") return erUp();
@@ -207,27 +217,18 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
   }
 
   const selectableProps = (o: Drawable) => ({
-    name: "selectable",
-    ref: pointer.bindNodeRef(o.id),
-    id: o.id,
+  name: "selectable",
+  ref: pointer.bindNodeRef(o.id),
+  id: o.id,
+  onPointerDown: tool === "pointer" ? (e: Konva.KonvaEventObject<PointerEvent>) => pointer.onNodePointerDown(e, o.id) : undefined,
+  draggable: tool === "pointer" && pointer.selectedId === o.id && (isMine(o.id) || isGM),
 
-    onPointerDown:
-      tool === "pointer"
-        ? (e: Konva.KonvaEventObject<PointerEvent>) =>
-            pointer.onNodePointerDown(e, o.id)
-        : undefined,
+  onDragStart:     tool === "pointer" ? pointer.onDragStart     : undefined,
+  onDragEnd:       tool === "pointer" ? pointer.onDragEnd       : undefined,
+  onTransformStart:tool === "pointer" ? pointer.onTransformStart: undefined,
+  onTransformEnd:  tool === "pointer" ? pointer.onTransformEnd  : undefined,
+});
 
-    // tylko wybrany obiekt może być przeciągany
-    draggable:
-      tool === "pointer" &&
-      pointer.selectedId === o.id &&
-      (isMine(o.id) || isGM),
-
-    onDragStart: tool === "pointer" ? pointer.onDragStart : undefined,
-    onDragEnd: tool === "pointer" ? pointer.onDragEnd : undefined,
-    onTransformStart: tool === "pointer" ? pointer.onTransformStart : undefined,
-    onTransformEnd: tool === "pointer" ? pointer.onTransformEnd : undefined,
-  });
 
   return (
     <div className="canvas-container">
@@ -250,7 +251,7 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
         y={stagePos.y}
         scaleX={stageScale}
         scaleY={stageScale}
-        draggable={tool === "hand"}
+        draggable={tool === "hand" && enabled}
         onDragStart={onDragStart}
         onDragMove={onDragMove}
         onDragEnd={onDragEnd}
@@ -285,7 +286,7 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
             }
 
             if (o.type === "rect") {
-              // ⬇ rysujemy w oparciu o środek + offset, żeby rotacja działała naturalnie z Transformerem
+              
               const cx = o.x + o.width / 2;
               const cy = o.y + o.height / 2;
               return (
@@ -326,7 +327,7 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
             return null;
           })}
 
-          {/* ⬇ prostokąt ramki zaznaczenia (pointer hook go steruje) */}
+         
           <Rect
             visible={false}
             listening={false}
@@ -335,11 +336,11 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
             dash={[4, 4]}
           />
 
-          {/* ⬇ Transformer do rotacji/przesuwania wybranych nodów */}
+          
           <Transformer
             ref={pointer.trRef}
             rotateEnabled
-            // pełne skalowanie (bez blokady proporcji — chcesz proporcje: keepRatio)
+            
             enabledAnchors={[
               "top-left",
               "top-center",
@@ -350,7 +351,7 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
               "bottom-center",
               "bottom-right",
             ]}
-            // prosta walidacja minimalnego rozmiaru
+            
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 5 || newBox.height < 5 ? oldBox : newBox
             }

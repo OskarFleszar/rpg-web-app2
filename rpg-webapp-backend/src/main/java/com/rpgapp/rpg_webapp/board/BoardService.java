@@ -91,7 +91,7 @@ public class BoardService {
         stroke.setWidth((int) dto.width());
         stroke.setOwnerId(owner.getId());
         stroke.setCreatedAt(java.time.LocalDateTime.now());
-// points list should be initialized in the field declaration or via setter
+
         if (stroke.getPoints() == null) stroke.setPoints(new java.util.ArrayList<>());
 
 
@@ -327,12 +327,12 @@ public class BoardService {
             if (ch == null || ch.id() == null || ch.kind() == null) continue;
             var objectId = ch.id();
 
-            // znajdź obiekt w snapshotcie (zrób helpery jeśli nie masz)
-            var obj = snap.findObjectById(objectId); // → patrz sekcja „Snapshot – helpery”
+            
+            var obj = snap.findObjectById(objectId); 
             if (obj == null) continue;
 
-            // uprawnienia: właściciel lub GM
-            Long ownerId = obj.ownerId();            // dopasuj do Twojego modelu
+           
+            Long ownerId = obj.ownerId();           
             if (!isGM && (ownerId == null || !Objects.equals(ownerId, who.getId()))) {
                 continue;
             }
@@ -341,7 +341,7 @@ public class BoardService {
                 case "stroke" -> {
                     var pts = ch.points();
                     if (pts == null || pts.isEmpty()) continue;
-                    snap.updateStrokePoints(objectId, pts); // helper w Snapshot
+                    snap.updateStrokePoints(objectId, pts); 
                     applied.add(ch);
                 }
                 case "rect", "ellipse" -> {
@@ -351,10 +351,10 @@ public class BoardService {
                             ch.x(), ch.y(),
                             ch.width(), ch.height(),
                             ch.rotation()
-                    ); // helper w Snapshot
+                    ); 
                     applied.add(ch);
                 }
-                default -> { /* ignore */ }
+                default -> {}
             }
         }
 

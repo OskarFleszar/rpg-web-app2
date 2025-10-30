@@ -25,37 +25,61 @@ export function usePointer(opts: {
   currentUserId: string;
   isGM: boolean;
   layerRef: React.RefObject<Konva.Layer | null>;
+  setPanZoomEnabled?: (v: boolean) => void;
 }) {
-  const { active, boardId, clientId, objects, currentUserId, isGM, layerRef } =
-    opts;
+  const {
+    active,
+    boardId,
+    clientId,
+    objects,
+    currentUserId,
+    isGM,
+    layerRef,
+    setPanZoomEnabled, 
+  } = opts;
+
   const publish = usePublish();
 
-  // tylko JEDEN wybrany obiekt
+  
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedIdRef = useRef<string | null>(null);
 
-  // Refs Konvy
+  const setSelection = useCallback((id: string | null) => {
+    selectedIdRef.current = id;
+    setSelectedId(id);
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelection(null);
+    beforeRef.current = null;
+    trRef.current?.nodes([]);
+    layerRef.current?.batchDraw();
+  }, [setSelection, layerRef]);
+
+  
   const trRef = useRef<Konva.Transformer | null>(null);
   const nodeRefs = useRef(new Map<string, Konva.Node>());
 
-  // snapshot geometrii „przed” (dla wybranego)
+ 
   const beforeRef = useRef<Drawable | null>(null);
 
   const canEdit = useCallback(
     (id: string) => {
       const o = objects.find((x) => x.id === id);
       if (!o) return false;
+      console.log(isGM)
       return isGM || o.ownerId === String(currentUserId);
+
     },
     [objects, isGM, currentUserId]
   );
 
-  // REJESTRACJA NODE'ÓW
+ 
   const bindNodeRef = useCallback(
     (id: string) => (node: Konva.Node | null) => {
       if (node) {
         node.setAttr("data-id", id);
         nodeRefs.current.set(id, node);
-        // jeśli to właśnie wybrany – podłącz do Transformera
         if (selectedId === id && trRef.current) {
           trRef.current.nodes([node]);
           layerRef.current?.batchDraw();
@@ -67,18 +91,12 @@ export function usePointer(opts: {
     [selectedId, layerRef]
   );
 
-  const clearSelection = useCallback(() => {
-    setSelectedId(null);
-    trRef.current?.nodes([]);
-    layerRef.current?.batchDraw();
-  }, [layerRef]);
 
-  // po wyłączeniu narzędzia – czyścimy
   useEffect(() => {
     if (!active) clearSelection();
   }, [active, clearSelection]);
 
-  // jeśli usunięto obiekt – czyścimy wybór
+  
   useEffect(() => {
     if (!selectedId) return;
     if (!objects.some((o) => o.id === selectedId)) {
@@ -86,25 +104,25 @@ export function usePointer(opts: {
     }
   }, [objects, selectedId, clearSelection]);
 
-  // KLIK NA OBIEKT – wybierz pojedynczy
+  
   const onNodePointerDown = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>, id: string) => {
       if (!active) return;
       if (!canEdit(id)) return;
 
-      setSelectedId(id);
+      setSelection(id);
       const node = nodeRefs.current.get(id);
       if (node && trRef.current) {
-        trRef.current.nodes([node]); // tylko ten jeden
+        trRef.current.nodes([node]);
+        trRef.current.getLayer()?.batchDraw();
         layerRef.current?.batchDraw();
       }
-
-      e.cancelBubble = true; // nie puszczaj do Stage
+      e.cancelBubble = true;
     },
-    [active, canEdit, layerRef]
+    [active, canEdit, setSelection, layerRef]
   );
 
-  // KLIK W PUSTE TŁO – odznacz
+  
   const onStagePointerDown = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>) => {
       if (!active) return;
@@ -114,147 +132,142 @@ export function usePointer(opts: {
     [active, clearSelection]
   );
 
-  // snapshot „przed”
+  
   const snapshotBefore = useCallback(() => {
-    if (!selectedId) return;
-    const o = objects.find((x) => x.id === selectedId);
+    const id = selectedIdRef.current;
+    if (!id) return;
+    const o = objects.find((x) => x.id === id);
     beforeRef.current = o ? JSON.parse(JSON.stringify(o)) : null;
-  }, [selectedId, objects]);
+  }, [objects]);
 
-  const onDragStart = useCallback(() => snapshotBefore(), [snapshotBefore]);
-  const onTransformStart = useCallback(
-    () => snapshotBefore(),
-    [snapshotBefore]
+  
+  const lockCamera = useCallback(
+    (lock: boolean) => setPanZoomEnabled?.(!lock),
+    [setPanZoomEnabled]
   );
 
-  // eksport zmian JEDNEGO obiektu
-  const exportNodeChanges = useCallback(
-    (node: Konva.Node, before: Drawable | null): Changed | null => {
-      if (!before) return null;
+  const onDragStart = useCallback(() => {
+    lockCamera(true);
+    snapshotBefore();
+  }, [snapshotBefore, lockCamera]);
 
-      if (before.type === "stroke") {
-        const tr = node.getAbsoluteTransform();
-        const out: number[] = [];
-        for (let i = 0; i < before.points.length; i += 2) {
-          const p = tr.point({ x: before.points[i], y: before.points[i + 1] });
-          out.push(p.x, p.y);
-        }
-        // skali nie zerujemy tutaj – poczekaj na confirm z backendu
-        return { id: before.id, kind: "stroke", points: out };
+  const onTransformStart = useCallback(() => {
+    lockCamera(true);
+    snapshotBefore();
+  }, [snapshotBefore, lockCamera]);
+
+ 
+  function sceneToLayerPoint(node: Konva.Node) {
+    const layer = node.getLayer();
+    const abs = node.getAbsolutePosition(); 
+    const inv = layer?.getAbsoluteTransform().copy().invert();
+    return inv ? inv.point(abs) : abs; 
+  }
+
+  function exportNodeChanges(node: Konva.Node, before: Drawable | null) {
+    if (!before) return null;
+
+    
+    const scaleX = (node as any).scaleX?.() ?? 1;
+    const scaleY = (node as any).scaleY?.() ?? 1;
+    const rotation = (node as any).rotation?.() ?? 0;
+
+   
+    const center = sceneToLayerPoint(node);
+
+    if (before.type === "rect") {
+      const w = (before.width ?? 0) * scaleX;
+      const h = (before.height ?? 0) * scaleY;
+      return {
+        id: before.id,
+        kind: "rect",
+        x: center.x - w / 2,
+        y: center.y - h / 2,
+        width: w,
+        height: h,
+        rotation,
+      } as ChangedShape;
+    }
+
+    if (before.type === "ellipse") {
+      const w = (before.width ?? 0) * scaleX;
+      const h = (before.height ?? 0) * scaleY;
+      return {
+        id: before.id,
+        kind: "ellipse",
+        x: center.x - w / 2,
+        y: center.y - h / 2,
+        width: w,
+        height: h,
+        rotation,
+      } as ChangedShape;
+    }
+
+    if (before.type === "stroke") {
+      
+      const absTr = node.getAbsoluteTransform();
+      const invLayer = node.getLayer()?.getAbsoluteTransform().copy().invert();
+      const pts: number[] = [];
+      for (let i = 0; i < before.points.length; i += 2) {
+        const pScene = absTr.point({
+          x: before.points[i],
+          y: before.points[i + 1],
+        });
+        const pLayer = invLayer ? invLayer.point(pScene) : pScene;
+        pts.push(pLayer.x, pLayer.y);
       }
+      return { id: before.id, kind: "stroke", points: pts } as ChangedStroke;
+    }
 
-      if (before.type === "rect") {
-        const rect = node as Konva.Rect;
+    return null;
+  }
 
-        const sx = rect.scaleX() ?? 1;
-        const sy = rect.scaleY() ?? 1;
-        const rot = rect.rotation() ?? 0;
-
-        // Konva Rect rysujemy z x,y = środek (bo masz offsetX/offsetY = width/2,height/2)
-        const cx = rect.x();
-        const cy = rect.y();
-
-        const newW = before.width * sx;
-        const newH = before.height * sy;
-
-        // 1) Natychmiast przepisz geometrię na „bez skalowania”
-        rect.width(newW);
-        rect.height(newH);
-        rect.x(cx);
-        rect.y(cy);
-        rect.rotation(rot);
-        rect.scaleX(1);
-        rect.scaleY(1);
-
-        // 2) Wyślij do backendu top-left (model trzymasz jako top-left):
-        const nx = cx - newW / 2;
-        const ny = cy - newH / 2;
-
-        return {
-          id: before.id,
-          kind: "rect",
-          x: nx,
-          y: ny,
-          width: newW,
-          height: newH,
-          rotation: rot,
-        };
-      }
-
-      if (before.type === "ellipse") {
-        const el = node as Konva.Ellipse;
-        const sx = el.scaleX() ?? 1;
-        const sy = el.scaleY() ?? 1;
-        const rot = el.rotation() ?? 0;
-
-        const cx = el.x();
-        const cy = el.y();
-
-        const newW = before.width * sx;
-        const newH = before.height * sy;
-
-        // Ellipse w Konvie trzyma radiusy i x,y = środek
-        el.radiusX(newW / 2);
-        el.radiusY(newH / 2);
-        el.x(cx);
-        el.y(cy);
-        el.rotation(rot);
-        el.scaleX(1);
-        el.scaleY(1);
-
-        const nx = cx - newW / 2;
-        const ny = cy - newH / 2;
-
-        return {
-          id: before.id,
-          kind: "ellipse",
-          x: nx,
-          y: ny,
-          width: newW,
-          height: newH,
-          rotation: rot,
-        };
-      }
-
-      return null;
-    },
-    []
-  );
-
-  // commit tylko dla wybranego
+  
   const commitSelection = useCallback(() => {
-    if (!active) return;
-    if (!selectedId) return;
-    if (!canEdit(selectedId)) return;
+    if (!active) {
+      lockCamera(false);
+      return;
+    }
+    const id = selectedIdRef.current;
+    if (!id) {
+      lockCamera(false);
+      return;
+    }
+    if (!canEdit(id)) {
+      lockCamera(false);
+      return;
+    }
 
-    const node = nodeRefs.current.get(selectedId);
+    const node = nodeRefs.current.get(id);
     const before = beforeRef.current;
-    if (!node || !before) return;
+    if (!node || !before) {
+      lockCamera(false);
+      return;
+    }
 
     const ch = exportNodeChanges(node, before);
-    if (!ch) return;
+    beforeRef.current = null; 
+
+    if (!ch) {
+      lockCamera(false);
+      return;
+    }
 
     publish(`/app/board.${boardId}.op`, {
       type: "transform.apply",
       boardId,
       clientId,
-      changed: [ch], // JEDEN obiekt
+      isGM,
+      changed: [ch],
     } as const);
-  }, [
-    active,
-    selectedId,
-    canEdit,
-    exportNodeChanges,
-    publish,
-    boardId,
-    clientId,
-  ]);
+    console.log(ch)
+
+    lockCamera(false);
+    
+  }, [active, canEdit, publish, boardId, clientId, lockCamera]);
 
   const onDragEnd = useCallback(() => commitSelection(), [commitSelection]);
-  const onTransformEnd = useCallback(
-    () => commitSelection(),
-    [commitSelection]
-  );
+  const onTransformEnd = useCallback(() => commitSelection(), [commitSelection]);
 
   return {
     selectedId,

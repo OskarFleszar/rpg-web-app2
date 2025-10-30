@@ -110,11 +110,7 @@ export function useShape(opts: {
         clientId,
         shape: obj,
       };
-      console.log("[shape.add SEND]", {
-        when: new Date().toISOString(),
-        clientId,
-        shapeId: obj.id,
-      });
+      console.log("[shape.add SEND]", obj);
 
       publish(`/app/board.${boardId}.op`, toSend);
 

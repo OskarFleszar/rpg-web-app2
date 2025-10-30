@@ -43,7 +43,7 @@ public class BoardWsController {
         Board board = boards.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found: " + id));
 
-        // TODO: authorize user vs b.get().getCampaign()
+    
 
         String type = String.valueOf(body.get("type"));
         switch (type) {
@@ -78,7 +78,7 @@ public class BoardWsController {
                 }
 
                 boolean isOwner = service.isOwner(oid, userId);
-                boolean isGm = false; // TODO: sprawdź rolę GM względem kampanii boarda
+                boolean isGm = false; 
                 if (!(isOwner || isGm)) return;
 
                 if (service.removeObject(id, oid)) {
@@ -160,13 +160,13 @@ public class BoardWsController {
                 if (dto == null || dto.changed() == null || dto.changed().isEmpty()) return;
 
                 var who  = users.findUserById(userId).orElseThrow();
-                // bezpieczne pobranie flagi GM (może nie być w payloadzie)
+              
                 boolean isGM = Boolean.TRUE.equals(body.get("isGM"));
 
-                // zastosuj zmiany w snapshotcie
+              
                 var applied = service.applyTransforms(id, dto.changed(), who, isGM);
 
-                // build odpowiedzi BEZ Map.of (bo clientId może być null)
+                
                 var out = new HashMap<String, Object>();
                 out.put("type", "transform.applied");
                 out.put("boardId", id);

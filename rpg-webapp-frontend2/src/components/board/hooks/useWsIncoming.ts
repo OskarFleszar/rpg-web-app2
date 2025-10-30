@@ -207,47 +207,41 @@ export function useWsIncoming(
         break;
       }
       case "transform.applied": {
-        const changed = (op as TransformAppliedOp).changed ?? [];
+  
 
-        setObjects((prev) => {
-          const byId = new Map(prev.map((o) => [o.id, o]));
+  const changed = (op as TransformAppliedOp).changed ?? [];
+  console.log(changed)
 
-          for (const ch of changed) {
-            const id = String(ch.id);
-            const cur = byId.get(id);
-            if (!cur) continue;
+  
+  const byId = new Map(changed.map(ch => [String(ch.id), ch]));
 
-            if (ch.kind === "stroke") {
-              if (!isStroke(cur)) continue; // zawężenie typu
-              byId.set(id, { ...cur, points: ch.points } as Stroke);
-            } else if (ch.kind === "rect") {
-              if (!isRect(cur)) continue;
-              byId.set(id, {
-                ...cur,
-                x: ch.x,
-                y: ch.y,
-                width: ch.width,
-                height: ch.height,
-                rotation: ch.rotation ?? 0,
-              });
-            } else if (ch.kind === "ellipse") {
-              if (!isEllipse(cur)) continue;
-              byId.set(id, {
-                ...cur,
-                x: ch.x,
-                y: ch.y,
-                width: ch.width,
-                height: ch.height,
-                rotation: ch.rotation ?? 0,
-              });
-            }
-          }
+  setObjects(prev =>
+    prev.map(o => {
+      const ch = byId.get(o.id);
+      if (!ch) return o;
 
-          return Array.from(byId.values());
-        });
-
-        break;
+      if (ch.kind === "stroke" && isStroke(o)) {
+        return { ...o, points: ch.points };
       }
+
+      if ((ch.kind === "rect" || ch.kind === "ellipse") && (isRect(o) || isEllipse(o))) {
+        return {
+          ...o,
+          x: ch.x,
+          y: ch.y,
+          width: ch.width,
+          height: ch.height,
+          rotation: ch.rotation ?? 0,
+        };
+      }
+      console.log("obiekty:", o)
+      return o;
+    })
+  );
+
+  break;
+}
+
     }
   });
 
