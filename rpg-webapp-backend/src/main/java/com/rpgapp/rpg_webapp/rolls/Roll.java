@@ -39,6 +39,7 @@ public class Roll {
     private LocalDateTime rollTime;
     private Long characterId;
     private int bonus;
+    private boolean GMRoll;
 
 
     @JsonBackReference("user_rolls")
@@ -55,7 +56,7 @@ public class Roll {
         return user != null ? user.getNickname() : "Nieznany użytkownik";
     }
 
-    public Roll(int rollResult, List<Integer> singleDiceResult, int numberOfDice, String rollType, String rollFor, String outcome, LocalDateTime rollTime, Long characterId, int bonus, User user, Campaign campaign) {
+    public Roll(int rollResult, List<Integer> singleDiceResult, int numberOfDice, String rollType, String rollFor, String outcome, LocalDateTime rollTime, Long characterId, int bonus, User user, Campaign campaign, boolean GMRoll) {
 
         this.rollResult = rollResult;
         this.singleDiceResult = singleDiceResult;
@@ -68,5 +69,6 @@ public class Roll {
         this.bonus = bonus;
         this.user = user;
         this.campaign = campaign;
+        this.GMRoll = GMRoll;
     }
 }

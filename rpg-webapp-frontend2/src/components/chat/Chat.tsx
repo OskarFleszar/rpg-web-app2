@@ -13,6 +13,7 @@ type RollInfo = {
   outcome?: string;
   characterId?: number;
   clientId?: string;
+  GMRoll: boolean;
 };
 
 type ChatEntryBase = {
@@ -36,11 +37,14 @@ type CharacterOption = {
 type ChatProps = {
   campaignId?: string;
   characters?: CharacterOption[];
+  GMRoll: boolean;
+  isGM: boolean;
 };
 
-export function Chat({ campaignId, characters }: ChatProps) {
+export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
   const publish = usePublish();
   useChannel<MessageItem>(`/chatroom/${campaignId}`, (msg) => {
+    console.log(msg);
     setMessages((prev) => [...prev, msg]);
   });
 
@@ -100,7 +104,13 @@ export function Chat({ campaignId, characters }: ChatProps) {
       rollFor: rollData.rollFor,
       numberOfDice: Number(rollData.numberOfDice),
       characterId: Number(selectedCharacterId),
+      GMRoll,
     });
+    console.log( {rollType: rollData.rollType,
+      rollFor: rollData.rollFor,
+      numberOfDice: Number(rollData.numberOfDice),
+      characterId: Number(selectedCharacterId),
+      GMRoll,})
   };
 
   const handleRollDataChange = (
@@ -128,9 +138,9 @@ export function Chat({ campaignId, characters }: ChatProps) {
             <div key={i} className="chat-message system">
               <em>{m.content}</em>
             </div>
-          ) : (
+          ) : m.roll.GMRoll && !isGM ? ("") : ( 
             <div key={i} className="chat-message roll">
-              <strong>{m.nickname}</strong> Rolled {m.roll.numberOfDice}×
+              <strong>{m.nickname}</strong> Rolled {m.roll.GMRoll ? "(GM) " : ""} {m.roll.numberOfDice}×
               {m.roll.rollType}
               {m.roll.rollFor ? ` for ${m.roll.rollFor}` : ""}:{" "}
               {m.roll.results?.join(", ") ?? "…"}{" "}

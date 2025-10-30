@@ -67,7 +67,9 @@ public class ChatService {
                     r.getBonus(),
                     results,
                     r.getRollResult(),
-                    r.getOutcome()
+                    r.getOutcome(),
+                    r.isGMRoll()
+                    
 
             );
 
@@ -129,6 +131,7 @@ public class ChatService {
         roll.setSingleDiceResult(results);
         roll.setRollResult(total);
         roll.setRollTime(now);
+        roll.setGMRoll(body.GMRoll());
 
 
         String outcome = null;
@@ -153,7 +156,7 @@ public class ChatService {
 
         ChatEntryDTO.RollInfo info = new ChatEntryDTO.RollInfo(
                 body.rollType(), diceCount, body.rollFor(),
-                bonus, results, total, outcome
+                bonus, results, total, outcome, body.GMRoll()
         );
 
         return ChatEntryDTO.roll(user.getId(), user.getNickname(), now, content, info);

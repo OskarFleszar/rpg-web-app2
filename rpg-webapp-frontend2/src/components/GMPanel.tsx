@@ -7,9 +7,11 @@ type GMPanelProps = {
   campaignId?: string;
   isGM: boolean;
   boardId: number;
+  GMRoll: boolean;
+  setGMRoll:  React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export function GMPanel({ campaignId, isGM, boardId }: GMPanelProps) {
+export function GMPanel({ campaignId, isGM, boardId, GMRoll, setGMRoll }: GMPanelProps) {
   const publish = usePublish();
   const [addingUser, setAddingUser] = useState(false);
   const [nicknameToAdd, setNicknameToAdd] = useState("");
@@ -68,6 +70,10 @@ export function GMPanel({ campaignId, isGM, boardId }: GMPanelProps) {
         >
           Clear
         </button>
+        <span>
+          GM Roll
+          <input type="checkbox" checked={GMRoll} onChange={() => setGMRoll(!GMRoll)}/>
+        </span>
       </div>
       <button
         className="GM-panel-open-button"

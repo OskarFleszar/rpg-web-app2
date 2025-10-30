@@ -33,6 +33,7 @@ public record ChatEntryDTO(
             Integer bonus,
             List<Integer> results,
             Integer total,
-            String outcome
+            String outcome,
+            boolean GMRoll
     ) {}
 }

@@ -207,8 +207,7 @@ export function useWsIncoming(
         break;
       }
       case "transform.applied": {
-
-         if ((op as any).clientId && (op as any).clientId === clientId) break;
+        if ((op as any).clientId && (op as any).clientId === clientId) break;
         const changed = (op as TransformAppliedOp).changed ?? [];
         
         const byId = new Map(changed.map(ch => [String(ch.id), ch]));

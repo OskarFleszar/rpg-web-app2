@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import "./CampaignPage.css";
 
-import { Chat } from "./Chat";
+import { Chat } from "../../components/chat/Chat";
 import { WSProvider } from "../../ws/WSProvider";
 import BoardCanvas from "../../components/board/BoardCanvas";
 import { GMPanel } from "../../components/GMPanel";
@@ -16,6 +16,7 @@ export function CampaignPage() {
   const { state } = useLocation();
   const characterIds = state?.characterIds as number[];
   const [isGM, setIsGM] = useState(false);
+  const [GMRoll, setGMRoll] = useState(false);
 
   useEffect(() => {
     if (characterIds) {
@@ -66,12 +67,12 @@ export function CampaignPage() {
     <div className="campaign-page">
       <WSProvider baseUrl={baseUrl}>
         {isGM ? (
-          <GMPanel campaignId={id} isGM={isGM} boardId={Number(id)} />
+          <GMPanel campaignId={id} isGM={isGM} boardId={Number(id)} GMRoll={GMRoll} setGMRoll={setGMRoll} />
         ) : (
           <></>
         )}
 
-        <Chat campaignId={id} characters={characters} />
+        <Chat campaignId={id} characters={characters} GMRoll={GMRoll} isGM={isGM} />
         <BoardCanvas boardId={Number(id)} isGM={isGM} />
       </WSProvider>
     </div>
