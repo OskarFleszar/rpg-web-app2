@@ -12,6 +12,7 @@ import com.rpgapp.rpg_webapp.board.snapshot.BoardObject;
 import com.rpgapp.rpg_webapp.board.snapshot.ShapeObject;
 import com.rpgapp.rpg_webapp.board.snapshot.Snapshot;
 import com.rpgapp.rpg_webapp.board.snapshot.StrokeObject;
+import com.rpgapp.rpg_webapp.campaign.CampaignService;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
 import jakarta.transaction.Transactional;
@@ -34,15 +35,17 @@ public class BoardService {
     private final BoardObjectIndexRepository indexRepo;
     private final ObjectMapper mapper;
     private final CharacterService characterService;
+    private final CampaignService campaignService;
 
     private final Map<Long, Map<String, List<int[]>>> tempPaths = new ConcurrentHashMap<>();
 
-    public BoardService(BoardRepository boards, BoardStateRepository states, BoardObjectIndexRepository indexRepo, ObjectMapper mapper, CharacterService characterService) {
+    public BoardService(BoardRepository boards, BoardStateRepository states, BoardObjectIndexRepository indexRepo, ObjectMapper mapper, CharacterService characterService, CampaignService campaignService) {
         this.boards = boards;
         this.states = states;
         this.indexRepo = indexRepo;
         this.mapper = mapper;
         this.characterService = characterService;
+        this.campaignService = campaignService;
     }
 
     private Snapshot readSnapshot(BoardState st) throws Exception {
@@ -362,6 +365,10 @@ public class BoardService {
         states.save(st);
 
         return applied;
+    }
+
+    public void changeBoard (Long campaignId, Long boardId) {
+        campaignService.changeActiveBoard(campaignId, boardId);
     }
 
 

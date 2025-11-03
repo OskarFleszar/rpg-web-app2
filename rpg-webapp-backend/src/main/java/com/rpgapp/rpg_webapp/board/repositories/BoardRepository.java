@@ -13,14 +13,14 @@ import java.util.Optional;
 public interface BoardRepository extends JpaRepository<Board, Long> {
     List<Board> findAllByCampaign_CampaignId(Long campaignId);
     Optional<Board> findFirstByCampaign_CampaignIdOrderByIdAsc(Long campaignId);
-
+    
      @Query("""
-  select new com.rpgapp.rpg_webapp.campaign.dto.BoardBasicDTO(b.id, b.name)
-  from Board b
-  where b.campaign.id = :campaignId
-  order by b.name asc
-  """)
-List<BoardBasicDTO> findBoards(@Param("campaignId") Long campaignId);
+      select new com.rpgapp.rpg_webapp.campaign.dto.BoardBasicDTO(b.id, b.name)
+      from Board b
+      where b.campaign.id = :campaignId
+      order by b.name asc
+      """)
+    List<BoardBasicDTO> findBoards(@Param("campaignId") Long campaignId);
 
 
 }

@@ -193,6 +193,22 @@ public class BoardWsController {
                 broker.convertAndSend("/topic/board." + id + ".op", out);
             }
 
+        case "change.board" -> {
+            var boardIdRaw = body.get("boardId");
+            var campaignIdRaw = body.get("campaignId");
+
+            Long boardId = Long.valueOf(boardIdRaw.toString());
+            Long campaignId = Long.valueOf(campaignIdRaw.toString());
+
+            var out = new HashMap<String, Object>();
+            out.put("type", "change-board");
+            out.put("boardId", boardId);
+
+            service.changeBoard(campaignId, boardId);
+
+            broker.convertAndSend("/topic/board." + id + ".op", out);
+        }
+
 
 
 
@@ -200,4 +216,26 @@ public class BoardWsController {
             default -> { /* ignore unknown */ }
         }
     }
+
+    @MessageMapping("/campaign.{campaignId}.op")
+public void onOp(@DestinationVariable Long campaignId,
+                 @Payload Map<String, Object> body,
+                 Principal principal) {
+    String type = Objects.toString(body.get("type"), "");
+    switch (type) {
+        case "change.board" -> {
+            Long boardId = Long.valueOf(body.get("boardId").toString());
+            // opcjonalnie: persistuj activeBoard w DB
+            service.changeBoard(campaignId, boardId);
+
+            var out = new HashMap<String, Object>();
+            out.put("type", "change-board");
+            out.put("boardId", boardId);
+
+            // KLUCZ: broadcast po temacie kampanii
+            broker.convertAndSend("/topic/campaign." + campaignId + ".op", out);
+        }
+        // ...
+    }
+}
 }

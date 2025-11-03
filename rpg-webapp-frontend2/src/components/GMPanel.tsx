@@ -10,6 +10,8 @@ type GMPanelProps = {
   GMRoll: boolean;
   setGMRoll: React.Dispatch<React.SetStateAction<boolean>>;
   setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>;
+  gmBoardId: number | null;
+  setGmBoardId: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
 type BoardBasic = {
@@ -24,6 +26,8 @@ export function GMPanel({
   GMRoll,
   setGMRoll,
   setActiveBoardId,
+  gmBoardId,
+  setGmBoardId,
 }: GMPanelProps) {
   const publish = usePublish();
   const [addingUser, setAddingUser] = useState(false);
@@ -37,6 +41,16 @@ export function GMPanel({
   useEffect(() => {
     getBoardNames();
   }, []);
+
+  useEffect(() => {
+    if (!campaignId) return;
+
+    publish(`/app/campaign.${campaignId}.op`, {
+      type: "change.board",
+      boardId,
+      campaignId,
+    } as const);
+  }, [boardId, campaignId]);
 
   const getBoardNames = async () => {
     try {
@@ -141,19 +155,41 @@ export function GMPanel({
           />
         </span>
 
-        <select
-          value={boardId ?? ""}
-          onChange={(e) => {
-            const v = e.target.value;
-            setActiveBoardId(v === "" ? null : Number(v));
-          }}
-        >
-          {boardBasicData.map((boardData) => (
-            <option key={boardData.id} value={boardData.id}>
-              {boardData.name}
-            </option>
-          ))}
-        </select>
+        <div>
+          All board
+          <select
+            value={boardId ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              setActiveBoardId(v === "" ? null : Number(v));
+
+              console.log(boardId);
+            }}
+          >
+            {boardBasicData.map((boardData) => (
+              <option key={boardData.id} value={boardData.id}>
+                {boardData.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          GM board
+          <select
+            value={gmBoardId ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              setGmBoardId(v === "" ? null : Number(v));
+            }}
+          >
+            {boardBasicData.map((boardData) => (
+              <option key={boardData.id} value={boardData.id}>
+                {boardData.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {addingBoard ? (
           <div>

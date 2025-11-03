@@ -8,7 +8,7 @@ import {
   Stage,
   Transformer,
 } from "react-konva";
-import  Konva from "konva";
+import Konva from "konva";
 import Toolbar from "./Toolbar";
 import { usePanZoom } from "./hooks/usePanZoom";
 import { useSnapshot } from "./hooks/useSnapshot";
@@ -21,13 +21,23 @@ import { useUndo } from "./hooks/useUndo";
 import { useShape } from "./hooks/useShape";
 import { usePointer } from "./hooks/usePointer";
 
-type Props = { boardId: number; isGM: boolean };
+type Props = {
+  boardId: number;
+  isGM: boolean;
+  setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>;
+  campaignId: string | undefined;
+};
 
 type PushUndo = (
   a: { kind: "draw"; objectId: string } | { kind: "erase"; objectIds: string[] }
 ) => void;
 
-export default function BoardCanvas({ boardId, isGM }: Props) {
+export default function BoardCanvas({
+  boardId,
+  isGM,
+  setActiveBoardId,
+  campaignId,
+}: Props) {
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
@@ -73,17 +83,16 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
   const layerRef = useRef<Konva.Layer | null>(null);
 
   const {
-  stageScale,
-  stagePos,
-  isPanning,
-  onWheel,
-  onDragMove,
-  onDragStart,
-  onDragEnd,
-  enabled,
-  setEnabled,          
-} = usePanZoom();
-
+    stageScale,
+    stagePos,
+    isPanning,
+    onWheel,
+    onDragMove,
+    onDragStart,
+    onDragEnd,
+    enabled,
+    setEnabled,
+  } = usePanZoom();
 
   const cursor =
     tool === "hand"
@@ -100,19 +109,19 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
   );
 
   const pointer = usePointer({
-  active: tool === "pointer",
-  boardId,
-  clientId,
-  objects,
-  setObjects,
-  currentUserId,
-  isGM,
-  layerRef,
-  setPanZoomEnabled: setEnabled,  
-});
+    active: tool === "pointer",
+    boardId,
+    clientId,
+    objects,
+    setObjects,
+    currentUserId,
+    isGM,
+    layerRef,
+    setPanZoomEnabled: setEnabled,
+  });
 
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
-    useWsIncoming(boardId, setObjects, clientId, {
+    useWsIncoming(boardId, setObjects, clientId, setActiveBoardId, campaignId, {
       pushUndo: (a) => pushUndoRef.current?.(a),
       shouldIgnoreEraseApplied: (ids) =>
         !!shouldIgnoreEraseAppliedRef.current?.(ids),
@@ -188,7 +197,6 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
     if (pt) setPointerOnLayer(pt);
   };
 
-
   function onPointerDown(e: any) {
     if (tool === "pencil") return pencil.onPointerDown();
     if (tool === "eraser") return erDown();
@@ -196,15 +204,19 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
     if (tool === "pointer") return pointer.onStagePointerDown(e);
   }
   function onPointerMove() {
-  
-  if (tool === "eraser" || tool === "pencil" || tool === "rect" || tool === "ellipse") {
-    updatePointer();
+    if (
+      tool === "eraser" ||
+      tool === "pencil" ||
+      tool === "rect" ||
+      tool === "ellipse"
+    ) {
+      updatePointer();
+    }
+    if (tool === "pencil") return pencil.onPointerMove();
+    if (tool === "eraser") return erMove();
+    if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
+    if (tool === "pointer") return;
   }
-  if (tool === "pencil") return pencil.onPointerMove();
-  if (tool === "eraser") return erMove();
-  if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
-  if (tool === "pointer") return; 
-}
 
   function onPointerUp() {
     if (tool === "pencil") return pencil.onPointerUp();
@@ -217,18 +229,24 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
   }
 
   const selectableProps = (o: Drawable) => ({
-  name: "selectable",
-  ref: pointer.bindNodeRef(o.id),
-  id: o.id,
-  onPointerDown: tool === "pointer" ? (e: Konva.KonvaEventObject<PointerEvent>) => pointer.onNodePointerDown(e, o.id) : undefined,
-  draggable: tool === "pointer" && pointer.selectedId === o.id && (isMine(o.id) || isGM),
+    name: "selectable",
+    ref: pointer.bindNodeRef(o.id),
+    id: o.id,
+    onPointerDown:
+      tool === "pointer"
+        ? (e: Konva.KonvaEventObject<PointerEvent>) =>
+            pointer.onNodePointerDown(e, o.id)
+        : undefined,
+    draggable:
+      tool === "pointer" &&
+      pointer.selectedId === o.id &&
+      (isMine(o.id) || isGM),
 
-  onDragStart:     tool === "pointer" ? pointer.onDragStart     : undefined,
-  onDragEnd:       tool === "pointer" ? pointer.onDragEnd       : undefined,
-  onTransformStart:tool === "pointer" ? pointer.onTransformStart: undefined,
-  onTransformEnd:  tool === "pointer" ? pointer.onTransformEnd  : undefined,
-});
-
+    onDragStart: tool === "pointer" ? pointer.onDragStart : undefined,
+    onDragEnd: tool === "pointer" ? pointer.onDragEnd : undefined,
+    onTransformStart: tool === "pointer" ? pointer.onTransformStart : undefined,
+    onTransformEnd: tool === "pointer" ? pointer.onTransformEnd : undefined,
+  });
 
   return (
     <div className="canvas-container">
@@ -286,7 +304,6 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
             }
 
             if (o.type === "rect") {
-              
               const cx = o.x + o.width / 2;
               const cy = o.y + o.height / 2;
               return (
@@ -327,7 +344,6 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
             return null;
           })}
 
-         
           <Rect
             visible={false}
             listening={false}
@@ -336,11 +352,9 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
             dash={[4, 4]}
           />
 
-          
           <Transformer
             ref={pointer.trRef}
             rotateEnabled
-            
             enabledAnchors={[
               "top-left",
               "top-center",
@@ -351,7 +365,6 @@ export default function BoardCanvas({ boardId, isGM }: Props) {
               "bottom-center",
               "bottom-right",
             ]}
-            
             boundBoxFunc={(oldBox, newBox) =>
               newBox.width < 5 || newBox.height < 5 ? oldBox : newBox
             }

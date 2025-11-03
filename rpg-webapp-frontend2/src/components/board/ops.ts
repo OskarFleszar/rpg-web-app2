@@ -158,7 +158,6 @@ export type TransformAppliedOp = {
   clientId?: string;
 };
 
-// (opcjonalnie – to wysyłasz z frontu, nie odbierasz)
 export type TransformApplyOp = {
   type: "transform.apply";
   boardId: number;
@@ -166,6 +165,11 @@ export type TransformApplyOp = {
   changed: (TransformChangedStroke | TransformChangedShape)[];
 };
 
+export type ChangeBoardOp = {
+  type: "change-board";
+  boardId: number;
+  campaignId: number;
+};
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
@@ -179,4 +183,5 @@ export type BoardOp =
   | EraseAppliedOp
   | EraseUndoAppliedOp
   | BoardClearedOp
-  | TransformAppliedOp;
+  | TransformAppliedOp
+  | ChangeBoardOp;

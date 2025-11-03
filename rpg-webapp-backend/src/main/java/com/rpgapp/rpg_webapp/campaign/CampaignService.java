@@ -99,4 +99,11 @@ public class CampaignService {
     public List<BoardBasicDTO> getBoards (Long canpaignId) {
         return boardRepository.findBoards(canpaignId);
     }
+
+    public void changeActiveBoard (Long campaignId, Long boardId) {
+        Campaign campaign = getCampaignData(campaignId).orElseThrow();
+        Board board  = boardRepository.findById(boardId)
+            .orElseThrow(() -> new EntityNotFoundException("Board not found: " + boardId));
+        campaign.setActiveBoard(board);
+    }
 }

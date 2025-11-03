@@ -18,6 +18,7 @@ export function CampaignPage() {
   const [isGM, setIsGM] = useState(false);
   const [GMRoll, setGMRoll] = useState(false);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
+  const [GMBoardId, setGMBoardId] = useState<number | null>(null);
 
   useEffect(() => {
     if (characterIds) {
@@ -91,6 +92,8 @@ export function CampaignPage() {
             GMRoll={GMRoll}
             setGMRoll={setGMRoll}
             setActiveBoardId={setActiveBoardId}
+            gmBoardId={GMBoardId}
+            setGmBoardId={setGMBoardId}
           />
         ) : (
           <></>
@@ -102,7 +105,14 @@ export function CampaignPage() {
           GMRoll={GMRoll}
           isGM={isGM}
         />
-        <BoardCanvas boardId={Number(activeBoardId)} isGM={isGM} />
+        <BoardCanvas
+          boardId={Number(
+            isGM && GMBoardId != null ? GMBoardId : activeBoardId
+          )}
+          isGM={isGM}
+          setActiveBoardId={setActiveBoardId}
+          campaignId={id}
+        />
       </WSProvider>
     </div>
   );

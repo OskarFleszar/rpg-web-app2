@@ -21,6 +21,8 @@ export function useWsIncoming(
   boardId: number,
   setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>,
   clientId: string,
+  setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>,
+  campaignId: string | undefined,
   opts?: {
     pushUndo?: PushUndo;
     shouldIgnoreEraseApplied?: ShouldIgnoreErase;
@@ -209,11 +211,11 @@ export function useWsIncoming(
       case "transform.applied": {
         if ((op as any).clientId && (op as any).clientId === clientId) break;
         const changed = (op as TransformAppliedOp).changed ?? [];
-        
-        const byId = new Map(changed.map(ch => [String(ch.id), ch]));
 
-        setObjects(prev =>
-          prev.map(o => {
+        const byId = new Map(changed.map((ch) => [String(ch.id), ch]));
+
+        setObjects((prev) =>
+          prev.map((o) => {
             const ch = byId.get(o.id);
             if (!ch) return o;
 
@@ -221,7 +223,10 @@ export function useWsIncoming(
               return { ...o, points: ch.points };
             }
 
-            if ((ch.kind === "rect" || ch.kind === "ellipse") && (isRect(o) || isEllipse(o))) {
+            if (
+              (ch.kind === "rect" || ch.kind === "ellipse") &&
+              (isRect(o) || isEllipse(o))
+            ) {
               return {
                 ...o,
                 x: ch.x,
@@ -230,18 +235,25 @@ export function useWsIncoming(
                 height: ch.height,
                 rotation: ch.rotation ?? 0,
               };
-              
             }
-          
+
             return o;
           })
         );
 
         break;
       }
-
     }
   });
+
+  useChannel<{ type: "change-board"; boardId: number }>(
+    `/topic/campaign.${campaignId}.op`,
+    (op) => {
+      if (!op || op.type !== "change-board") return;
+      setActiveBoardId(Number(op.boardId));
+      console.log("change-board from WS", op.boardId);
+    }
+  );
 
   return {
     addMyPath: (id: string) => myActivePathsRef.current.add(id),
