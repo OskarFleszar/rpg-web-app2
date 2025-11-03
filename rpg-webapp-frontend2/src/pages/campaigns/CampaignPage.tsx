@@ -17,13 +17,30 @@ export function CampaignPage() {
   const characterIds = state?.characterIds as number[];
   const [isGM, setIsGM] = useState(false);
   const [GMRoll, setGMRoll] = useState(false);
+  const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
 
   useEffect(() => {
     if (characterIds) {
       fetchCharactersData();
     }
     fetchiSGM();
+    fetchActiveBoard();
   }, []);
+
+  const fetchActiveBoard = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/campaign/${id}/activeBoard`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      console.log(response.data);
+      setActiveBoardId(response.data);
+    } catch (error) {
+      console.error("An error occured while fetching active board id", error);
+    }
+  };
 
   const fetchCharactersData = async () => {
     try {
@@ -67,13 +84,25 @@ export function CampaignPage() {
     <div className="campaign-page">
       <WSProvider baseUrl={baseUrl}>
         {isGM ? (
-          <GMPanel campaignId={id} isGM={isGM} boardId={Number(id)} GMRoll={GMRoll} setGMRoll={setGMRoll} />
+          <GMPanel
+            campaignId={id}
+            isGM={isGM}
+            boardId={Number(activeBoardId)}
+            GMRoll={GMRoll}
+            setGMRoll={setGMRoll}
+            setActiveBoardId={setActiveBoardId}
+          />
         ) : (
           <></>
         )}
 
-        <Chat campaignId={id} characters={characters} GMRoll={GMRoll} isGM={isGM} />
-        <BoardCanvas boardId={Number(id)} isGM={isGM} />
+        <Chat
+          campaignId={id}
+          characters={characters}
+          GMRoll={GMRoll}
+          isGM={isGM}
+        />
+        <BoardCanvas boardId={Number(activeBoardId)} isGM={isGM} />
       </WSProvider>
     </div>
   );

@@ -1,4 +1,4 @@
-package com.rpgapp.rpg_webapp.campaign;
+package com.rpgapp.rpg_webapp.campaign.dto;
 
 import lombok.Data;
 

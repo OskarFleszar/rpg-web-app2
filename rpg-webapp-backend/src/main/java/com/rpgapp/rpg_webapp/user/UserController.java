@@ -1,7 +1,7 @@
 package com.rpgapp.rpg_webapp.user;
 
 import com.rpgapp.rpg_webapp.campaign.Campaign;
-import com.rpgapp.rpg_webapp.campaign.CampaignBasicDTO;
+import com.rpgapp.rpg_webapp.campaign.dto.CampaignBasicDTO;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

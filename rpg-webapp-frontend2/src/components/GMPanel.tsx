@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./GMPanel.css";
 import { usePublish } from "../ws/hooks";
 
@@ -8,15 +8,55 @@ type GMPanelProps = {
   isGM: boolean;
   boardId: number;
   GMRoll: boolean;
-  setGMRoll:  React.Dispatch<React.SetStateAction<boolean>>;
+  setGMRoll: React.Dispatch<React.SetStateAction<boolean>>;
+  setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
-export function GMPanel({ campaignId, isGM, boardId, GMRoll, setGMRoll }: GMPanelProps) {
+type BoardBasic = {
+  id: number;
+  name: string;
+};
+
+export function GMPanel({
+  campaignId,
+  isGM,
+  boardId,
+  GMRoll,
+  setGMRoll,
+  setActiveBoardId,
+}: GMPanelProps) {
   const publish = usePublish();
   const [addingUser, setAddingUser] = useState(false);
   const [nicknameToAdd, setNicknameToAdd] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [addingBoard, setAddingBoard] = useState(false);
+  const [boardToAdd, setBoardToAdd] = useState("");
+  const [boardBasicData, setboardBasicData] = useState<BoardBasic[]>([]);
   const userId = localStorage.getItem("userId");
+
+  useEffect(() => {
+    getBoardNames();
+  }, []);
+
+  const getBoardNames = async () => {
+    try {
+      if (!isGM) return;
+      const res = await axios.get(
+        `http://localhost:8080/api/campaign/${campaignId}/getBoards`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      console.log(res.data);
+
+      setboardBasicData(res.data);
+    } catch (error) {
+      console.error("An error occured while getting board names", error);
+    }
+  };
 
   const handleAddUser = async () => {
     try {
@@ -35,6 +75,28 @@ export function GMPanel({ campaignId, isGM, boardId, GMRoll, setGMRoll }: GMPane
       setAddingUser(false);
     } catch (error) {
       console.error("An error occured while adding user", error);
+    }
+  };
+
+  const handleAddBoard = async () => {
+    try {
+      if (!isGM || !boardToAdd) return;
+      console.log(boardToAdd);
+      await axios.post(
+        `http://localhost:8080/api/campaign/${campaignId}/addBoard`,
+        { name: boardToAdd },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setBoardToAdd("");
+      setAddingBoard(false);
+      getBoardNames();
+    } catch (error) {
+      console.error("An error occured while adding board", error);
     }
   };
   return (
@@ -72,8 +134,41 @@ export function GMPanel({ campaignId, isGM, boardId, GMRoll, setGMRoll }: GMPane
         </button>
         <span>
           GM Roll
-          <input type="checkbox" checked={GMRoll} onChange={() => setGMRoll(!GMRoll)}/>
+          <input
+            type="checkbox"
+            checked={GMRoll}
+            onChange={() => setGMRoll(!GMRoll)}
+          />
         </span>
+
+        <select
+          value={boardId ?? ""}
+          onChange={(e) => {
+            const v = e.target.value;
+            setActiveBoardId(v === "" ? null : Number(v));
+          }}
+        >
+          {boardBasicData.map((boardData) => (
+            <option key={boardData.id} value={boardData.id}>
+              {boardData.name}
+            </option>
+          ))}
+        </select>
+
+        {addingBoard ? (
+          <div>
+            <input
+              type="text"
+              placeholder="Board Name"
+              value={boardToAdd}
+              onChange={(e) => setBoardToAdd(e.target.value)}
+            ></input>
+            <button onClick={handleAddBoard}>✔️</button>
+            <button onClick={() => setAddingBoard(false)}>❌</button>
+          </div>
+        ) : (
+          <button onClick={() => setAddingBoard(true)}>Add board</button>
+        )}
       </div>
       <button
         className="GM-panel-open-button"

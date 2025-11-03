@@ -2,6 +2,7 @@ package com.rpgapp.rpg_webapp.campaign;
 
 import com.rpgapp.rpg_webapp.board.entity.Board;
 import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
+import com.rpgapp.rpg_webapp.campaign.dto.BoardBasicDTO;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
 import com.rpgapp.rpg_webapp.user.UserRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -47,6 +49,7 @@ public class CampaignService {
         b = boardRepository.save(b);
 
         campaign.setActiveBoard(b);
+        campaignRepository.save(campaign);
     }
 
 
@@ -82,5 +85,18 @@ public class CampaignService {
 
      return campaign.getGameMaster().getId();
 
+    }
+
+    public void addNewBoard(Campaign campaign, String name) {
+
+        Board b = new Board();
+        b.setCampaign(campaign);
+        b.setName(name);
+        campaign.getBoards().add(b);
+        b = boardRepository.save(b);
+    }
+
+    public List<BoardBasicDTO> getBoards (Long canpaignId) {
+        return boardRepository.findBoards(canpaignId);
     }
 }

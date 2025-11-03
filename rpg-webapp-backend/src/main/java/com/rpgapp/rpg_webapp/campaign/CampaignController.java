@@ -1,9 +1,20 @@
 package com.rpgapp.rpg_webapp.campaign;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.rpgapp.rpg_webapp.board.entity.Board;
+import com.rpgapp.rpg_webapp.campaign.dto.BoardAddRequestDTO;
+import com.rpgapp.rpg_webapp.campaign.dto.BoardBasicDTO;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
+
 
 @RestController
 @RequestMapping(path = "api/campaign")
@@ -36,7 +47,28 @@ public class CampaignController {
     }
 
 
+  
+    @PostMapping("/{campaignId}/addBoard")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addNewBoard(@PathVariable Long campaignId,
+                            @RequestBody BoardAddRequestDTO req) {
+        Campaign campaign = campaignService.getCampaignData(campaignId).orElseThrow();
+        campaignService.addNewBoard(campaign, req.name());
+    }
 
+    @GetMapping("/{campaignId}/getBoards")
+    public List<BoardBasicDTO> getBoards(@PathVariable("campaignId") Long campaignId) {
+        return campaignService.getBoards(campaignId);
+    }
+
+    @GetMapping("/{campaignId}/activeBoard")
+    public Long getActiveBoard(@PathVariable("campaignId") Long campaignId) {
+        Campaign campaign = campaignService.getCampaignData(campaignId).orElseThrow();
+        return campaign.getActiveBoard().getId();
+    }
+    
+    
+    
 
 
 
