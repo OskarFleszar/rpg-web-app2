@@ -13,6 +13,7 @@ import { CharacterPage } from "./pages/characters/CharacterPage";
 import { CreateCharacterPage } from "./pages/characters/CreateCharacterPage";
 import { CampaignPage } from "./pages/campaigns/CampaignPage";
 import { CharacterSelectScreen } from "./pages/campaigns/CharacterSelectScreen";
+import { UpcomingSessionsPage } from "./pages/upcoming-sessions/UpcomingSessionsPage";
 
 function App() {
   //const [userData, setUserData] = useState({});
@@ -70,6 +71,7 @@ function App() {
         />
         <Route path="campaigns/:id" element={<CampaignPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="upcoming-sessions" element={<UpcomingSessionsPage />} />
         <Route
           path="register"
           element={<RegisterPage setLogedIn={setLogedIn} />}

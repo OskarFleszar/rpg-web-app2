@@ -29,6 +29,10 @@ export function Header({ logedIn, setLogedIn }: HeaderProps) {
         <NavLink className="header-link" to="/characters">
           <span className="link-text">Characters</span>
         </NavLink>
+
+        <NavLink className="header-link" to="/upcoming-sessions">
+          <span className="link-text">Upcoming Sessions</span>
+        </NavLink>
       </div>
 
       <div className="right-section">

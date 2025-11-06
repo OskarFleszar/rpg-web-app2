@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class CampaignService {
@@ -105,5 +106,12 @@ public class CampaignService {
         Board board  = boardRepository.findById(boardId)
             .orElseThrow(() -> new EntityNotFoundException("Board not found: " + boardId));
         campaign.setActiveBoard(board);
+    }
+
+    public List<User> getMembers(Long camapignId) {
+        Campaign campaign = getCampaignData(camapignId).orElseThrow();
+        Set<User> members = campaign.getPlayers();
+
+         return List.copyOf(members);
     }
 }

@@ -1,5 +1,5 @@
 .GM-panel {
-   position: absolute;
+  position: absolute;
   top: 200px;
   left: -60px;
   z-index: 10;
@@ -10,17 +10,17 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  overflow: visible; 
-  transform: translateX(0);
- 
-  transition: transform .26s ease, opacity .26s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: visible;
+  transform: translateX(-120px);
+
+  transition: transform 0.26s ease, opacity 0.26s ease;
 }
 
 .GM-panel.open {
   transform: translateX(60px);
   opacity: 1;
-  transition: transform .26s ease, opacity .26s ease;
+  transition: transform 0.26s ease, opacity 0.26s ease;
 }
 
 .GM-panel-tools {
@@ -30,7 +30,7 @@
   flex-direction: column;
 }
 
-.GM-panel-tools.open{
+.GM-panel-tools.open {
   opacity: 1;
   pointer-events: auto;
 }

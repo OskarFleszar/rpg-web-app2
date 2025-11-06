@@ -5,8 +5,10 @@ import "./CampaignPage.css";
 
 import { Chat } from "../../components/chat/Chat";
 import { WSProvider } from "../../ws/WSProvider";
+
 import BoardCanvas from "../../components/board/BoardCanvas";
 import { GMPanel } from "../../components/GMPanel";
+import { CalendarComponent } from "../../components/Calendar";
 
 export function CampaignPage() {
   const baseUrl = "http://localhost:8080";
@@ -19,6 +21,7 @@ export function CampaignPage() {
   const [GMRoll, setGMRoll] = useState(false);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
   const [GMBoardId, setGMBoardId] = useState<number | null>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     if (characterIds) {
@@ -94,6 +97,7 @@ export function CampaignPage() {
             setActiveBoardId={setActiveBoardId}
             gmBoardId={GMBoardId}
             setGmBoardId={setGMBoardId}
+            setShowCalendar={setShowCalendar}
           />
         ) : (
           <></>
@@ -114,6 +118,25 @@ export function CampaignPage() {
           campaignId={id}
         />
       </WSProvider>
+      {showCalendar && (
+        <div
+          className="modal-backdrop"
+          onClick={() => setShowCalendar(false)} // klik w tło zamyka
+        >
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()} // żeby klik w kalendarz NIE zamykał
+          >
+            <button
+              className="modal-close"
+              onClick={() => setShowCalendar(false)}
+            >
+              ✕
+            </button>
+            <CalendarComponent campaignId={id} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

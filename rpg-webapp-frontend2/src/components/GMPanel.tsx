@@ -12,6 +12,7 @@ type GMPanelProps = {
   setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>;
   gmBoardId: number | null;
   setGmBoardId: React.Dispatch<React.SetStateAction<number | null>>;
+  setShowCalendar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type BoardBasic = {
@@ -28,6 +29,7 @@ export function GMPanel({
   setActiveBoardId,
   gmBoardId,
   setGmBoardId,
+  setShowCalendar,
 }: GMPanelProps) {
   const publish = usePublish();
   const [addingUser, setAddingUser] = useState(false);
@@ -205,6 +207,7 @@ export function GMPanel({
         ) : (
           <button onClick={() => setAddingBoard(true)}>Add board</button>
         )}
+        <button onClick={() => setShowCalendar((v) => !v)}>📅 Calendar</button>
       </div>
       <button
         className="GM-panel-open-button"

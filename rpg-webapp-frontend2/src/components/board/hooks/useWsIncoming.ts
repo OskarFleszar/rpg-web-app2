@@ -41,6 +41,7 @@ export function useWsIncoming(
       }
     >()
   );
+  const pendingRemotePointsRef = useRef<Map<string, number[][]>>(new Map());
 
   const [pendingRemoval, setPendingRemoval] = useState<Set<string>>(new Set());
 
@@ -71,6 +72,38 @@ export function useWsIncoming(
           ownerId: String(op.ownerId ?? ""),
           last: undefined,
         });
+        console.log("stroke start: ", "color:", op.color, "width:", op.width);
+
+        const buffered = pendingRemotePointsRef.current.get(op.pathId);
+        if (buffered && buffered.length) {
+          pendingRemotePointsRef.current.delete(op.pathId);
+          const add = buffered.flat();
+
+          setObjects((prev) => {
+            const idx = prev.findIndex((o) => o.id === op.pathId);
+            if (idx === -1) {
+              const newStroke: Stroke = {
+                type: "stroke",
+                id: op.pathId,
+                color: op.color,
+                strokeWidth: op.width,
+                points: add,
+                ownerId: String(op.ownerId ?? ""),
+              };
+              return [...prev, newStroke];
+            }
+            const existing = prev[idx];
+            if (!isStroke(existing)) return prev;
+            const updated: Stroke = {
+              ...existing,
+              points: [...existing.points, ...add],
+            };
+            const copy = prev.slice();
+            copy[idx] = updated;
+            return copy;
+          });
+        }
+
         break;
       }
 
@@ -78,18 +111,15 @@ export function useWsIncoming(
         if (pendingRemoval.has(op.pathId)) return;
 
         let state = remoteStrokesRef.current.get(op.pathId);
-        if (!state) {
-          state = {
-            color: "#000",
-            strokeWidth: 2,
-            ownerId: "",
-            last: undefined,
-          };
-          remoteStrokesRef.current.set(op.pathId, state);
-        }
-
         const add = (op.points ?? []).flat();
         if (!add.length) break;
+
+        if (!state) {
+          const buf = pendingRemotePointsRef.current.get(op.pathId) ?? [];
+          buf.push(...(op.points ?? []));
+          pendingRemotePointsRef.current.set(op.pathId, buf);
+          return;
+        }
 
         setObjects((prev) => {
           const idx = prev.findIndex((o) => o.id === op.pathId);
@@ -102,6 +132,13 @@ export function useWsIncoming(
               points: add,
               ownerId: state!.ownerId,
             };
+            console.log(
+              "stroke append: ",
+              "color:",
+              state!.color,
+              "width:",
+              state!.strokeWidth
+            );
             return [...prev, newStroke];
           }
           const existing = prev[idx];
@@ -126,6 +163,7 @@ export function useWsIncoming(
         if (op.clientId === clientId && op.pathId && opts?.pushUndo) {
           opts.pushUndo({ kind: "draw", objectId: op.pathId });
         }
+        console.log("stroke ended");
         break;
       }
 

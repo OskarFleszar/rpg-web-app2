@@ -186,7 +186,7 @@ export default function BoardCanvas({
 
   useEffect(() => {
     if (tool !== "pointer") pointer.clearSelection();
-  }, [tool, pointer]);
+  }, [tool]);
 
   const [pointerOnLayer, setPointerOnLayer] = useState<{
     x: number;
