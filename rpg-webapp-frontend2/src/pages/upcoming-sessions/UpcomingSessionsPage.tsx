@@ -24,8 +24,9 @@ export function UpcomingSessionsPage() {
   const loadSessions = async () => {
     try {
       setLoading(true);
+      const userId = localStorage.getItem("userId");
       const res = await axios.get<SessionProposalDto[]>(
-        "http://localhost:8080/api/calendar/my-upcoming-sessions",
+        `http://localhost:8080/api/calendar/my-upcoming-sessions/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -33,6 +34,7 @@ export function UpcomingSessionsPage() {
         }
       );
       setSessions(res.data);
+      console.log(res.data);
     } catch (e) {
       console.error("Error loading sessions", e);
     } finally {
@@ -50,6 +52,7 @@ export function UpcomingSessionsPage() {
     vote: "YES" | "NO"
   ) => {
     try {
+      console.log(vote, localStorage.getItem("userId"));
       await axios.post(
         `http://localhost:8080/api/campaign/${campaignId}/calendar/${proposalId}/vote`,
         { vote, userId: localStorage.getItem("userId") },
@@ -59,6 +62,7 @@ export function UpcomingSessionsPage() {
           },
         }
       );
+
       loadSessions();
     } catch (e) {
       console.error("Error voting", e);

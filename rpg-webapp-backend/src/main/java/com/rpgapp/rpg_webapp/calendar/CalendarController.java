@@ -36,23 +36,16 @@ public class CalendarController {
     public SessionProposalDTO vote(
             @PathVariable Long campaignId,
             @PathVariable Long proposalId,
-            @RequestBody VoteRequestDTO req,
-            Long userId  
+            @RequestBody VoteRequestDTO req
+
     ) {
         var proposal = calendarService.vote(
                 proposalId,
-                userId,
+                req.userId(),
                 req.vote()
         );
         return SessionProposalDTO.from(proposal);
     }
 
-    @GetMapping("/my-upcoming-sessions")
-    public List<SessionProposalDTO> list(@PathVariable Long campaignId) {
-        return calendarService
-                .getProposals(campaignId)           
-                .stream()
-                .map(SessionProposalDTO::from)      
-                .toList();
-    }
+
 }

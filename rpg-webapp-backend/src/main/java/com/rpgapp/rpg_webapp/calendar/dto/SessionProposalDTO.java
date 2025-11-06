@@ -6,6 +6,8 @@ import com.rpgapp.rpg_webapp.calendar.SessionProposal;
 
 public record SessionProposalDTO(
         Long id,
+        Long campaignId,
+        String campaignName,
         String status,
         String dateTimeUtc,
         List<SessionVoteDTO> votes
@@ -13,6 +15,8 @@ public record SessionProposalDTO(
     public static SessionProposalDTO from(SessionProposal p) {
         return new SessionProposalDTO(
                 p.getId(),
+                p.getCampaign().getCampaignId(),          // <<< to jest ważne
+                p.getCampaign().getCampaignName(),
                 p.getStatus().name(),
                 p.getSessionDateTime().toString(),
                 p.getVotes().stream()

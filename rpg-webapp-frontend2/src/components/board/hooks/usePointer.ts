@@ -14,7 +14,6 @@ type ChangedShape = {
   height: number;
   rotation?: number;
 };
-type Changed = ChangedStroke | ChangedShape;
 
 export function usePointer(opts: {
   active: boolean;
@@ -35,12 +34,11 @@ export function usePointer(opts: {
     currentUserId,
     isGM,
     layerRef,
-    setPanZoomEnabled, 
+    setPanZoomEnabled,
   } = opts;
 
   const publish = usePublish();
 
-  
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedIdRef = useRef<string | null>(null);
 
@@ -56,25 +54,21 @@ export function usePointer(opts: {
     layerRef.current?.batchDraw();
   }, [setSelection, layerRef]);
 
-  
   const trRef = useRef<Konva.Transformer | null>(null);
   const nodeRefs = useRef(new Map<string, Konva.Node>());
 
- 
   const beforeRef = useRef<Drawable | null>(null);
 
   const canEdit = useCallback(
     (id: string) => {
       const o = objects.find((x) => x.id === id);
       if (!o) return false;
-      console.log(isGM)
+      console.log(isGM);
       return isGM || o.ownerId === String(currentUserId);
-
     },
     [objects, isGM, currentUserId]
   );
 
- 
   const bindNodeRef = useCallback(
     (id: string) => (node: Konva.Node | null) => {
       if (node) {
@@ -91,12 +85,10 @@ export function usePointer(opts: {
     [selectedId, layerRef]
   );
 
-
   useEffect(() => {
     if (!active) clearSelection();
   }, [active, clearSelection]);
 
-  
   useEffect(() => {
     if (!selectedId) return;
     if (!objects.some((o) => o.id === selectedId)) {
@@ -104,7 +96,6 @@ export function usePointer(opts: {
     }
   }, [objects, selectedId, clearSelection]);
 
-  
   const onNodePointerDown = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>, id: string) => {
       if (!active) return;
@@ -122,7 +113,6 @@ export function usePointer(opts: {
     [active, canEdit, setSelection, layerRef]
   );
 
-  
   const onStagePointerDown = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>) => {
       if (!active) return;
@@ -132,7 +122,6 @@ export function usePointer(opts: {
     [active, clearSelection]
   );
 
-  
   const snapshotBefore = useCallback(() => {
     const id = selectedIdRef.current;
     if (!id) return;
@@ -140,7 +129,6 @@ export function usePointer(opts: {
     beforeRef.current = o ? JSON.parse(JSON.stringify(o)) : null;
   }, [objects]);
 
-  
   const lockCamera = useCallback(
     (lock: boolean) => setPanZoomEnabled?.(!lock),
     [setPanZoomEnabled]
@@ -156,23 +144,20 @@ export function usePointer(opts: {
     snapshotBefore();
   }, [snapshotBefore, lockCamera]);
 
- 
   function sceneToLayerPoint(node: Konva.Node) {
     const layer = node.getLayer();
-    const abs = node.getAbsolutePosition(); 
+    const abs = node.getAbsolutePosition();
     const inv = layer?.getAbsoluteTransform().copy().invert();
-    return inv ? inv.point(abs) : abs; 
+    return inv ? inv.point(abs) : abs;
   }
 
   function exportNodeChanges(node: Konva.Node, before: Drawable | null) {
     if (!before) return null;
 
-    
     const scaleX = (node as any).scaleX?.() ?? 1;
     const scaleY = (node as any).scaleY?.() ?? 1;
     const rotation = (node as any).rotation?.() ?? 0;
 
-   
     const center = sceneToLayerPoint(node);
 
     if (before.type === "rect") {
@@ -204,7 +189,6 @@ export function usePointer(opts: {
     }
 
     if (before.type === "stroke") {
-      
       const absTr = node.getAbsoluteTransform();
       const invLayer = node.getLayer()?.getAbsoluteTransform().copy().invert();
       const pts: number[] = [];
@@ -222,7 +206,6 @@ export function usePointer(opts: {
     return null;
   }
 
-  
   const commitSelection = useCallback(() => {
     if (!active) {
       lockCamera(false);
@@ -246,7 +229,7 @@ export function usePointer(opts: {
     }
 
     const ch = exportNodeChanges(node, before);
-    beforeRef.current = null; 
+    beforeRef.current = null;
 
     if (!ch) {
       lockCamera(false);
@@ -260,14 +243,16 @@ export function usePointer(opts: {
       isGM,
       changed: [ch],
     } as const);
-    console.log(ch)
+    console.log(ch);
 
     lockCamera(false);
-    
   }, [active, canEdit, publish, boardId, clientId, lockCamera]);
 
   const onDragEnd = useCallback(() => commitSelection(), [commitSelection]);
-  const onTransformEnd = useCallback(() => commitSelection(), [commitSelection]);
+  const onTransformEnd = useCallback(
+    () => commitSelection(),
+    [commitSelection]
+  );
 
   return {
     selectedId,

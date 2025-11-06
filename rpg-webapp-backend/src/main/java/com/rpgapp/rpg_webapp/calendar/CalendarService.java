@@ -1,5 +1,6 @@
 package com.rpgapp.rpg_webapp.calendar;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -60,6 +61,7 @@ public class CalendarService {
 
         if (everyoneVotedYes) {
             proposal.setStatus(SessionProposal.Status.CONFIRMED);
+
         } else if (votes.stream().anyMatch(v -> v.getVote() == SessionVote.Vote.NO)) {
             proposal.setStatus(SessionProposal.Status.REJECTED); 
         }
@@ -70,5 +72,16 @@ public class CalendarService {
    public List<SessionProposal> getProposals(Long campaignId) {
         return proposalRepo
                 .findByCampaign_CampaignIdOrderBySessionDateTimeDesc(campaignId);
+  }
+
+    public List<SessionProposal> getUpcomingSessionsForUser(Long userId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        return proposalRepo
+                .findByCampaign_Players_IdAndSessionDateTimeAfterOrderBySessionDateTimeAsc(
+                        userId,
+                        now
+                );
     }
+
+
 }
