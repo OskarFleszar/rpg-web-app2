@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import "./GMPanel.css";
-import { usePublish } from "../ws/hooks";
+import { usePublish } from "../../ws/hooks";
 
 type GMPanelProps = {
   campaignId?: string;

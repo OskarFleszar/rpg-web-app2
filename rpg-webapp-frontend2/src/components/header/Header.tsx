@@ -21,19 +21,23 @@ export function Header({ logedIn, setLogedIn }: HeaderProps) {
         <p>RPG</p>
       </div>
 
-      <div className="middle-section">
-        <NavLink className="header-link" to="/campaigns">
-          <span className="link-text">Campaigns</span>
-        </NavLink>
+      {logedIn ? (
+        <div className="middle-section">
+          <NavLink className="header-link" to="/campaigns">
+            <span className="link-text">Campaigns</span>
+          </NavLink>
 
-        <NavLink className="header-link" to="/characters">
-          <span className="link-text">Characters</span>
-        </NavLink>
+          <NavLink className="header-link" to="/characters">
+            <span className="link-text">Characters</span>
+          </NavLink>
 
-        <NavLink className="header-link" to="/upcoming-sessions">
-          <span className="link-text">Upcoming Sessions</span>
-        </NavLink>
-      </div>
+          <NavLink className="header-link" to="/upcoming-sessions">
+            <span className="link-text">Upcoming Sessions</span>
+          </NavLink>
+        </div>
+      ) : (
+        <></>
+      )}
 
       <div className="right-section">
         {logedIn ? (

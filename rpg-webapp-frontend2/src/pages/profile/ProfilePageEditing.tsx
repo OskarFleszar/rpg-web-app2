@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
+import "../../styles/utilities.css";
+import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 
 type BasicUserData = { nickname: string; email: string; password: string };
 
@@ -89,36 +91,74 @@ export function ProfilePageEditing({
   };
 
   return (
-    <>
+    <div className="profile-page-wrapper">
       <div className="profile-page">
-        <img className="profile-picture" src={image} />
-        <div className="custom-file-upload">
-          <label htmlFor="fileInput" className="file-label">
-            Choose File
-          </label>
-          <input
-            id="fileInput"
-            type="file"
-            style={{ display: "none" }}
-            onChange={handleImageChange}
-          />
-        </div>
-        <p>Nickname:</p>
-        <input
-          name="nickname"
-          value={basicUserData.nickname}
-          onChange={handleChange}
-        />
+        <div className="profile-content">
+          <div className="profile-picture-wrapper">
+            <img className="profile-picture" src={image} alt="avatar" />
+          </div>
 
-        <p>Email:</p>
-        <input
-          name="email"
-          value={basicUserData.email}
-          onChange={handleChange}
-        />
-        <button onClick={handleCancelButtonPress}>Cancel</button>
-        <button onClick={handleSave}>Save</button>
+          <div className="profile-info">
+            <div className="custom-file-upload">
+              <label htmlFor="fileInput" className="file-label">
+                Choose File
+              </label>
+              <input
+                id="fileInput"
+                type="file"
+                style={{ display: "none" }}
+                onChange={handleImageChange}
+              />
+            </div>
+
+            <div className="profile-field-edit">
+              <label
+                htmlFor="nicknameInput"
+                className="profile-label profile-label-small"
+              >
+                Nickname
+              </label>
+              <input
+                id="nicknameInput"
+                name="nickname"
+                value={basicUserData.nickname}
+                onChange={handleChange}
+                className="profile-input"
+              />
+            </div>
+
+            <div className="profile-field-edit">
+              <label
+                htmlFor="emailInput"
+                className="profile-label profile-label-small"
+              >
+                Email
+              </label>
+              <input
+                id="emailInput"
+                name="email"
+                value={basicUserData.email}
+                onChange={handleChange}
+                className="profile-input"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="profile-actions edit-actions">
+          <button
+            className="btn btn-secondary"
+            onClick={handleCancelButtonPress}
+          >
+            Cancel
+          </button>
+          <button className="btn btn-primary" onClick={handleSave}>
+            Save
+          </button>
+        </div>
       </div>
-    </>
+
+      <BackgroundFog />
+    </div>
   );
 }

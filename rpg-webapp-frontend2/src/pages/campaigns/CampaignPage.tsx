@@ -7,8 +7,8 @@ import { Chat } from "../../components/chat/Chat";
 import { WSProvider } from "../../ws/WSProvider";
 
 import BoardCanvas from "../../components/board/BoardCanvas";
-import { GMPanel } from "../../components/GMPanel";
-import { CalendarComponent } from "../../components/Calendar";
+import { GMPanel } from "../../components/gmpanel/GMPanel";
+import { CalendarComponent } from "../../components/calendar/Calendar";
 
 export function CampaignPage() {
   const baseUrl = "http://localhost:8080";

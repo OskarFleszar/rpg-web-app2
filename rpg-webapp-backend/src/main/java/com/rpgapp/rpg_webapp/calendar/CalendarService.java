@@ -59,11 +59,16 @@ public class CalendarService {
                         && v.getVote() == SessionVote.Vote.YES)
         );
 
+        System.out.println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH" + everyoneVotedYes);
+
         if (everyoneVotedYes) {
             proposal.setStatus(SessionProposal.Status.CONFIRMED);
+            System.out.println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH" + proposal.getStatus());
+            proposalRepo.save(proposal);
 
         } else if (votes.stream().anyMatch(v -> v.getVote() == SessionVote.Vote.NO)) {
-            proposal.setStatus(SessionProposal.Status.REJECTED); 
+            proposal.setStatus(SessionProposal.Status.REJECTED);
+            proposalRepo.save(proposal);
         }
 
         return proposal;

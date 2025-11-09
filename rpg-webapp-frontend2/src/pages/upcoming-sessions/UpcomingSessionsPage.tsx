@@ -70,7 +70,7 @@ export function UpcomingSessionsPage() {
   };
 
   const formatDate = (utc: string) =>
-    new Date(utc).toLocaleString(undefined, {
+    new Date(utc).toLocaleString("en-GB", {
       dateStyle: "medium",
       timeStyle: "short",
     });
@@ -79,11 +79,9 @@ export function UpcomingSessionsPage() {
     <div style={{ padding: "1rem" }}>
       <h2>Upcoming sessions</h2>
 
-      {loading && <p>Ładowanie…</p>}
+      {loading && <p>Loading…</p>}
 
-      {!loading && sessions.length === 0 && (
-        <p>Na razie nie ma zaplanowanych terminów.</p>
-      )}
+      {!loading && sessions.length === 0 && <p>No planed sessions yet.</p>}
 
       {!loading &&
         sessions.map((s) => {
@@ -120,16 +118,12 @@ export function UpcomingSessionsPage() {
 
               <div style={{ marginTop: 4, fontSize: 13 }}>
                 <div>
-                  <strong>Twój głos: </strong>
-                  {myVote
-                    ? myVote === "YES"
-                      ? "✅ pasuje"
-                      : "❌ nie pasuje"
-                    : "brak"}
+                  <strong>Your vote: </strong>
+                  {myVote ? (myVote === "YES" ? "✅ Yes" : "❌ No") : "None"}
                 </div>
                 {noVotes.length > 0 && (
                   <div>
-                    <strong>Nie pasuje:</strong>{" "}
+                    <strong>No:</strong>{" "}
                     {noVotes.map((v) => v.nickname).join(", ")}
                   </div>
                 )}
@@ -142,13 +136,13 @@ export function UpcomingSessionsPage() {
                     disabled={myVote === "YES"}
                     style={{ marginRight: 4 }}
                   >
-                    Pasuje
+                    Yes
                   </button>
                   <button
                     onClick={() => handleVote(s.campaignId, s.id, "NO")}
                     disabled={myVote === "NO"}
                   >
-                    Nie pasuje
+                    No
                   </button>
                 </div>
               )}

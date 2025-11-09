@@ -34,6 +34,7 @@ export function CalendarComponent({ campaignId }: Props) {
           },
         }
       );
+      alert("Campaigh date proposed.");
     } catch (e) {
       console.error("Error proposing session", e);
     } finally {
