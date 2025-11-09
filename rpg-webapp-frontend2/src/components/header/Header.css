@@ -1,7 +1,9 @@
 .header {
   font-family: var(--font-heading);
-  background-color: grey;
+  background-color: var(--color-bg);
   padding: 0 15px;
+
+  border-bottom: 1px solid var(--color-border);
 
   display: flex;
   justify-content: space-between;
@@ -11,7 +13,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 80px;
   z-index: 100;
 }
 
@@ -24,22 +26,73 @@
   max-width: 850px;
   margin-left: 10px;
   margin-right: 10px;
+  height: 100%;
 
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .header .header-link {
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-right: 40px;
+  padding: 0 12px;
+  position: relative;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
+/* delikatne podświetlenie i podniesienie linka */
+.header .header-link:hover {
+  background: rgba(49, 47, 47, 0.65);
+  transform: translateY(-2px);
+}
+
+/* animowana złoto-czerwona linia pod linkiem */
+.header .header-link::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8f0000, #d68b00);
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+
+.header .header-link:hover::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* efekt na tekście */
 .header .link-text {
   margin: 0 10px;
-  color: black;
+  color: var(--color-text);
+  font-size: 1.2rem;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.header .header-link:hover .link-text {
+  color: #f4ecd5;
+  text-shadow: 0 0 8px rgba(214, 139, 0, 0.8);
 }
 
 .header .right-section{
   width: 150px;
   display: flex;
   justify-content: right;
+}
+
+.navbar-btn {
+  font-size: 0.65rem;
+  padding: 0.6rem 0.7rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
 }

@@ -43,18 +43,23 @@ export function Header({ logedIn, setLogedIn }: HeaderProps) {
         {logedIn ? (
           <>
             <NavLink to="/profile">
-              <button>Profile</button>
+              <button className="btn btn-primary navbar-btn">Profile</button>
             </NavLink>
 
-            <button onClick={handleLogout}>Logout</button>
+            <button
+              onClick={handleLogout}
+              className="btn btn-secondary navbar-btn"
+            >
+              Logout
+            </button>
           </>
         ) : (
           <>
             <NavLink to="/login">
-              <button>Login</button>
+              <button className="btn btn-primary navbar-btn">Login</button>
             </NavLink>
             <NavLink to="/register">
-              <button>Register</button>
+              <button className="btn btn-secondary navbar-btn">Register</button>
             </NavLink>
           </>
         )}

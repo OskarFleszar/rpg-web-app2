@@ -123,7 +123,7 @@ export function ProfilePageEditing({
                 name="nickname"
                 value={basicUserData.nickname}
                 onChange={handleChange}
-                className="profile-input"
+                className="input-primary"
               />
             </div>
 
@@ -139,7 +139,7 @@ export function ProfilePageEditing({
                 name="email"
                 value={basicUserData.email}
                 onChange={handleChange}
-                className="profile-input"
+                className="input-primary"
               />
             </div>
           </div>

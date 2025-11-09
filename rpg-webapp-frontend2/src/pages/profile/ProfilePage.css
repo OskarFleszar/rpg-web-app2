@@ -89,28 +89,8 @@
 }
 
 /* przycisk (możesz nadpisać istniejące .btn-primary) */
-.btn.btn-primary {
-  position: relative;
-  right: 0;
-  background: linear-gradient(135deg, #8f0000, #d68b00);
-  border: none;
-  padding: 0.65rem 1.8rem;
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a0f0a;
-  cursor: pointer;
-  display: inline-block;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
 
-.btn.btn-primary:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-  box-shadow: 0 0 16px rgba(248, 141, 0, 0.75);
-}
+
 
 /* RESPONSYWNOŚĆ */
 
@@ -131,28 +111,12 @@
   }
 }
 
-/* dopasowanie labeli w trybie edycji, żeby nie były gigantyczne */
+
 .profile-label-small {
   font-size: 0.9rem;
   letter-spacing: 0.12em;
 }
 
-.profile-input {
-  width: 100%;
-  padding: 0.5rem 0.7rem;
-  margin-top: 0.2rem;
-  border-radius: 6px;
-  border: 1px solid rgba(176, 141, 87, 0.6);
-  background: rgba(5, 5, 7, 0.9);
-  color: #f4ecd5;
-  font-size: 0.95rem;
-  outline: none;
-}
-
-.profile-input:focus {
-  border-color: #d68b00;
-  box-shadow: 0 0 8px rgba(214, 139, 0, 0.6);
-}
 
 .custom-file-upload {
   margin-bottom: 1rem;
@@ -182,23 +146,3 @@
   min-width: 90px;
 }
 
-/* prosty secondary button */
-.btn.btn-secondary {
-  background: transparent;
-  border-radius: 999px;
-  border: 1px solid rgba(176, 141, 87, 0.8);
-  padding: 0.6rem 1.4rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #f4ecd5;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-
-.btn.btn-secondary:hover {
-  background: rgba(176, 141, 87, 0.15);
-  transform: translateY(-1px);
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
-}

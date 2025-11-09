@@ -1,13 +1,13 @@
 :root {
   /* Kolory */
-  --color-bg: #111111;
+  --color-bg: rgba(10, 10, 12, 0.92);
   --color-surface: #1b1510;
   --color-accent: #c49a3a;
   --color-accent-soft: #7a5b20;
-  --color-text: #f5f1e8;
+  --color-text: #c0b59a;
   --color-text-muted: #b3a89a;
   --color-danger: #c43a3a;
-  --color-border: #3a2a1a;
+  --color-border: rgba(176, 140, 87, 0.719);
 
   /* Fonty */
   --font-body: "Merriweather", serif;

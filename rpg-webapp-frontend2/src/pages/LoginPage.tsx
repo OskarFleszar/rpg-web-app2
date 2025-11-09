@@ -2,12 +2,15 @@ import { useState } from "react";
 import "./RegisterPage.css";
 import { useNavigate } from "react-router";
 import axios from "axios";
+import { BackgroundFog } from "../styles/stypecomponents/BackgroundFog";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 type RegisterPageProps = { setLogedIn: (logedIn: boolean) => void };
 
 export function LoginPage({ setLogedIn }: RegisterPageProps) {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -28,13 +31,14 @@ export function LoginPage({ setLogedIn }: RegisterPageProps) {
   };
 
   return (
-    <>
+    <div className="register-page-wrapper">
       <div className="register-page">
-        <div className="register-form-container">
-          <p>Login</p>
+        <div className="register-form-content">
+          <p className="top-text">Login</p>
           <form onSubmit={handleLogin} className="register-form">
             <div>
               <input
+                className="input-primary register-input"
                 type="text"
                 placeholder="Email adress"
                 value={email}
@@ -43,21 +47,39 @@ export function LoginPage({ setLogedIn }: RegisterPageProps) {
                 }}
               />
             </div>
-            <div>
+
+            <div className="password-wrapper">
               <input
-                type="password"
+                className="input-primary register-input"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
+                onChange={(e) => {
+                  setPassword(e.target.value);
                 }}
               />
+              <button
+                type="button"
+                className="eye-btn"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {" "}
+                {showPassword ? (
+                  <EyeSlashIcon className="eye-icon" />
+                ) : (
+                  <EyeIcon className="eye-icon" />
+                )}
+              </button>{" "}
             </div>
 
-            <button type="submit">Login</button>
+            <button className="btn-primary register-button" type="submit">
+              Login
+            </button>
           </form>
         </div>
       </div>
-    </>
+
+      <BackgroundFog />
+    </div>
   );
 }
