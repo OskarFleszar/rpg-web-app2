@@ -40,6 +40,7 @@ export function CharacterAttributes({
                 <form>
                   <label>Starting Value:</label>
                   <input
+                    className="input-primary"
                     type="number"
                     name={attributeName}
                     value={attributeValues.baseValue}
@@ -53,6 +54,7 @@ export function CharacterAttributes({
                 <form>
                   <label>Advancement:</label>
                   <input
+                    className="input-primary"
                     type="number"
                     name={attributeName}
                     value={attributeValues.advancementPoints}
@@ -66,6 +68,7 @@ export function CharacterAttributes({
                 <form>
                   <label>Current Value:</label>
                   <input
+                    className="input-primary"
                     type="number"
                     name={attributeName}
                     value={attributeValues.currentValue}

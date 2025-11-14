@@ -11,6 +11,8 @@ import { CharacterArmor } from "./CharacterArmor";
 import { CharacterGoldNotes } from "./CharacterGoldNotes";
 import type { Armors, Items, Weapons } from "./CharacterPage";
 import { useNavigate } from "react-router";
+import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
+import { CharacterFirstInfo } from "./CharacterFirstInfo";
 
 export function CreateCharacterPage() {
   const navigate = useNavigate();
@@ -135,33 +137,56 @@ export function CreateCharacterPage() {
   };
 
   return (
-    <div className="charcter-card-page">
-      <div className="character-card-container">
-        <img className="profile-picture" src={characterImage} />
-        <div className="custom-file-upload">
-          <label htmlFor="fileInput" className="file-label">
-            Choose File
-          </label>
-          <input
-            id="fileInput"
-            type="file"
-            style={{ display: "none" }}
-            onChange={handleImageChange}
+    <div className="page-wrapper">
+      <div className="charcter-card-page">
+        <div className="character-card-container">
+          <div className="charcter-card-first-row">
+            <div className="picture-container">
+              <div className="character-card-page-image-wrapper">
+                <img className="character-image" src={characterImage} />
+              </div>
+              <div className="custom-file-upload">
+                <label htmlFor="fileInput" className="file-label">
+                  Change Picture
+                </label>
+                <input
+                  id="fileInput"
+                  type="file"
+                  style={{ display: "none" }}
+                  onChange={handleImageChange}
+                />
+              </div>
+            </div>
+
+            <CharacterFirstInfo
+              character={character}
+              setCharacter={setCharacter}
+            />
+          </div>
+          <CharacterBasicInfo
+            character={character}
+            setCharacter={setCharacter}
           />
+          <CharacterAttributes
+            attributes={attributes}
+            setAttributes={setAttributes}
+          />
+          <CharacterSkills skills={skills} setSkills={setSkills} />
+          <CharacterTalentsEquipment
+            items={equipment}
+            setItems={setEquipment}
+          />
+          <CharacterWeapons weapons={weapons} setWeapons={setWeapons} />
+          <CharacterArmor armors={armor} setArmors={setArmor} />
+          <CharacterTalentsEquipment items={talents} setItems={setTalents} />
+          <CharacterGoldNotes
+            character={character}
+            setCharacter={setCharacter}
+          />
+          <button onClick={handleSaveCharacter}>Create Character</button>
         </div>
-        <CharacterBasicInfo character={character} setCharacter={setCharacter} />
-        <CharacterAttributes
-          attributes={attributes}
-          setAttributes={setAttributes}
-        />
-        <CharacterSkills skills={skills} setSkills={setSkills} />
-        <CharacterTalentsEquipment items={equipment} setItems={setEquipment} />
-        <CharacterWeapons weapons={weapons} setWeapons={setWeapons} />
-        <CharacterArmor armors={armor} setArmors={setArmor} />
-        <CharacterTalentsEquipment items={talents} setItems={setTalents} />
-        <CharacterGoldNotes character={character} setCharacter={setCharacter} />
-        <button onClick={handleSaveCharacter}>Create Character</button>
       </div>
+      <BackgroundFog />
     </div>
   );
 }

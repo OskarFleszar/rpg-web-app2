@@ -1,5 +1,29 @@
-.characters-page{
-    display: flex;
-    justify-content: center;
-    margin: 100px 0;
+.characters-page {
+  width: 100%;
+  max-width: calc(5 * 300px + 4 * 2rem); /* 5 kart + 4 odstępy między nimi */
+  margin: 100px auto;
+  padding: 0 2rem;
+}
+
+.charater-cards-grid {
+  margin-top: 5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center; /* wszystkie rzędy wyrównane do środka */
+}
+
+.create-character-btn {
+  position: absolute;
+  top: 100px;
+  right: 40px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.confirm-btn {
+  position: absolute;
+  top: 100px;
+  right: 140px;
+  padding: 0.65rem 1rem;
 }

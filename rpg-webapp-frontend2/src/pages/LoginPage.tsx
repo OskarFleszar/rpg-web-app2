@@ -31,7 +31,7 @@ export function LoginPage({ setLogedIn }: RegisterPageProps) {
   };
 
   return (
-    <div className="register-page-wrapper">
+    <div className="page-wrapper">
       <div className="register-page">
         <div className="register-form-content">
           <p className="top-text">Login</p>

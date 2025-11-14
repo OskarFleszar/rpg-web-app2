@@ -110,16 +110,16 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
             </div>
           );
         })}
-      </div>
 
-      <div className="add-skill-form">
-        <input
-          type="text"
-          placeholder="Skill Name"
-          value={newSkillName}
-          onChange={(e) => setNewSkillName(e.target.value)}
-        />
-        <button onClick={handleAddSkill}>Add Skill</button>
+        <div className="add-skill-form">
+          <input
+            type="text"
+            placeholder="Skill Name"
+            value={newSkillName}
+            onChange={(e) => setNewSkillName(e.target.value)}
+          />
+          <button onClick={handleAddSkill}>Add Skill</button>
+        </div>
       </div>
     </div>
   );

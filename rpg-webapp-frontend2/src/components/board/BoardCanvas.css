@@ -1,4 +1,4 @@
-.canvas-container{
+.canvas-container {
   position: fixed;
   top: 60px;
   left: 0;
@@ -6,7 +6,7 @@
   height: calc(100vh - 60px);
   overflow: hidden;
   border: none;
-  z-index: -1; 
+  z-index: 1;
 }
 
 .tool-button:hover {
@@ -30,9 +30,8 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  overflow: visible; 
-  
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: visible;
 }
 
 .board-toolbar.pencil-open {
@@ -40,7 +39,7 @@
 }
 
 .tool-button,
-.tool-tile {               
+.tool-tile {
   width: 40px;
   height: 30px;
   border: 1px solid #ddd;
@@ -54,16 +53,20 @@
   line-height: 1;
 }
 
-.tool-button:hover { background: #f0f0f0; }
-.tool-button.active { background: #e6f0ff; border-color: #8ab4ff; }
+.tool-button:hover {
+  background: #f0f0f0;
+}
+.tool-button.active {
+  background: #e6f0ff;
+  border-color: #8ab4ff;
+}
 
 .pencil-select,
 .eraser-select {
-  position: relative;   
+  position: relative;
   display: inline-flex;
   flex-direction: column;
 }
-
 
 .drawing-settings {
   display: flex;
@@ -77,15 +80,15 @@
 
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #ddd;
-  border-top: none;                 /* wspólna ramka */
+  border-top: none; /* wspólna ramka */
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
   transform: translateY(-6px);
   opacity: 0;
   pointer-events: none;
-  transition: transform .26s ease, opacity .26s ease;
+  transition: transform 0.26s ease, opacity 0.26s ease;
 }
 
 .pencil-select.open .drawing-settings,
@@ -94,7 +97,6 @@
   opacity: 1;
   pointer-events: auto;
 }
-
 
 .tool-tile input[type="color"] {
   appearance: none;
@@ -105,8 +107,13 @@
   background: transparent;
   cursor: pointer;
 }
-.tool-tile input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-.tool-tile input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+.tool-tile input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.tool-tile input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
 
 .tool-tile input[type="number"] {
   width: 100%;

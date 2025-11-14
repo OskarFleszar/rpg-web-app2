@@ -4,6 +4,7 @@ import type { CharacterBasic } from "../characters/CharactersPage";
 import { CharacterSelectCard } from "./CharacterSelectCard";
 import "../characters/CharactersPage.css";
 import { useNavigate, useParams } from "react-router";
+import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 
 export function CharacterSelectScreen() {
   const { id } = useParams();
@@ -34,32 +35,40 @@ export function CharacterSelectScreen() {
   };
 
   return (
-    <div className="characters-page">
-      {characters.map((character) => (
-        <CharacterSelectCard
-          key={character.characterId}
-          character={character}
-          setCharactersSelectedId={setCharactersSelectedId}
-        />
-      ))}
-      <button
-        onClick={() => {
-          navigate(`/campaigns/${id}`, {
-            state: { characterIds: charactersSelectedId },
-          });
-          setCharactersSelectedId([]);
-        }}
-      >
-        Confirm
-      </button>
-      <button
-        onClick={() => {
-          navigate(`/campaigns/${id}`);
-          setCharactersSelectedId([]);
-        }}
-      >
-        Skip
-      </button>
+    <div className="page-wrapper">
+      <div className="characters-page">
+        <div className="charater-cards-grid">
+          {characters.map((character) => (
+            <CharacterSelectCard
+              key={character.characterId}
+              character={character}
+              setCharactersSelectedId={setCharactersSelectedId}
+            />
+          ))}
+        </div>
+        <button
+          className="btn-primary create-character-btn confirm-btn"
+          onClick={() => {
+            navigate(`/campaigns/${id}`, {
+              state: { characterIds: charactersSelectedId },
+            });
+            setCharactersSelectedId([]);
+          }}
+        >
+          Confirm
+        </button>
+        <button
+          className="btn-secondary create-character-btn "
+          onClick={() => {
+            navigate(`/campaigns/${id}`);
+            setCharactersSelectedId([]);
+          }}
+        >
+          Skip
+        </button>
+      </div>
+
+      <BackgroundFog />
     </div>
   );
 }

@@ -27,22 +27,27 @@ export function CharacterSelectCard({
     );
 
   return (
-    <div className="character-card">
-      <img
-        className="character-image"
-        src={imgSrc}
-        alt={`${character.name} profile`}
-        loading="lazy"
-        onError={(e) => {
-          e.currentTarget.src = defaultPfp;
-        }}
-      />
-      <p>{character.name}</p>
-      <input
-        type="checkbox"
-        className="character-select-checkbox"
-        onChange={handleChange}
-      />
+    <div className="character-card select">
+      <div className="character-image-wrapper">
+        <img
+          className="character-image"
+          src={imgSrc}
+          alt={`${character.name} profile`}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = defaultPfp;
+          }}
+        />
+      </div>
+      <p>{character.name || "Character Name"}</p>
+      <label className="character-checkbox-wrapper">
+        <input
+          type="checkbox"
+          className="character-select-checkbox"
+          onChange={handleChange}
+        />
+        <span className="character-checkbox-custom" />
+      </label>
     </div>
   );
 }

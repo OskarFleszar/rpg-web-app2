@@ -37,16 +37,18 @@ export function CharacterCard({ character }: CharacterCardProps) {
       className="character-link"
     >
       <div className="character-card">
-        <img
-          className="character-image"
-          src={imgSrc}
-          alt={`${character.name} profile`}
-          loading="lazy"
-          onError={(e) => {
-            e.currentTarget.src = defaultPfp;
-          }}
-        />
-        <p>{character.name}</p>
+        <div className="character-image-wrapper">
+          <img
+            className="character-image"
+            src={imgSrc}
+            alt={`${character.name} profile`}
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.src = defaultPfp;
+            }}
+          />
+        </div>
+        <p>{character.name || "Character Name"}</p>
       </div>
     </Link>
   );

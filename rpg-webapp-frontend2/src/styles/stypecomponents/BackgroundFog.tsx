@@ -2,7 +2,7 @@ import "./BackgroundFog.css";
 
 export function BackgroundFog() {
   return (
-    <>
+    <div className="fogwrapper">
       <div id="foglayer_01" className="fog">
         <div className="image01"></div>
         <div className="image02"></div>
@@ -19,6 +19,6 @@ export function BackgroundFog() {
         <div className="image01"></div>
         <div className="image02"></div>
       </div>
-    </>
+    </div>
   );
 }

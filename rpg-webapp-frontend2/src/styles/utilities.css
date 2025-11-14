@@ -22,6 +22,7 @@
   letter-spacing: 0.16em;
   font-size: 1rem;
   font-weight: 600;
+  font-family: var(--font-heading);
   color: #1a0f0a;
   cursor: pointer;
   display: inline-block;
@@ -42,6 +43,7 @@
   text-transform: uppercase;
   letter-spacing: 0.16em;
   font-size: 0.8rem;
+  font-family: var(--font-heading);
   font-weight: 600;
   color: #f4ecd5;
   cursor: pointer;
@@ -77,4 +79,16 @@
 .input-primary:focus {
   border-color: #d68b00;
   box-shadow: 0 0 8px rgba(214, 139, 0, 0.6);
+}
+
+.page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  background: radial-gradient(circle at top, #1b1b1f 0, #050608 55%), #000;
+  overflow: hidden;
+  z-index: 1;
 }

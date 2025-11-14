@@ -91,7 +91,7 @@ export function ProfilePageEditing({
   };
 
   return (
-    <div className="profile-page-wrapper">
+    <div className="page-wrapper">
       <div className="profile-page">
         <div className="profile-content">
           <div className="profile-picture-wrapper">

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { CharacterCard } from "./CharacterCard";
 import "./CharactersPage.css";
 import { NavLink } from "react-router";
+import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 
 export type CharacterBasic = {
   characterId: number;
@@ -35,13 +36,21 @@ export function CharactersPage() {
   };
 
   return (
-    <div className="characters-page">
-      {characters.map((character) => (
-        <CharacterCard key={character.characterId} character={character} />
-      ))}
-      <NavLink to={"/characters/create"}>
-        <button>Create Character</button>
-      </NavLink>
+    <div className="page-wrapper">
+      <div className="characters-page">
+        <div className="charater-cards-grid">
+          {characters.map((character) => (
+            <CharacterCard key={character.characterId} character={character} />
+          ))}
+        </div>
+        <NavLink to={"/characters/create"}>
+          <button className="btn-primary create-character-btn">
+            Create Character
+          </button>
+        </NavLink>
+      </div>
+
+      <BackgroundFog />
     </div>
   );
 }
