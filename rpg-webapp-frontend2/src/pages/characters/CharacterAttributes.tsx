@@ -31,6 +31,7 @@ export function CharacterAttributes({
 
   return (
     <div className="character-attributes-container">
+      <div className="section-title">Attributes</div>
       <div className="attributes-grid">
         {Object.entries(attributes).map(([attributeName, attributeValues]) => {
           return (

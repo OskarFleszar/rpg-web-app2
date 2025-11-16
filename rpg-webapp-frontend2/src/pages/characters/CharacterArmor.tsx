@@ -43,65 +43,89 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
 
   return (
     <div className="character-armor-container">
-      {armors.map((armor, idx) => {
-        return (
-          <div className="single-armor-container" key={idx}>
-            <div>
-              <label>Armor type:</label>
-              <input
-                type="text"
-                value={armor.armorType}
-                name="aromrType"
-                onChange={(e) => handleChange(e, idx)}
-              />
+      <div className="section-title">Armor</div>
+      <div className="armors-grid">
+        {armors.map((armor, idx) => {
+          return (
+            <div className="single-armor-container" key={idx}>
+              <div>
+                <label>Armor type:</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  value={armor.armorType}
+                  name="aromrType"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
+              <div>
+                <label>Armor location:</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  value={armor.location}
+                  name="location"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
+              <div>
+                <label>Armor points:</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  value={armor.armorPoints ?? ""}
+                  name="armorPoints"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
             </div>
-            <div>
-              <label>Armor location:</label>
-              <input
-                type="text"
-                value={armor.location}
-                name="location"
-                onChange={(e) => handleChange(e, idx)}
-              />
-            </div>
-            <div>
-              <label>Armor points:</label>
-              <input
-                type="text"
-                value={armor.armorPoints ?? ""}
-                name="armorPoints"
-                onChange={(e) => handleChange(e, idx)}
-              />
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
       <div className="new-armor-form">
-        <input
-          type="text"
-          name="armorType"
-          placeholder="Armor Type"
-          value={newArmor.armorType}
-          onChange={handleNewArmorChange}
-        />
+        <p>Add a new armor</p>
 
-        <input
-          type="text"
-          name="location"
-          placeholder="location"
-          value={newArmor.location}
-          onChange={handleNewArmorChange}
-        />
+        <form>
+          <label>Type:</label>
+          <input
+            className="input-primary"
+            type="text"
+            name="armorType"
+            placeholder="Armor Type"
+            value={newArmor.armorType}
+            onChange={handleNewArmorChange}
+          />
+        </form>
 
-        <input
-          type="number"
-          name="armorPoints"
-          placeholder="Armor Points"
-          value={newArmor.armorPoints ?? ""}
-          onChange={handleNewArmorChange}
-        />
-        <button onClick={handleAddNewArmor}>Add Armor</button>
+        <form>
+          <label>Location:</label>
+          <input
+            className="input-primary"
+            type="text"
+            name="location"
+            placeholder="location"
+            value={newArmor.location}
+            onChange={handleNewArmorChange}
+          />
+        </form>
+        <form>
+          <label>Armor Points:</label>
+          <input
+            className="input-primary"
+            type="number"
+            name="armorPoints"
+            placeholder="Armor Points"
+            value={newArmor.armorPoints ?? ""}
+            onChange={handleNewArmorChange}
+          />
+        </form>
+        <button
+          className="btn-primary add-armor-btn"
+          onClick={handleAddNewArmor}
+        >
+          Add Armor
+        </button>
       </div>
     </div>
   );

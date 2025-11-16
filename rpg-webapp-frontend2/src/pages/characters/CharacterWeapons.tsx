@@ -55,100 +55,133 @@ export function CharacterWeapons({
 
   return (
     <div className="character-weapons-container">
-      {weapons.map((weapon, idx) => {
-        return (
-          <div className="single-weapon-container" key={idx}>
-            <div>
-              <label>Name:</label>
-              <input
-                type="text"
-                value={weapon.name}
-                name="name"
-                onChange={(e) => handleChange(e, idx)}
-              />
+      <div className="section-title">Weapons</div>
+      <div className="weapons-grid">
+        {weapons.map((weapon, idx) => {
+          return (
+            <div className="single-weapon-container" key={idx}>
+              <div>
+                <label>Weapon Name:</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  value={weapon.name}
+                  name="name"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
+              <div>
+                <label>Weapon Category:</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  value={weapon.category}
+                  name="category"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
+              <div>
+                <label>Weapon Strength:</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  value={weapon.strength}
+                  name="strength"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
+              <div>
+                <label>Weapon Range:</label>
+                <input
+                  className="input-primary"
+                  type="number"
+                  value={weapon.range ?? ""}
+                  name="range"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
+              <div>
+                <label>Weapon Attributes:</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  value={weapon.weaponAttributes}
+                  name="weaponAttributes"
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
             </div>
-            <div>
-              <label>Category:</label>
-              <input
-                type="text"
-                value={weapon.category}
-                name="category"
-                onChange={(e) => handleChange(e, idx)}
-              />
-            </div>
-            <div>
-              <label>Strength:</label>
-              <input
-                type="text"
-                value={weapon.strength}
-                name="strength"
-                onChange={(e) => handleChange(e, idx)}
-              />
-            </div>
-            <div>
-              <label>Range:</label>
-              <input
-                type="number"
-                value={weapon.range ?? ""}
-                name="range"
-                onChange={(e) => handleChange(e, idx)}
-              />
-            </div>
-            <div>
-              <label>Attributes:</label>
-              <input
-                type="text"
-                value={weapon.weaponAttributes}
-                name="weaponAttributes"
-                onChange={(e) => handleChange(e, idx)}
-              />
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
       <div className="new-weapon-form">
-        <input
-          type="text"
-          name="name"
-          value={newWeapon.name}
-          placeholder="Weapon Name"
-          onChange={handleNewWeaponChange}
-        />
+        <p>Add a new weapon</p>
+        <form>
+          <label>Name:</label>
+          <input
+            className="input-primary weapon-input"
+            type="text"
+            name="name"
+            value={newWeapon.name}
+            placeholder="Weapon Name"
+            onChange={handleNewWeaponChange}
+          />
+        </form>
+        <form>
+          <label>Category:</label>
+          <input
+            className="input-primary"
+            type="text"
+            name="category"
+            value={newWeapon.category}
+            placeholder="Weapon Category"
+            onChange={handleNewWeaponChange}
+          />
+        </form>
 
-        <input
-          type="text"
-          name="category"
-          value={newWeapon.category}
-          placeholder="Weapon Category"
-          onChange={handleNewWeaponChange}
-        />
+        <form>
+          <label>Strength:</label>
+          <input
+            className="input-primary"
+            type="text"
+            name="strength"
+            value={newWeapon.strength}
+            placeholder="Strength"
+            onChange={handleNewWeaponChange}
+          />
+        </form>
 
-        <input
-          type="text"
-          name="strength"
-          value={newWeapon.strength}
-          placeholder="Strength"
-          onChange={handleNewWeaponChange}
-        />
+        <form>
+          <label>Range:</label>
+          <input
+            className="input-primary"
+            type="number"
+            name="range"
+            value={newWeapon.range ?? ""}
+            placeholder="Weapon Range"
+            onChange={handleNewWeaponChange}
+          />
+        </form>
 
-        <input
-          type="number"
-          name="range"
-          value={newWeapon.range ?? ""}
-          placeholder="Weapon Range"
-          onChange={handleNewWeaponChange}
-        />
+        <form>
+          <label>Attributes:</label>
+          <input
+            className="input-primary"
+            type="text"
+            name="weaponAttributes"
+            value={newWeapon.weaponAttributes}
+            placeholder="Weapon Attributes"
+            onChange={handleNewWeaponChange}
+          />
+        </form>
 
-        <input
-          type="text"
-          name="weaponAttributes"
-          value={newWeapon.weaponAttributes}
-          placeholder="Weapon Attributes"
-          onChange={handleNewWeaponChange}
-        />
-
-        <button onClick={handleAddNewWeapon}>Add Weapon</button>
+        <button
+          className="btn-primary add-weapon-btn"
+          onClick={handleAddNewWeapon}
+        >
+          Add Weapon
+        </button>
       </div>
     </div>
   );

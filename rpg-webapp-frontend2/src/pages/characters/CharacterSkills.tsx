@@ -62,63 +62,74 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
 
   return (
     <div className="character-skills-container">
+      <div className="section-title">Basic Skils</div>
       <div className="basic-skills-container">
         {baseSkills.map(([skillName, skillInfo]) => {
           return (
             <div className="single-skill-container" key={skillName}>
               <div className="skill-name">{skillName}</div>
-
-              {LEVELS.map((level) => {
-                return (
-                  <div className="skill-levels-container" key={level}>
-                    <label>{LEVEL_LABELS[level]}</label>
-                    <input
-                      type="radio"
-                      name={skillName}
-                      value={level}
-                      checked={skillInfo.level === level}
-                      onChange={handleChange}
-                    />
-                  </div>
-                );
-              })}
+              <div className="skill-values">
+                {LEVELS.map((level) => {
+                  return (
+                    <div className="skill-levels-container" key={level}>
+                      <input
+                        type="radio"
+                        name={skillName}
+                        value={level}
+                        checked={skillInfo.level === level}
+                        onChange={handleChange}
+                      />
+                      <label>{LEVEL_LABELS[level]}</label>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
       </div>
-
+      <div className="section-title">Advanced Skills</div>
       <div className="advanced-skills-container">
-        {advancedSkills.map(([skillName, skillInfo]) => {
-          return (
-            <div className="single-skill-container" key={skillName}>
-              <div className="skill-name">{skillName}</div>
-
-              {LEVELS.map((level) => {
-                return (
-                  <div className="skill-levels-container" key={level}>
-                    <label>{LEVEL_LABELS[level]}</label>
-                    <input
-                      type="radio"
-                      name={skillName}
-                      value={level}
-                      checked={skillInfo.level === level}
-                      onChange={handleChange}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
+        <div className="advanced-skills-container-grid">
+          {advancedSkills.map(([skillName, skillInfo]) => {
+            return (
+              <div className="single-skill-container" key={skillName}>
+                <div className="skill-name">{skillName}</div>
+                <div className="skill-values">
+                  {LEVELS.map((level) => {
+                    return (
+                      <div className="skill-levels-container" key={level}>
+                        <input
+                          type="radio"
+                          name={skillName}
+                          value={level}
+                          checked={skillInfo.level === level}
+                          onChange={handleChange}
+                        />{" "}
+                        <label>{LEVEL_LABELS[level]}</label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
         <div className="add-skill-form">
           <input
+            className="input-primary"
             type="text"
             placeholder="Skill Name"
             value={newSkillName}
             onChange={(e) => setNewSkillName(e.target.value)}
           />
-          <button onClick={handleAddSkill}>Add Skill</button>
+          <button
+            className="btn-primary add-skill-btn"
+            onClick={handleAddSkill}
+          >
+            Add Skill
+          </button>
         </div>
       </div>
     </div>

@@ -46,10 +46,12 @@ export function CharacterGoldNotes({
   };
   return (
     <div className="character-gold-and-notes-container">
+      <div className="section-title">Gold</div>
       <div className="coins-container">
         <div>
           <label>Gold Coins:</label>
           <input
+            className="input-primary"
             type="number"
             name="gold"
             value={character.gold}
@@ -59,6 +61,7 @@ export function CharacterGoldNotes({
         <div>
           <label>Silver Coins:</label>
           <input
+            className="input-primary"
             type="number"
             name="silver"
             value={character.silver}
@@ -68,6 +71,7 @@ export function CharacterGoldNotes({
         <div>
           <label>Bronze Coins:</label>
           <input
+            className="input-primary"
             type="number"
             name="bronze"
             value={character.bronze}
@@ -77,22 +81,23 @@ export function CharacterGoldNotes({
       </div>
 
       <div className="backstory-container">
-        <div>
-          <label>Backstory:</label>
-          <textarea
-            name="backstory"
-            value={character.backstory}
-            onChange={handleChange}
-          ></textarea>
-        </div>
-        <div>
-          <label>Notes:</label>
-          <textarea
-            name="notes"
-            value={character.notes}
-            onChange={handleChange}
-          ></textarea>
-        </div>
+        <label>Backstory</label>
+        <textarea
+          className="input-primary"
+          name="backstory"
+          value={character.backstory}
+          onChange={handleChange}
+        ></textarea>
+      </div>
+
+      <div className="notes-container">
+        <label>Notes</label>
+        <textarea
+          className="input-primary"
+          name="notes"
+          value={character.notes}
+          onChange={handleChange}
+        ></textarea>
       </div>
     </div>
   );
