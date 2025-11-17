@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import Calendar from "react-calendar";
+import "./Calendar.css";
 
 type Props = {
   campaignId: string | undefined;
@@ -43,15 +44,10 @@ export function CalendarComponent({ campaignId }: Props) {
   };
 
   return (
-    <div
-      style={{
-        marginTop: "0.5rem",
-        padding: "0.5rem",
-        borderTop: "1px solid #ccc",
-      }}
-    >
+    <div className="calendar-panel">
       {step === "date" && (
         <Calendar
+          className="session-calendar"
           value={sessionDate}
           onChange={(value) => {
             const d = Array.isArray(value) ? value[0] : value;
@@ -60,8 +56,9 @@ export function CalendarComponent({ campaignId }: Props) {
           }}
         />
       )}
+
       {step === "time" && (
-        <div style={{ marginTop: 4 }}>
+        <div className="calendar-time-picker">
           <label>
             Hour:
             <input
@@ -72,8 +69,13 @@ export function CalendarComponent({ campaignId }: Props) {
           </label>
         </div>
       )}
-      <button style={{ marginTop: 6 }} onClick={handlePlanSession}>
-        Add
+
+      <button
+        className="btn-primary calendar-add-btn"
+        onClick={handlePlanSession}
+        disabled={saving}
+      >
+        {saving ? "Saving..." : "Add"}
       </button>
     </div>
   );

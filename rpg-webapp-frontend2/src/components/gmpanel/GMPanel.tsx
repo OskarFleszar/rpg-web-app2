@@ -128,11 +128,18 @@ export function GMPanel({
                 setNicknameToAdd(e.target.value);
               }}
             />
-            <button onClick={handleAddUser}>✔️</button>
+            <button className="confirm-button" onClick={handleAddUser}>
+              ✔️
+            </button>
             <button onClick={() => setAddingUser(false)}>❌</button>
           </div>
         ) : (
-          <button onClick={() => setAddingUser(true)}>👤➕</button>
+          <button
+            className="gm-panel-button"
+            onClick={() => setAddingUser(true)}
+          >
+            👤➕
+          </button>
         )}
         <button
           onClick={() => {
@@ -143,22 +150,26 @@ export function GMPanel({
               userId,
             } as const);
           }}
-          className="btn btn-danger"
+          className="gm-panel-button"
           title="Clear the whole board"
         >
           Clear
         </button>
-        <span>
-          GM Roll
-          <input
-            type="checkbox"
-            checked={GMRoll}
-            onChange={() => setGMRoll(!GMRoll)}
-          />
-        </span>
+        <div className="gmroll">
+          <span>GM Roll</span>
+          <label className="checkbox-wrapper">
+            <input
+              className="character-select-checkbox"
+              type="checkbox"
+              checked={GMRoll}
+              onChange={() => setGMRoll(!GMRoll)}
+            />
+            <span className="character-checkbox-custom" />
+          </label>
+        </div>
 
-        <div>
-          All board
+        <div className="board-picker">
+          <p>Main board</p>
           <select
             value={boardId ?? ""}
             onChange={(e) => {
@@ -176,8 +187,8 @@ export function GMPanel({
           </select>
         </div>
 
-        <div>
-          GM board
+        <div className="board-picker">
+          <p>GM board</p>
           <select
             value={gmBoardId ?? ""}
             onChange={(e) => {
@@ -201,19 +212,31 @@ export function GMPanel({
               value={boardToAdd}
               onChange={(e) => setBoardToAdd(e.target.value)}
             ></input>
-            <button onClick={handleAddBoard}>✔️</button>
+            <button className="confirm-button" onClick={handleAddBoard}>
+              ✔️
+            </button>
             <button onClick={() => setAddingBoard(false)}>❌</button>
           </div>
         ) : (
-          <button onClick={() => setAddingBoard(true)}>Add board</button>
+          <button
+            className="gm-panel-button"
+            onClick={() => setAddingBoard(true)}
+          >
+            Add board
+          </button>
         )}
-        <button onClick={() => setShowCalendar((v) => !v)}>📅 Calendar</button>
+        <button
+          className="gm-panel-button"
+          onClick={() => setShowCalendar((v) => !v)}
+        >
+          Calendar
+        </button>
       </div>
       <button
         className="GM-panel-open-button"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? "<=" : "=>"}
+        {isOpen ? "⮜" : "⮞"}
       </button>
     </div>
   );

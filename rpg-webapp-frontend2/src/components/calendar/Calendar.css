@@ -1,0 +1,97 @@
+/* kontener kalendarza */
+.calendar-panel {
+  margin-top: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  
+  background: rgba(10, 10, 12, 0.96);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+  font-family: var(--font-heading);
+  color: var(--color-text);
+}
+
+/* główna ramka react-calendar */
+.session-calendar {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-family: var(--font-heading);
+  color: var(--color-text);
+}
+
+/* nawigacja góra (miesiące) */
+.session-calendar .react-calendar__navigation {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.session-calendar .react-calendar__navigation button {
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+}
+
+.session-calendar .react-calendar__navigation button:enabled:hover {
+  color: #e4bf72;
+}
+
+/* siatka dni */
+.session-calendar .react-calendar__month-view__weekdays {
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  color: rgba(244, 239, 228, 0.7);
+}
+
+.session-calendar .react-calendar__month-view__weekdays__weekday {
+  padding: 0.2rem 0;
+}
+
+/* pojedynczy dzień */
+.session-calendar .react-calendar__tile {
+  background: transparent;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.35rem 0;
+  font-size: 0.8rem;
+  color: var(--color-text);
+}
+
+.session-calendar .react-calendar__tile:enabled:hover {
+  border-color: var(--color-border);
+  background: rgba(176, 140, 87, 0.15);
+}
+
+/* wybrany dzień */
+.session-calendar .react-calendar__tile--active {
+  background: rgba(176, 140, 87, 0.9);
+  color: #070709;
+}
+
+/* dzisiaj */
+.session-calendar .react-calendar__tile--now {
+  border-color: var(--color-border);
+}
+
+/* time input + przycisk */
+.calendar-time-picker {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.calendar-time-picker input[type="time"] {
+  margin-left: 0.5rem;
+  background: rgba(15, 15, 20, 0.95);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.2rem 0.35rem;
+  color: var(--color-text);
+  font-family: var(--font-heading);
+}
+
+.calendar-add-btn {
+  margin-top: 0.75rem;
+  width: 100%;
+  font-size: 0.8rem;
+}

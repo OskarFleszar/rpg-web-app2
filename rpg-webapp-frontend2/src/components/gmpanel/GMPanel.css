@@ -1,36 +1,209 @@
-.GM-panel {
-  position: absolute;
-  top: 200px;
-  left: -60px;
-  z-index: 10;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  background: rgba(255, 255, 255);
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: visible;
-  transform: translateX(-120px);
 
-  transition: transform 0.26s ease, opacity 0.26s ease;
+
+/* === GM PANEL === */
+
+.GM-panel {
+  position: fixed;
+  top: 200px;
+  left: 0;
+
+  display: flex;
+  align-items: stretch;
+  gap: 0px;
+
+  /* kontener jest przezroczysty */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+
+  font-family: var(--font-heading);
+  z-index: 30;
+
+
+
+  transform: translateX(calc(-100% + 26px));
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  opacity: 0.9;
 }
 
 .GM-panel.open {
-  transform: translateX(60px);
+  transform: translateX(0);  
   opacity: 1;
-  transition: transform 0.26s ease, opacity 0.26s ease;
 }
+
+
 
 .GM-panel-tools {
-  opacity: 0;
-  pointer-events: none;
+  opacity: 1;
+
+
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  padding: 1rem 1rem 1rem 0.5rem;
+
+  background: rgba(10, 10, 12, 0.96);
+  border-radius: 0 12px 12px 0;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+ 
 }
 
-.GM-panel-tools.open {
-  opacity: 1;
-  pointer-events: auto;
+/* inputy / selecty w stylu karty */
+.GM-panel-tools input[type="text"],
+.GM-panel-tools select {
+  background: rgba(15, 15, 20, 0.95);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.18rem 0.35rem;
+  color: #f4efe4;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  min-width: 0;
+}
+
+.GM-panel-tools input[type="checkbox"] {
+  accent-color: var(--color-border);
+}
+
+.GM-panel-tools input:focus,
+.GM-panel-tools select:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(176, 140, 87, 0.7);
+}
+
+
+.GM-panel-tools button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-heading);
+  cursor: pointer;
+
+  background: radial-gradient(
+    circle at 30% 0%,
+    #ffdf8a,
+    #e7992c 45%,
+    #7c2700 100%
+  );
+  color: #16110a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.75);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.gm-panel-button{
+  width: 7rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.GM-panel-tools button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+}
+
+.GM-panel-tools button:active {
+  transform: translateY(0);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+}
+
+.GM-panel-open-button {
+  align-self: center;
+  border: none;
+  cursor: pointer;
+
+  width: 26px;
+  height: 72px;
+  border-radius: 0 999px 999px 0;
+
+  background: radial-gradient(
+    circle at 30% 0%,
+    #ffdf8a,
+    #e7992c 45%,
+    #7c2700 100%
+  );
+  color: #16110a;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.85);
+}
+
+.GM-panel-open-button:hover {
+  transform: translateX(1px);
+}
+
+.gmroll {
+  display: flex;
+  flex-direction: row;      
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;     
+  color: var(--color-text);           
+}
+
+.checkbox-wrapper {
+  position: relative;
+  top: -2px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+
+.character-select-checkbox {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+}
+
+
+.character-checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid rgb(176, 140, 87);
+  background: #070709;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.character-select-checkbox:checked + .character-checkbox-custom {
+  background: rgb(176, 140, 87);
+}
+
+.character-select-checkbox:checked + .character-checkbox-custom::after {
+  content: "✔";
+  font-size: 12px;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.board-picker {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: start;
+}
+
+.board-picker p {
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--color-text);
+}
+
+.confirm-button {
+  margin: 0 4px
 }
