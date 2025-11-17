@@ -118,7 +118,7 @@ public class ChatService {
         List<Integer> results = rollDice(diceCount, sides);
 
         int bonus = body.bonus() != null ? body.bonus() : 0;
-        int total = sum(results) + bonus;
+        int total = sum(results);
 
 
         Roll roll = new Roll();

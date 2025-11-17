@@ -175,15 +175,25 @@ export function CreateCharacterPage() {
           <CharacterTalentsEquipment
             items={equipment}
             setItems={setEquipment}
+            type="EQ"
           />
           <CharacterWeapons weapons={weapons} setWeapons={setWeapons} />
           <CharacterArmor armors={armor} setArmors={setArmor} />
-          <CharacterTalentsEquipment items={talents} setItems={setTalents} />
+          <CharacterTalentsEquipment
+            items={talents}
+            setItems={setTalents}
+            type="TALENTS"
+          />
           <CharacterGoldNotes
             character={character}
             setCharacter={setCharacter}
           />
-          <button onClick={handleSaveCharacter}>Create Character</button>
+          <button
+            className="btn-primary down-button"
+            onClick={handleSaveCharacter}
+          >
+            Create Character
+          </button>
         </div>
       </div>
       <BackgroundFog />
