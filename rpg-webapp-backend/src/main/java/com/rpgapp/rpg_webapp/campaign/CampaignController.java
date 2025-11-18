@@ -1,8 +1,11 @@
 package com.rpgapp.rpg_webapp.campaign;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,9 +15,7 @@ import com.rpgapp.rpg_webapp.campaign.dto.BoardAddRequestDTO;
 import com.rpgapp.rpg_webapp.campaign.dto.BoardBasicDTO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-
-
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "api/campaign")
@@ -36,8 +37,9 @@ public class CampaignController {
     }
 
     @PostMapping("/create")
-    public void createNewCampaign (@RequestBody Campaign campaign) {
+    public Long createNewCampaign (@RequestBody Campaign campaign) {
         campaignService.createCampaign(campaign);
+        return campaignService.getCampaignId(campaign);
     }
 
     @PostMapping("/{campaignId}/add")
@@ -47,7 +49,6 @@ public class CampaignController {
     }
 
 
-  
     @PostMapping("/{campaignId}/addBoard")
     @ResponseStatus(HttpStatus.CREATED)
     public void addNewBoard(@PathVariable Long campaignId,
@@ -66,11 +67,22 @@ public class CampaignController {
         Campaign campaign = campaignService.getCampaignData(campaignId).orElseThrow();
         return campaign.getActiveBoard().getId();
     }
-    
-    
-    
 
+    @PostMapping(
+            path = "/uploadCampaignImage/{campaignId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<Void> uploadCharacterImage(
+            @PathVariable Long campaignId,
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
 
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
 
+        campaignService.saveCampaignImage(file, campaignId);
+        return ResponseEntity.noContent().build();
+    }
 
 }

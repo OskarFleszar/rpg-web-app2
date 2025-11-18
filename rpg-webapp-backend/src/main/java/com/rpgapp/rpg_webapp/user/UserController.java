@@ -62,7 +62,11 @@ public class UserController {
 
         return userService.getUserCampaigns(user.getUserId()).stream().map(campaigns -> new CampaignBasicDTO(
                 campaigns.getCampaignId(),
-                campaigns.getCampaignName()
+                campaigns.getCampaignName(),
+                campaigns.getCampaignImage(),
+                campaigns.getImageType(),
+                campaigns.getGameMaster().getNickname()
+
         )).collect(java.util.stream.Collectors.toSet());
     }
 

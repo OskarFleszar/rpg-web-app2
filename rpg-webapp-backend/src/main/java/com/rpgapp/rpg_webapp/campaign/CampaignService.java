@@ -3,13 +3,17 @@ package com.rpgapp.rpg_webapp.campaign;
 import com.rpgapp.rpg_webapp.board.entity.Board;
 import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.campaign.dto.BoardBasicDTO;
+import com.rpgapp.rpg_webapp.character.Character;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
 import com.rpgapp.rpg_webapp.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +85,10 @@ public class CampaignService {
         return campaignRepository.findById(campaignId);
     }
 
+    public Long getCampaignId (Campaign campaign) {
+        return campaign.getCampaignId();
+    }
+
     public Long getGM (Long campaignId) {
       Campaign campaign = campaignRepository.findById(campaignId).orElseThrow(() -> new EntityNotFoundException("Campaign " + campaignId + " not found"));
 
@@ -113,5 +121,15 @@ public class CampaignService {
         Set<User> members = campaign.getPlayers();
 
          return List.copyOf(members);
+    }
+
+    @Transactional
+    public void saveCampaignImage(MultipartFile file, Long campaignId) throws IOException {
+        Campaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new IllegalStateException("Campaign with id: " + campaignId + " doesn't exist"));
+
+        campaign.setImageType(file.getContentType());
+        campaign.setCampaignImage(file.getBytes());
+        campaignRepository.save(campaign);
     }
 }

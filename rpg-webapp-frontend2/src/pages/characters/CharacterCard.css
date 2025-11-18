@@ -60,8 +60,8 @@
 }
 
 .character-checkbox-wrapper {
-  position: absolute; /* ZAMIANA z relative */
-  bottom: 10px; /* zamiast bottom/right kombinowanych */
+  position: absolute; 
+  bottom: 10px; 
   left: 10px;
   cursor: pointer;
 }
@@ -79,12 +79,12 @@
   border: 2px solid rgb(176, 140, 87);
   background: #070709;
   box-sizing: border-box;
-  display: flex; /* ładne centrowanie ptaszka */
+  display: flex; 
   align-items: center;
   justify-content: center;
 }
 
-/* zaznaczony */
+
 .character-select-checkbox:checked + .character-checkbox-custom {
   background: rgb(176, 140, 87);
 }

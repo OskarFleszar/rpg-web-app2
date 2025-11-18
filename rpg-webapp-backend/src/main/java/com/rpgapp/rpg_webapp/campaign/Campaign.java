@@ -33,6 +33,8 @@ public class Campaign {
     )
     private long campaignId;
     private String campaignName;
+    private byte[] campaignImage;
+    private String imageType;
 
     @ManyToOne
     @JoinColumn(name = "game_master_id")
@@ -62,11 +64,12 @@ public class Campaign {
     private Board activeBoard;
 
 
-    public Campaign(String campaignName, User gameMaster, Set<User> players, List<Roll> roll, List<Board> boards) {
+    public Campaign(String campaignName, User gameMaster, Set<User> players, List<Roll> roll, List<Board> boards, byte[] campaignImage) {
         this.campaignName = campaignName;
         this.gameMaster = gameMaster;
         this.players = players;
         this.roll = roll;
         this.boards = boards;
+        this.campaignImage = campaignImage;
     }
 }

@@ -15,6 +15,7 @@ import { CampaignPage } from "./pages/campaigns/CampaignPage";
 import { CharacterSelectScreen } from "./pages/campaigns/CharacterSelectScreen";
 import { UpcomingSessionsPage } from "./pages/upcoming-sessions/UpcomingSessionsPage";
 import { RequireAuth } from "./RequireAuth";
+import { CreateCampaignPage } from "./pages/campaigns/CreateCampaignPage";
 
 function App() {
   const [logedIn, setLogedIn] = useState(() => !!localStorage.getItem("token"));
@@ -59,6 +60,7 @@ function App() {
           <Route path="characters/:id" element={<CharacterPage />} />
           <Route path="characters/create" element={<CreateCharacterPage />} />
           <Route path="campaigns" element={<CampaignsPage />} />
+          <Route path="campaigns/create" element={<CreateCampaignPage />} />
           <Route
             path="campaigns/:id/characterselect"
             element={<CharacterSelectScreen />}

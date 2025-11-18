@@ -1,6 +1,6 @@
 .characters-page {
   width: 100%;
-  max-width: calc(5 * 300px + 4 * 2rem); /* 5 kart + 4 odstępy między nimi */
+  max-width: calc(5 * 300px + 4 * 2rem);
   margin: 100px auto;
   padding: 0 2rem;
 }
@@ -10,7 +10,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
-  justify-content: center; /* wszystkie rzędy wyrównane do środka */
+  justify-content: center; 
 }
 
 .create-character-btn {
