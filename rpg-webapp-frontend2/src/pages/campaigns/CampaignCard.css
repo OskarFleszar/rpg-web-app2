@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  padding: 1.5rem 1.5rem 0 1.5rem;
+  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
   background-color: var(--color-bg);
   border-radius: 14px;
   border: 2px solid var(--color-border);
@@ -28,14 +28,22 @@
   color: inherit;
 }
 
-.campaign-card p{
+.campaign-card p {
   color: var(--color-text);
   text-align: center;
-  font-size: 1.7rem;
   text-decoration: none;
-  margin-bottom: 36px;
+  font-family: var(--font-heading);
+  margin: 0.5rem 0 0 0;
 }
 
-.campaign-image {
-    width: 160px;
+.campaign-name-text {
+  font-weight: 600;
+  font-size: 1.8rem;
+  padding: 1rem;
+}
+
+.gm-nickname {
+  font-size: 1rem;
+  font-weight: 300;
+  
 }

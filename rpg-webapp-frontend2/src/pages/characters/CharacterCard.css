@@ -41,6 +41,7 @@
   font-size: 1.7rem;
   text-decoration: none;
   margin-bottom: 36px;
+  font-family: var(--font-heading);
 }
 
 .character-image-wrapper {

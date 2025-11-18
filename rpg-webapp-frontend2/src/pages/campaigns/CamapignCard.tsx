@@ -34,8 +34,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             }}
           />
         </div>
-        <p>{campaign.campaignName}</p>
-        <p>{campaign.gameMasterNickname}</p>
+        <p className="campaign-name-text">{campaign.campaignName}</p>
+        <p className="gm-nickname">
+          Game Master: {campaign.gameMasterNickname}
+        </p>
       </div>
     </Link>
   );

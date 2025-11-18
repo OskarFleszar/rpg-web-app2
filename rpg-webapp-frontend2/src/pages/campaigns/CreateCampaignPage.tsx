@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./CreateCampaignPage.css";
 import defaultPfp from "../../assets/images/nig.jpg";
 import { useNavigate } from "react-router";
+import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 
 export function CreateCampaignPage() {
   const navigate = useNavigate();
@@ -63,44 +64,51 @@ export function CreateCampaignPage() {
   return (
     <div className="page-wrapper">
       <div className="create-campaign-page">
-        <div className="character-card-page-image-wrapper">
-          <img className="character-image" src={campaignImage} />
+        <div className="campaign-picture-container">
+          <div className="character-card-page-image-wrapper">
+            <img className="character-image" src={campaignImage} />
+          </div>
+          <div className="custom-file-upload">
+            <label htmlFor="fileInput" className="file-label">
+              Change Picture
+            </label>
+            <input
+              id="fileInput"
+              type="file"
+              style={{ display: "none" }}
+              onChange={handleImageChange}
+            />
+          </div>
         </div>
-        <div className="custom-file-upload">
-          <label htmlFor="fileInput" className="file-label">
-            Change Picture
-          </label>
+        <div className="input-buttons">
           <input
-            id="fileInput"
-            type="file"
-            style={{ display: "none" }}
-            onChange={handleImageChange}
+            className="input-primary campaign-name-input"
+            type="text"
+            placeholder={"Enter the campaign name"}
+            value={newCampaignName}
+            onChange={(e) => {
+              setNewCampaignName(e.target.value);
+            }}
           />
+          <div className="buttons">
+            <button
+              className="btn-primary create-btn"
+              onClick={handleCreateCampaign}
+            >
+              Create
+            </button>
+            <button
+              onClick={() => {
+                navigate("/campaigns");
+              }}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-        <input
-          className="input-primary campaign-name-input"
-          type="text"
-          placeholder={"Enter the campaign name"}
-          value={newCampaignName}
-          onChange={(e) => {
-            setNewCampaignName(e.target.value);
-          }}
-        />
-        <button
-          className="btn-primary create-btn"
-          onClick={handleCreateCampaign}
-        >
-          Create
-        </button>
-        <button
-          onClick={() => {
-            navigate("/campaigns");
-          }}
-          className="btn-secondary"
-        >
-          Cancel
-        </button>
       </div>
+      <BackgroundFog />
     </div>
   );
 }
