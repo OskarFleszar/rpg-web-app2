@@ -21,13 +21,13 @@
   position: relative;
 }
 
-/* dekoracyjna kreska pod napisem */
+
 .section-title::after {
   content: "";
   display: block;
-  width: 240px;                       /* długość kreski */
+  width: 240px;                      
   height: 2px;
-  margin: 0.4rem auto 0;              /* odstęp od napisu, wyrównanie do środka */
+  margin: 0.4rem auto 0;              
   background: linear-gradient(
     to right,
     transparent,

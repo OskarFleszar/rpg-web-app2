@@ -1,7 +1,9 @@
+import { BackgroundFog } from "../styles/stypecomponents/BackgroundFog";
+
 export function HomePage() {
   return (
-    <>
-      <p>Welcome to the rpg app</p>
-    </>
+    <div className="page-wrapper">
+      <BackgroundFog />
+    </div>
   );
 }

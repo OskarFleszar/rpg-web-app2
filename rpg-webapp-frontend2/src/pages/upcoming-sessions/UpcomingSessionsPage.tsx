@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import "./UpcomingSessionsPage.css";
 
 type SessionVoteDto = {
   userId: number;
@@ -76,79 +77,81 @@ export function UpcomingSessionsPage() {
     });
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2>Upcoming sessions</h2>
+    <div className="page-wrapper">
+      <div className="propositions-page">
+        <h2 className="top-caption">Upcoming sessions</h2>
 
-      {loading && <p>Loading…</p>}
+        {loading && <p>Loading…</p>}
 
-      {!loading && sessions.length === 0 && <p>No planed sessions yet.</p>}
+        {!loading && sessions.length === 0 && <p>No planed sessions yet.</p>}
 
-      {!loading &&
-        sessions.map((s) => {
-          const yesVotes = s.votes.filter((v) => v.vote === "YES");
-          const noVotes = s.votes.filter((v) => v.vote === "NO");
-          const myVote = s.votes.find((v) => v.userId === userId)?.vote;
+        {!loading &&
+          sessions.map((s) => {
+            const yesVotes = s.votes.filter((v) => v.vote === "YES");
+            const noVotes = s.votes.filter((v) => v.vote === "NO");
+            const myVote = s.votes.find((v) => v.userId === userId)?.vote;
 
-          return (
-            <div
-              key={s.id}
-              style={{
-                marginBottom: "0.75rem",
-                padding: "0.75rem",
-                borderRadius: 6,
-                border: "1px solid #ddd",
-                background:
-                  s.status === "CONFIRMED"
-                    ? "#e6ffed"
-                    : s.status === "PROPOSED"
-                    ? "#f3f4ff"
-                    : "#fff5f5",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div>
-                  <strong>{s.campaignName}</strong>
-                  <div>{formatDate(s.dateTimeUtc)}</div>
-                  <small>Status: {s.status}</small>
-                </div>
-                <div style={{ fontSize: 12 }}>
-                  ✅ {yesVotes.length} | ❌ {noVotes.length}
-                </div>
-              </div>
-
-              <div style={{ marginTop: 4, fontSize: 13 }}>
-                <div>
-                  <strong>Your vote: </strong>
-                  {myVote ? (myVote === "YES" ? "✅ Yes" : "❌ No") : "None"}
-                </div>
-                {noVotes.length > 0 && (
+            return (
+              <div
+                className="single-proposition-container"
+                key={s.id}
+                style={{
+                  borderColor:
+                    s.status === "CONFIRMED"
+                      ? "#008000"
+                      : s.status === "REJECTED"
+                      ? "#D2042D"
+                      : "",
+                }}
+              >
+                <div className="top-proposal-content">
+                  <div className="proposal-data">
+                    <strong className="campaign-name">
+                      Campaign : {s.campaignName}
+                    </strong>
+                    <div>Date: {formatDate(s.dateTimeUtc)}</div>
+                    <p className="status">Status: {s.status}</p>
+                  </div>
                   <div>
-                    <strong>No:</strong>{" "}
-                    {noVotes.map((v) => v.nickname).join(", ")}
+                    ✅ {yesVotes.length} | ❌ {noVotes.length}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 4, fontSize: 13 }}>
+                  <div>
+                    <strong>Your vote: </strong>
+                    {myVote ? (myVote === "YES" ? "✅ Yes" : "❌ No") : "None"}
+                  </div>
+                  {noVotes.length > 0 && (
+                    <div>
+                      <strong>No:</strong>{" "}
+                      {noVotes.map((v) => v.nickname).join(", ")}
+                    </div>
+                  )}
+                </div>
+
+                {s.status !== "CONFIRMED" && (
+                  <div style={{ marginTop: 6 }}>
+                    <button
+                      className="btn-primary yes-btn"
+                      onClick={() => handleVote(s.campaignId, s.id, "YES")}
+                      disabled={myVote === "YES"}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      className="btn-secondary no-btn"
+                      onClick={() => handleVote(s.campaignId, s.id, "NO")}
+                      disabled={myVote === "NO"}
+                    >
+                      No
+                    </button>
                   </div>
                 )}
               </div>
-
-              {s.status !== "CONFIRMED" && (
-                <div style={{ marginTop: 6 }}>
-                  <button
-                    onClick={() => handleVote(s.campaignId, s.id, "YES")}
-                    disabled={myVote === "YES"}
-                    style={{ marginRight: 4 }}
-                  >
-                    Yes
-                  </button>
-                  <button
-                    onClick={() => handleVote(s.campaignId, s.id, "NO")}
-                    disabled={myVote === "NO"}
-                  >
-                    No
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+      </div>
     </div>
   );
 }

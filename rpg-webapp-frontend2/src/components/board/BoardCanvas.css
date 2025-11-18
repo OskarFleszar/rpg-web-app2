@@ -9,58 +9,62 @@
   z-index: 1;
 }
 
-.tool-button:hover {
-  background: #f0f0f0;
-}
-
-.tool-button.active {
-  background: #e6f0ff;
-  border-color: #8ab4ff;
-}
+/* === BOARD TOOLBAR === */
 
 .board-toolbar {
   position: absolute;
   top: 12px;
   left: 12px;
   z-index: 10;
+
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  background: rgba(255, 255, 255);
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: visible;
+
+  background: rgba(10, 10, 12, 0.96);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding:  0.5rem;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.85);
+
+  font-family: var(--font-heading);
+  color: var(--color-text);
 }
 
 .board-toolbar.pencil-open {
-  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
+/* przyciski narzędzi */
 .tool-button,
 .tool-tile {
-  width: 40px;
+  width: 34px;
   height: 30px;
-  border: 1px solid #ddd;
-  background: #f8f8f8;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(176, 140, 87, 0.45);
+  background: rgba(15, 15, 20, 0.95);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
+  color: var(--color-text);
+  padding: 0;
 }
 
 .tool-button:hover {
-  background: #f0f0f0;
-}
-.tool-button.active {
-  background: #e6f0ff;
-  border-color: #8ab4ff;
+  background: rgba(176, 140, 87, 0.18);
 }
 
+.tool-button.active {
+  background: rgba(176, 140, 87, 0.9);
+  border-color: rgba(255, 220, 140, 0.95);
+  color: #15100a;
+}
+
+/* grupy narzędzi (pencil, eraser) */
 .pencil-select,
 .eraser-select {
   position: relative;
@@ -68,27 +72,26 @@
   flex-direction: column;
 }
 
+/* panel z ustawieniami (kolor, grubość, rozmiar gumki) */
 .drawing-settings {
+  position: absolute;
+  left: -7px;
+  top: calc(100% + 6px);
+
   display: flex;
   flex-direction: column;
-  position: absolute;
-  left: -9px;
-  top: calc(100% + 6px);
-  padding: 6px;
-  display: flex;
   gap: 6px;
 
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #ddd;
-  border-top: none; /* wspólna ramka */
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 6px;
+  background: rgba(10, 10, 12, 0.98);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.85);
 
   transform: translateY(-6px);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.26s ease, opacity 0.26s ease;
+  transition: transform 0.22s ease, opacity 0.22s ease;
 }
 
 .pencil-select.open .drawing-settings,
@@ -97,6 +100,7 @@
   opacity: 1;
   pointer-events: auto;
 }
+
 
 .tool-tile input[type="color"] {
   appearance: none;
@@ -107,13 +111,16 @@
   background: transparent;
   cursor: pointer;
 }
+
 .tool-tile input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
+
 .tool-tile input[type="color"]::-webkit-color-swatch {
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
 }
+
 
 .tool-tile input[type="number"] {
   width: 100%;
@@ -121,6 +128,25 @@
   border: none;
   background: transparent;
   text-align: center;
-  font-size: 14px;
+  font-size: 0.8rem;
+  color: var(--color-text);
   outline: none;
 }
+
+.shape-square {
+  width: 15px;
+  height: 15px;
+  border: 1px solid #f4efe4; /* biały / jasny obrys */
+  box-sizing: border-box;
+}
+
+.shape-circle {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #f4efe4; /* biały / jasny obrys */
+  border-radius: 50%;
+  box-sizing: border-box;
+
+}
+
+

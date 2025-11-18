@@ -87,7 +87,7 @@ export default function Toolbar(props: Props) {
           title="Ellipse"
           onClick={() => setTool("ellipse")}
         >
-          ⚪
+          <span className="shape-circle"></span>
         </button>
 
         <DrawingSettings
@@ -104,7 +104,7 @@ export default function Toolbar(props: Props) {
           title="Rect"
           onClick={() => setTool("rect")}
         >
-          ⬛
+          <span className="shape-square" />
         </button>
 
         <DrawingSettings
