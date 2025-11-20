@@ -16,6 +16,7 @@ import { CharacterSelectScreen } from "./pages/campaigns/CharacterSelectScreen";
 import { UpcomingSessionsPage } from "./pages/upcoming-sessions/UpcomingSessionsPage";
 import { RequireAuth } from "./RequireAuth";
 import { CreateCampaignPage } from "./pages/campaigns/CreateCampaignPage";
+import { SpellsCard } from "./pages/characters/SpellsCard/SpellsCard";
 
 function App() {
   const [logedIn, setLogedIn] = useState(() => !!localStorage.getItem("token"));
@@ -58,6 +59,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="characters" element={<CharactersPage />} />
           <Route path="characters/:id" element={<CharacterPage />} />
+          <Route path="characters/:id/spellcard" element={<SpellsCard />} />
           <Route path="characters/create" element={<CreateCharacterPage />} />
           <Route path="campaigns" element={<CampaignsPage />} />
           <Route path="campaigns/create" element={<CreateCampaignPage />} />

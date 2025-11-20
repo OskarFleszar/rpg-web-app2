@@ -13,6 +13,12 @@
   z-index: 2;
 }
 
+.spell-card-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
 .section-title {
   text-align: center;
   font-size: 2.5rem;

@@ -90,6 +90,11 @@ public class CharacterService {
         User user = getCurrentUser();
         character.setUser(user);
         characterRepository.save(character);
+
+        SpellCard spellCard = new SpellCard();
+        spellCard.setCharacter(character);
+        character.setSpellCard(spellCard);
+        characterRepository.save(character);
         getCharacterId(character);
     }
 
@@ -114,6 +119,19 @@ public class CharacterService {
         character.setImageType(file.getContentType());
         character.setCharacterImage(file.getBytes());
         characterRepository.save(character);
+    }
+
+    public void addNewSpell (List<Spell> spells, Long characterId) {
+        Character character = characterRepository.getReferenceById(characterId);
+
+        character.getSpellCard().setSpells(spells);
+        characterRepository.save(character);
+    }
+
+    public List<Spell> getCharacterSpels (Long characterId) {
+        Character character = characterRepository.getReferenceById(characterId);
+
+        return character.getSpellCard().getSpells();
     }
 
    @Transactional

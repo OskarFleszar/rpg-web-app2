@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -95,4 +96,13 @@ public class CharacterController {
         return ResponseEntity.noContent().build(); // 204
     }
 
+    @PostMapping(path = "/{characterId}/saveSpells")
+    public void addNewSpell (@PathVariable Long characterId,@RequestBody List<Spell> spells) {
+        characterService.addNewSpell(spells, characterId);
+    }
+
+    @GetMapping(path = "/{characterId}/getSpells")
+    public List<Spell> getCharacterSpells (@PathVariable Long characterId) {
+        return characterService.getCharacterSpels(characterId);
+    }
 }

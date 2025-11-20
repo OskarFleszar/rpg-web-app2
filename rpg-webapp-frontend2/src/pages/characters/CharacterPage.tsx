@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { NavLink, useNavigate, useParams } from "react-router";
 import defaultPfp from "../../assets/images/nig.jpg";
 import "./CharacterPage.css";
 import { CharacterBasicInfo } from "./CharacterBasicInfo";
@@ -214,6 +214,9 @@ export function CharacterPage() {
                 />
               </div>
             </div>
+            <NavLink to={`/characters/${id}/spellcard`}>
+              <button className="spell-card-button">S</button>
+            </NavLink>
 
             <CharacterFirstInfo
               character={character}

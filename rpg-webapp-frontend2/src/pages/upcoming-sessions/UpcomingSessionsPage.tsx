@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./UpcomingSessionsPage.css";
+import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 
 type SessionVoteDto = {
   userId: number;
@@ -152,6 +153,7 @@ export function UpcomingSessionsPage() {
             );
           })}
       </div>
+      <BackgroundFog />
     </div>
   );
 }
