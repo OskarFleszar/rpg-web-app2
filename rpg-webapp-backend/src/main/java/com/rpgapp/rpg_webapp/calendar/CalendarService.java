@@ -3,6 +3,8 @@ package com.rpgapp.rpg_webapp.calendar;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -36,45 +38,61 @@ public class CalendarService {
     return proposalRepo.save(proposal);
   }
 
-  public SessionProposal vote(Long proposalId, Long userId, SessionVote.Vote vote){
+    @Transactional
+    public SessionProposal vote(Long proposalId, Long userId, SessionVote.Vote vote) {
 
-    SessionProposal proposal = proposalRepo.findById(proposalId).orElseThrow();
-    User user = userService.getUserById(userId).orElseThrow();
+        SessionProposal proposal = proposalRepo.findById(proposalId).orElseThrow();
+        User user = userService.getUserById(userId).orElseThrow();
 
-    SessionVote sessionVote = voteRepo.findByProposal_IdAndUser_Id(proposalId, userId).orElseGet(() -> {
-      SessionVote v = new SessionVote();
-      v.setProposal(proposal);
-      v.setUser(user);
-      return v;
-    });
+        SessionVote sessionVote = voteRepo
+                .findByProposal_IdAndUser_Id(proposalId, userId)
+                .orElseGet(() -> {
+                    SessionVote v = new SessionVote();
+                    v.setProposal(proposal);
+                    v.setUser(user);
+                    return v;
+                });
 
-    sessionVote.setVote(vote);
-    voteRepo.save(sessionVote);
+        sessionVote.setVote(vote);
+        voteRepo.save(sessionVote);
 
-    var members = campaignService.getMembers(proposal.getCampaign().getCampaignId());
-    var votes = voteRepo.findByProposal_Id(proposalId);
+        Set<User> members = proposal.getCampaign().getPlayers();
 
-    boolean everyoneVotedYes = members.stream().allMatch(m ->
-                votes.stream().anyMatch(v -> v.getUser().getId().equals(m.getId())
-                        && v.getVote() == SessionVote.Vote.YES)
-        );
+        var votes = voteRepo.findByProposal_Id(proposalId);
 
-        System.out.println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH" + everyoneVotedYes);
+        boolean anyNo = votes.stream()
+                .anyMatch(vv -> vv.getVote() == SessionVote.Vote.NO);
 
-        if (everyoneVotedYes) {
-            proposal.setStatus(SessionProposal.Status.CONFIRMED);
-            System.out.println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH" + proposal.getStatus());
-            proposalRepo.save(proposal);
+        Set<Long> yesVoters = votes.stream()
+                .filter(vv -> vv.getVote() == SessionVote.Vote.YES)
+                .map(vv -> vv.getUser().getId())
+                .collect(Collectors.toSet());
 
-        } else if (votes.stream().anyMatch(v -> v.getVote() == SessionVote.Vote.NO)) {
+
+        Set<Long> requiredVoters = members.stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+
+        boolean everyoneVotedYes =
+                !requiredVoters.isEmpty() && yesVoters.containsAll(requiredVoters);
+
+  
+
+        if (anyNo) {
             proposal.setStatus(SessionProposal.Status.REJECTED);
-            proposalRepo.save(proposal);
+        } else if (everyoneVotedYes) {
+            proposal.setStatus(SessionProposal.Status.CONFIRMED);
+        } else {
+            proposal.setStatus(SessionProposal.Status.PROPOSED);
         }
 
-        return proposal;
-  }
+        return proposalRepo.save(proposal);
+    }
 
-   public List<SessionProposal> getProposals(Long campaignId) {
+
+
+    public List<SessionProposal> getProposals(Long campaignId) {
         return proposalRepo
                 .findByCampaign_CampaignIdOrderBySessionDateTimeDesc(campaignId);
   }

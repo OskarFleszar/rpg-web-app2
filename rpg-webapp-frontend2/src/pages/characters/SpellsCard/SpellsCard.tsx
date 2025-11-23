@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import "./SpellsCard.css";
+import { BackgroundFog } from "../../../styles/stypecomponents/BackgroundFog";
 
 type Spell = {
   spellName: string;
@@ -102,6 +104,7 @@ export function SpellsCard() {
   return (
     <div className="page-wrapper">
       <div className="spells-card-page">
+        <div className="section-title">Spells</div>
         <div className="spells-grid">
           {spells.map((spell, idx) => {
             return (
@@ -116,25 +119,27 @@ export function SpellsCard() {
                     onChange={(e) => handleChange(e, idx)}
                   />
                 </div>
-                <div>
-                  <label>Power level:</label>
-                  <input
-                    type="number"
-                    value={spell.powerLevel || 0}
-                    name="powerLevel"
-                    className="input-primary"
-                    onChange={(e) => handleChange(e, idx)}
-                  />
-                </div>
-                <div>
-                  <label>Cast time:</label>
-                  <input
-                    type="number"
-                    value={spell.castTime || 0}
-                    name="castTime"
-                    className="input-primary"
-                    onChange={(e) => handleChange(e, idx)}
-                  />
+                <div className="power-level-cast-time">
+                  <div>
+                    <label>Power level:</label>
+                    <input
+                      type="number"
+                      value={spell.powerLevel || 0}
+                      name="powerLevel"
+                      className="input-primary"
+                      onChange={(e) => handleChange(e, idx)}
+                    />
+                  </div>
+                  <div>
+                    <label>Cast time:</label>
+                    <input
+                      type="number"
+                      value={spell.castTime || 0}
+                      name="castTime"
+                      className="input-primary"
+                      onChange={(e) => handleChange(e, idx)}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label>Ingredient:</label>
@@ -170,25 +175,27 @@ export function SpellsCard() {
                 onChange={handleNewSpellChange}
               />
             </div>
-            <div>
-              <label>Power level:</label>
-              <input
-                type="number"
-                value={newSpell.powerLevel || 0}
-                name="powerLevel"
-                className="input-primary"
-                onChange={handleNewSpellChange}
-              />
-            </div>
-            <div>
-              <label>Cast time:</label>
-              <input
-                type="number"
-                value={newSpell.castTime || 0}
-                name="castTime"
-                className="input-primary"
-                onChange={handleNewSpellChange}
-              />
+            <div className="power-level-cast-time">
+              <div>
+                <label>Power level:</label>
+                <input
+                  type="number"
+                  value={newSpell.powerLevel || 0}
+                  name="powerLevel"
+                  className="input-primary"
+                  onChange={handleNewSpellChange}
+                />
+              </div>
+              <div>
+                <label>Cast time:</label>
+                <input
+                  type="number"
+                  value={newSpell.castTime || 0}
+                  name="castTime"
+                  className="input-primary"
+                  onChange={handleNewSpellChange}
+                />
+              </div>
             </div>
             <div>
               <label>Ingredient:</label>
@@ -209,24 +216,29 @@ export function SpellsCard() {
                 onChange={handleNewSpellChange}
               />
             </div>
-            <button className="btn-primary" onClick={handleAddSpell}>
+            <button
+              className="btn-primary add-spell-btn"
+              onClick={handleAddSpell}
+            >
               Add Spell
             </button>
           </div>
         </div>
-
-        <button onClick={handleSaveSpells} className="btn-primary">
-          Save
-        </button>
-        <button
-          onClick={() => {
-            navigate(`/characters/${id}`);
-          }}
-          className="btn-secondary"
-        >
-          Close
-        </button>
+        <div className="buttons-container">
+          <button onClick={handleSaveSpells} className="btn-primary">
+            Save
+          </button>
+          <button
+            onClick={() => {
+              navigate(`/characters/${id}`);
+            }}
+            className="btn-secondary close-btn"
+          >
+            Close
+          </button>
+        </div>{" "}
       </div>
+      <BackgroundFog />
     </div>
   );
 }

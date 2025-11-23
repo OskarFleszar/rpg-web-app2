@@ -1,5 +1,6 @@
+
 .spells-card-page {
-   position: relative;
+  position: relative;
   width: min(1000px, 100%);
   min-height: 0;
   margin-top: 60px;
@@ -10,4 +11,127 @@
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(4px);
   z-index: 2;
+  font-family: var(--font-heading);
+  color: var(--color-text);
 }
+
+.spells-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2rem;
+  row-gap: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+
+.single-spell-container {
+  border: 2.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  background: rgba(8, 8, 10, 0.9);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.7);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.single-spell-container label,
+.add-new-spell-form label {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(230, 220, 200, 0.8);
+}
+
+
+.single-spell-container .input-primary,
+.add-new-spell-form .input-primary {
+  width: 100%;
+}
+
+.single-spell-container textarea,
+.add-new-spell-form textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+
+.add-new-spell-form {
+  border: 2.5px dashed var(--color-border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  background: rgba(8, 8, 10, 0.7);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.7);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+.add-new-spell-form .btn-primary {
+  margin-top: 0.5rem;
+  align-self: stretch;
+}
+
+
+.spells-card-page > .btn-primary,
+.spells-card-page > .btn-secondary {
+  margin-right: 0.5rem;
+}
+
+
+@media (max-width: 768px) {
+  .spells-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.power-level-cast-time {
+  display: flex;
+  gap: 10px;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 3rem;
+  font-family: var(--font-heading);
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 240px;                      
+  height: 2px;
+  margin: 0.4rem auto 0;              
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-border),
+    transparent
+  );
+  box-shadow: 0 0 8px rgba(176, 140, 87, 0.55);  
+  border-radius: 999px;
+}
+
+.add-spell-btn{
+  margin: 0 100px;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn {
+ padding: 0.75rem 1.7rem;
+}
+
