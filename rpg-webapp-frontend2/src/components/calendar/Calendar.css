@@ -1,4 +1,4 @@
-/* kontener kalendarza */
+
 .calendar-panel {
   margin-top: 0.5rem;
   padding: 0.75rem 0.9rem;
@@ -9,7 +9,6 @@
   color: var(--color-text);
 }
 
-/* główna ramka react-calendar */
 .session-calendar {
   width: 100%;
   background: transparent;
@@ -18,7 +17,6 @@
   color: var(--color-text);
 }
 
-/* nawigacja góra (miesiące) */
 .session-calendar .react-calendar__navigation {
   display: flex;
   margin-bottom: 0.5rem;
@@ -37,7 +35,7 @@
   color: #e4bf72;
 }
 
-/* siatka dni */
+
 .session-calendar .react-calendar__month-view__weekdays {
   text-transform: uppercase;
   font-size: 0.65rem;
@@ -48,7 +46,7 @@
   padding: 0.2rem 0;
 }
 
-/* pojedynczy dzień */
+
 .session-calendar .react-calendar__tile {
   background: transparent;
   border-radius: 8px;
@@ -63,18 +61,17 @@
   background: rgba(176, 140, 87, 0.15);
 }
 
-/* wybrany dzień */
+
 .session-calendar .react-calendar__tile--active {
   background: rgba(176, 140, 87, 0.9);
   color: #070709;
 }
 
-/* dzisiaj */
+
 .session-calendar .react-calendar__tile--now {
   border-color: var(--color-border);
 }
 
-/* time input + przycisk */
 .calendar-time-picker {
   margin-top: 0.75rem;
   font-size: 0.8rem;

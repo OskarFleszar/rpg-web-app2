@@ -77,7 +77,7 @@ public class CalendarService {
         boolean everyoneVotedYes =
                 !requiredVoters.isEmpty() && yesVoters.containsAll(requiredVoters);
 
-  
+
 
         if (anyNo) {
             proposal.setStatus(SessionProposal.Status.REJECTED);

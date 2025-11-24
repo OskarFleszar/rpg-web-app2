@@ -53,6 +53,10 @@ export function CharacterWeapons({
     });
   };
 
+  const handleItemDelete = (idx: number) => {
+    setWeapons((prevWeapons) => prevWeapons.filter((_, i) => i !== idx));
+  };
+
   return (
     <div className="character-weapons-container">
       <div className="section-title">Weapons</div>
@@ -60,6 +64,11 @@ export function CharacterWeapons({
         {weapons.map((weapon, idx) => {
           return (
             <div className="single-weapon-container" key={idx}>
+              <div className="x-button-container">
+                <button onClick={() => handleItemDelete(idx)} className="x-btn">
+                  ✕
+                </button>
+              </div>
               <div>
                 <label>Weapon Name:</label>
                 <input

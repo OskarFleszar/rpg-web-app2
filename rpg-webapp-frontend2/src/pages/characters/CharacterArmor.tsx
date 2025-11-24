@@ -41,6 +41,10 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
     setNewArmor({ armorType: "", location: "", armorPoints: 0 });
   };
 
+  const handleItemDelete = (idx: number) => {
+    setArmors((prevArmors) => prevArmors.filter((_, i) => i !== idx));
+  };
+
   return (
     <div className="character-armor-container">
       <div className="section-title">Armor</div>
@@ -48,6 +52,11 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
         {armors.map((armor, idx) => {
           return (
             <div className="single-armor-container" key={idx}>
+              <div className="x-button-container">
+                <button onClick={() => handleItemDelete(idx)} className="x-btn">
+                  ✕
+                </button>
+              </div>
               <div>
                 <label>Armor type:</label>
                 <input

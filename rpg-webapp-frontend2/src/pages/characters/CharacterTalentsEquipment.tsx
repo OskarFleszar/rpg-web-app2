@@ -48,6 +48,10 @@ export function CharacterTalentsEquipment({
     setNewItem({ name: "", description: "" });
   };
 
+  const handleItemDelete = (idx: number) => {
+    setItems((prevItems) => prevItems.filter((_, i) => i !== idx));
+  };
+
   const handleTextareaChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>,
     idx: number
@@ -68,25 +72,32 @@ export function CharacterTalentsEquipment({
       <div className="items-grid">
         {items.map((item, idx) => (
           <div className="single-item-container" key={idx}>
-            <div className="item-header">
-              <label>Name</label>
-              <input
-                className="input-primary"
-                type="text"
-                name="name"
-                value={item.name}
-                onChange={(e) => handleChange(e, idx)}
-              />
+            <div className="x-button-container">
+              <button onClick={() => handleItemDelete(idx)} className="x-btn">
+                ✕
+              </button>
             </div>
+            <div>
+              <div className="item-header">
+                <label>Name</label>
+                <input
+                  className="input-primary"
+                  type="text"
+                  name="name"
+                  value={item.name}
+                  onChange={(e) => handleChange(e, idx)}
+                />
+              </div>
 
-            <div className="item-body">
-              <label>Description</label>
-              <textarea
-                className="input-primary item-textarea"
-                name="description"
-                value={item.description}
-                onChange={(e) => handleTextareaChange(e, idx)}
-              />
+              <div className="item-body">
+                <label>Description</label>
+                <textarea
+                  className="input-primary item-textarea"
+                  name="description"
+                  value={item.description}
+                  onChange={(e) => handleTextareaChange(e, idx)}
+                />
+              </div>
             </div>
           </div>
         ))}
