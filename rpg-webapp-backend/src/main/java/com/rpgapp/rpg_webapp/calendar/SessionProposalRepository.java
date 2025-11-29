@@ -16,4 +16,10 @@ public interface SessionProposalRepository extends JpaRepository<SessionProposal
             Long userId,
             OffsetDateTime from
     );
+
+    List<SessionProposal> findByStatusAndSessionDateTimeBetweenOrderBySessionDateTimeAsc(
+            SessionProposal.Status status,
+            OffsetDateTime from,
+            OffsetDateTime to
+    );
 }

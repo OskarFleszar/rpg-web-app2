@@ -85,9 +85,10 @@ public class UserService {
     }
 
 
-    public Set<Campaign> getUserCampaigns(Long userId) {
-        return campaignRepository.findCampaignsByUserId(userId);
+    public List<Campaign> getUserCampaigns(Long userId) {
+        return campaignRepository.findCampaignsForUser(userId);
     }
+
 
     public Optional<User> getUserById(long userId){
         return userRepository.findById(userId);

@@ -1,5 +1,7 @@
 import { NavLink, useNavigate } from "react-router";
 import "./Header.css";
+import { NotificationBell } from "../notifications/NotificationBell";
+import { WSProvider } from "../../ws/WSProvider";
 
 type HeaderProps = {
   logedIn: boolean;
@@ -7,6 +9,7 @@ type HeaderProps = {
 };
 
 export function Header({ logedIn, setLogedIn }: HeaderProps) {
+  const baseUrl = "http://localhost:8080";
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -42,6 +45,11 @@ export function Header({ logedIn, setLogedIn }: HeaderProps) {
       <div className="right-section">
         {logedIn ? (
           <>
+            <WSProvider baseUrl={baseUrl}>
+              {" "}
+              <NotificationBell />
+            </WSProvider>
+
             <NavLink to="/profile">
               <button className="btn btn-primary navbar-btn">Profile</button>
             </NavLink>

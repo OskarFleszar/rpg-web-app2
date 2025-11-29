@@ -31,10 +31,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/chatroom", "/topic")
+        config.enableSimpleBroker("/chatroom", "/topic", "/queue")
                 .setTaskScheduler(brokerTaskScheduler())
                 .setHeartbeatValue(new long[]{10_000, 10_000});
         config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override

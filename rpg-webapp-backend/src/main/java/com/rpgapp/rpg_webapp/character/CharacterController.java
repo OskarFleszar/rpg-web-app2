@@ -85,7 +85,7 @@ public class CharacterController {
     )
     public ResponseEntity<Void> uploadCharacterImage(
             @PathVariable Long characterId,
-            @RequestPart("file") MultipartFile file   // lub @RequestParam("file")
+            @RequestPart("file") MultipartFile file
     ) throws IOException {
 
         if (file == null || file.isEmpty()) {

@@ -30,7 +30,7 @@ export function CampaignsPage() {
           },
         }
       );
-      console.log(response.data);
+      console.log("kampanie: ", response.data);
       setCampaigns(response.data);
     } catch (error) {
       console.error("An error ovccured while fetching campaigns", error);

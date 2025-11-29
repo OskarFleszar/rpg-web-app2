@@ -15,8 +15,14 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
             "FROM Campaign c JOIN c.players p WHERE c.id = :campaignId AND p.id = :userId")
     boolean existsByUserAndCampaign(@Param("userId") Long userId, @Param("campaignId") Long campaignId);
 
-    @Query("SELECT c FROM Campaign c JOIN c.players p WHERE p.id = :userId")
-    Set<Campaign> findCampaignsByUserId(@Param("userId") Long userId);
+    @Query("""
+  SELECT DISTINCT c
+  FROM Campaign c
+  LEFT JOIN c.players p
+  WHERE p.id = :userId OR c.gameMaster.id = :userId
+""")
+    List<Campaign> findCampaignsForUser(Long userId);
+
 
 
 }

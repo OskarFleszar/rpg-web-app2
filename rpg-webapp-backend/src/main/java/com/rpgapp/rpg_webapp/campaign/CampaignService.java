@@ -5,6 +5,8 @@ import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.campaign.dto.BoardBasicDTO;
 import com.rpgapp.rpg_webapp.character.Character;
 import com.rpgapp.rpg_webapp.character.CharacterService;
+import com.rpgapp.rpg_webapp.notifications.NotificationService;
+import com.rpgapp.rpg_webapp.notifications.NotificationType;
 import com.rpgapp.rpg_webapp.user.User;
 import com.rpgapp.rpg_webapp.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class CampaignService {
@@ -27,12 +26,15 @@ public class CampaignService {
     private final UserRepository userRepository;
 
     private final BoardRepository boardRepository;
+
+    private final NotificationService notificationService;
     @Autowired
-    public CampaignService(CampaignRepository campaignRepository, CharacterService characterService, UserRepository userRepository, BoardRepository boardRepository) {
+    public CampaignService(CampaignRepository campaignRepository, CharacterService characterService, UserRepository userRepository, BoardRepository boardRepository, NotificationService notificationService) {
         this.campaignRepository = campaignRepository;
         this.characterService = characterService;
         this.userRepository = userRepository;
         this.boardRepository = boardRepository;
+        this.notificationService = notificationService;
     }
 
 
@@ -58,27 +60,45 @@ public class CampaignService {
     }
 
 
-    public void addNewUserToCampaign(String nickname, long campaignId) {
+    public void sendInviteToCampaign(String nickname, long campaignId) {
+        var user = userRepository.findUserByNickname(nickname)
+                .orElseThrow(() -> new IllegalStateException("User with nickname '" + nickname + "' not found"));
 
-        Optional<User> user = userRepository.findUserByNickname(nickname);
-        if (!user.isPresent()) {
-            throw new IllegalStateException("User with nickname '" + nickname + "' not found");
-        }
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new IllegalStateException("Campaign not found"));
 
-        if(campaign.getGameMaster().equals(characterService.getCurrentUser())){
-            if (!campaign.getPlayers().contains(user.get())) {
-                campaign.getPlayers().add(user.get());
-                campaignRepository.save(campaign);
-            } else {
-                throw new IllegalStateException("User is already part of this campaign");
-            }
+
+        if (!campaign.getGameMaster().equals(characterService.getCurrentUser())) {
+            throw new IllegalStateException("You dont have permission to do that");
         }
-        else{
-            throw new IllegalStateException("You dont have permision to do that");
+
+        if (campaign.getPlayers().contains(user)) {
+            throw new IllegalStateException("User is already part of this campaign");
         }
+
+        String campaignName = campaign.getCampaignName();
+        String gmName = campaign.getGameMaster().getNickname();
+
+        notificationService.notify(
+                user.getUserId(),
+                NotificationType.INVITED_TO_CAMPAIGN,
+                "Invitation to campaign: " + campaignName,
+                "GM: " + gmName + " invited you to his campaign.",
+                Map.of("campaignId", campaign.getCampaignId())
+        );
     }
+
+    public void addNewUserToCampaign(Long userId, long campaignId) {
+        var user = userRepository.findUserById(userId)
+                .orElseThrow(() -> new IllegalStateException("User with id '" + userId + "' not found"));
+
+        Campaign campaign = campaignRepository.findById(campaignId)
+                .orElseThrow(() -> new IllegalStateException("Campaign not found"));
+
+        campaign.getPlayers().add(user);
+        campaignRepository.save(campaign);
+    }
+
 
 
     public Optional<Campaign> getCampaignData(Long campaignId) {

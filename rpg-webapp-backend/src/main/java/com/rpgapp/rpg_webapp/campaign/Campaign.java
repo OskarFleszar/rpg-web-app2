@@ -13,12 +13,10 @@ import lombok.*;
 import java.util.List;
 import java.util.Set;
 
-@Entity
-@Table(name = "campaigns")
-@NoArgsConstructor
-@Data
-@Builder
-@AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Entity @Table(name = "campaigns")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"players", "roll", "message", "boards"})
 public class Campaign {
 
     @Id

@@ -74,11 +74,11 @@ export function GMPanel({
     }
   };
 
-  const handleAddUser = async () => {
+  const handleInviteUser = async () => {
     try {
       if (!isGM) return;
       await axios.post(
-        `http://localhost:8080/api/campaign/${campaignId}/add`,
+        `http://localhost:8080/api/campaign/${campaignId}/sendInvite`,
         { nickname: nicknameToAdd },
         {
           headers: {
@@ -128,7 +128,7 @@ export function GMPanel({
                 setNicknameToAdd(e.target.value);
               }}
             />
-            <button className="confirm-button" onClick={handleAddUser}>
+            <button className="confirm-button" onClick={handleInviteUser}>
               ✔️
             </button>
             <button onClick={() => setAddingUser(false)}>❌</button>

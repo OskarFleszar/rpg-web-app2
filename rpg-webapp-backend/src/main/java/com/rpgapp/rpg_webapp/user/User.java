@@ -14,24 +14,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-@Builder
-@Entity
-@Table(name = "app_user")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Entity @Table(name = "app_user")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"campaigns", "masterCampaigns", "character", "roll", "message", "drawing"})
 public class User implements UserDetails {
 
+
     @Id
-    @SequenceGenerator(
-            name = "user_sequence",
-            sequenceName = "user_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "user_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
+    @EqualsAndHashCode.Include
     private long userId;
     private String nickname;
     private String email;
@@ -51,8 +43,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> message;
 
-    @ManyToMany(mappedBy = "players", fetch = FetchType.EAGER)
-    private Set<Campaign> campaigns;
+    @ManyToMany(mappedBy = "players", fetch = FetchType.LAZY)
+    private Set<Campaign> campaigns = new HashSet<>();
 
 
     @OneToMany(mappedBy = "gameMaster")

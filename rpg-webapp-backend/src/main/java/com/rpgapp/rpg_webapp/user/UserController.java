@@ -50,25 +50,27 @@ public class UserController {
     }
 
     @GetMapping(path="/campaigns")
-    public Set<Campaign> getUserCampaigns(){
+    public List<Campaign> getUserCampaigns(){
         User user = characterService.getCurrentUser();
 
         return userService.getUserCampaigns(user.getUserId());
     }
 
-    @GetMapping(path="/campaigns/basic")
-    public Set<CampaignBasicDTO> getUserCampaignsBasic(){
-        User user = characterService.getCurrentUser();
-
-        return userService.getUserCampaigns(user.getUserId()).stream().map(campaigns -> new CampaignBasicDTO(
-                campaigns.getCampaignId(),
-                campaigns.getCampaignName(),
-                campaigns.getCampaignImage(),
-                campaigns.getImageType(),
-                campaigns.getGameMaster().getNickname()
-
-        )).collect(java.util.stream.Collectors.toSet());
+    @GetMapping("/campaigns/basic")
+    public List<CampaignBasicDTO> getUserCampaignsBasic() {
+        var user = characterService.getCurrentUser();
+        return userService.getUserCampaigns(user.getUserId())
+                .stream()
+                .map(c -> new CampaignBasicDTO(
+                        c.getCampaignId(),
+                        c.getCampaignName(),
+                        c.getCampaignImage(),
+                        c.getImageType(),
+                        c.getGameMaster().getNickname()
+                ))
+                .toList();
     }
+
 
 
     @GetMapping("/profileImage")

@@ -42,10 +42,15 @@ public class CampaignController {
         return campaignService.getCampaignId(campaign);
     }
 
-    @PostMapping("/{campaignId}/add")
-    public void addUserToCampaign(@RequestBody Map<String, String> payload, @PathVariable Long campaignId) {
+    @PostMapping("/{campaignId}/sendInvite")
+    public void inviteUserToCampaign(@RequestBody Map<String, String> payload, @PathVariable Long campaignId) {
         String nickname = payload.get("nickname");
-        campaignService.addNewUserToCampaign(nickname, campaignId);
+        campaignService.sendInviteToCampaign(nickname, campaignId);
+    }
+
+    @PostMapping("/{campaignId}/accept")
+    public void addUserToCampaign(@RequestBody Long userId, @PathVariable Long campaignId) {
+        campaignService.addNewUserToCampaign( userId, campaignId);
     }
 
 
