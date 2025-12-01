@@ -15,8 +15,12 @@
 
 .spell-card-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 15px;
+  font-family: var(--font-heading);
+  padding: 0.6rem 0.8rem;
+  text-align: center;
+  font-size: 0.7rem;
 }
 
 .section-title {
@@ -27,23 +31,21 @@
   position: relative;
 }
 
-
 .section-title::after {
   content: "";
   display: block;
-  width: 240px;                      
+  width: 240px;
   height: 2px;
-  margin: 0.4rem auto 0;              
+  margin: 0.4rem auto 0;
   background: linear-gradient(
     to right,
     transparent,
     var(--color-border),
     transparent
   );
-  box-shadow: 0 0 8px rgba(176, 140, 87, 0.55);  
+  box-shadow: 0 0 8px rgba(176, 140, 87, 0.55);
   border-radius: 999px;
 }
-
 
 .character-card-container {
   display: flex;
@@ -135,7 +137,7 @@
   border: 2.5px solid var(--color-border);
   border-radius: 10px;
   padding: 1rem 3rem;
-  flex: 0 1 280px;    
+  flex: 0 1 280px;
 }
 
 .attribute-name {
@@ -198,13 +200,13 @@
 @media (max-width: 768px) {
   .attributes-grid {
     flex-direction: column;
-    align-items: center;       
+    align-items: center;
   }
 
   .single-attribute-container {
     flex: 0 1 auto;
     width: 100%;
-    max-width: 380px;        
+    max-width: 380px;
     padding: 1rem 1.5rem;
   }
 
@@ -214,7 +216,7 @@
   }
 
   .attribute-value form input {
-    width: 150px;             
+    width: 150px;
   }
 }
 
@@ -227,15 +229,16 @@
   margin: 40px 0;
 }
 
-.basic-skills-container, .advanced-skills-container {
- 
+.basic-skills-container,
+.advanced-skills-container {
   padding: 1rem;
   font-family: var(--font-heading);
   flex: 1;
   margin-top: 20px;
 }
 
-.basic-skills-container,.advanced-skills-container-grid {
+.basic-skills-container,
+.advanced-skills-container-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 2rem;
@@ -262,7 +265,7 @@
 }
 
 .skill-levels-container {
-  margin-top: 10px
+  margin-top: 10px;
 }
 
 .add-skill-form {
@@ -285,20 +288,19 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);     
-  background: rgba(10, 10, 12, 1);            
+  border: 2px solid var(--color-border);
+  background: rgba(10, 10, 12, 1);
   cursor: pointer;
   position: relative;
   outline: none;
 }
-
 
 .skill-levels-container input[type="radio"]:checked::before {
   content: "";
   position: absolute;
   inset: 2px;
   border-radius: 50%;
-  background: #b08d57;                        
+  background: #b08d57;
 }
 
 .skill-levels-container input[type="radio"]:hover {
@@ -319,9 +321,8 @@
   }
 
   .add-skill-form {
-  
-  padding: 0 10%;
-}
+    padding: 0 10%;
+  }
 }
 
 /*Equipement and tallents*/
@@ -334,7 +335,6 @@
   font-family: var(--font-heading);
 }
 
-
 .items-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -342,7 +342,6 @@
   row-gap: 1rem;
   margin-top: 40px;
 }
-
 
 .single-item-container {
   border: 2.5px solid var(--color-border);
@@ -353,7 +352,6 @@
 
   display: flex;
   flex-direction: column;
-  
 }
 
 .x-button-container {
@@ -367,7 +365,6 @@
   color: var(--color-text);
   cursor: pointer;
 }
-
 
 .item-header,
 .item-body {
@@ -383,8 +380,6 @@
   color: rgba(230, 220, 200, 0.8);
 }
 
-
-
 .item-header input,
 .item-body .item-textarea {
   width: 100%;
@@ -394,7 +389,7 @@
   height: 35px;
   min-height: 35px;
   scrollbar-width: none;
-  resize: none;     
+  resize: none;
   overflow: hidden;
 }
 
@@ -425,13 +420,14 @@
   }
 
   .single-item-container {
-    flex-direction: column; 
+    flex-direction: column;
   }
 }
 
 /*Weapons and armor*/
 
-.character-weapons-container, .character-armor-container {
+.character-weapons-container,
+.character-armor-container {
   margin-top: 40px;
   display: flex;
   flex-direction: column;
@@ -439,21 +435,26 @@
   align-items: center;
 }
 
-.weapons-grid, .armors-grid {
+.weapons-grid,
+.armors-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2rem;
   column-gap: 2rem;
 }
 
-.single-weapon-container, .new-weapon-form, .single-armor-container, .new-armor-form {
+.single-weapon-container,
+.new-weapon-form,
+.single-armor-container,
+.new-armor-form {
   font-family: var(--font-heading);
   border: 2.5px solid var(--color-border);
   padding: 1rem;
   border-radius: 10px;
 }
 
-.new-weapon-form, .new-armor-form {
+.new-weapon-form,
+.new-armor-form {
   margin-top: 20px;
   font-family: var(--font-heading);
   display: flex;
@@ -461,19 +462,22 @@
   width: 50%;
 }
 
-.new-weapon-form p, .new-armor-form p  {
+.new-weapon-form p,
+.new-armor-form p {
   margin-top: 0;
-  text-align: center; 
+  text-align: center;
   font-size: 1.2rem;
 }
 
-.new-weapon-form form, .new-armor-form form {
+.new-weapon-form form,
+.new-armor-form form {
   margin-bottom: 10px;
 }
 
-.add-weapon-btn, .add-armor-btn {
+.add-weapon-btn,
+.add-armor-btn {
   padding: 0.4rem 0.4rem;
-  margin-top: 20px ;
+  margin-top: 20px;
   margin-left: 27%;
   margin-right: 27%;
 }
@@ -490,14 +494,15 @@
 .coins-container {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap;            
+  flex-wrap: wrap;
 }
 
 .coins-container > div {
-  flex: 1 1 150px;             
+  flex: 1 1 150px;
 }
 
-.backstory-container, .notes-container {
+.backstory-container,
+.notes-container {
   margin-top: 40px;
   text-align: center;
 }
@@ -510,10 +515,9 @@
   resize: vertical;
 }
 
-
 .down-button {
   padding: 0.5rem 0.4rem;
-  margin-top: 20px ;
+  margin-top: 20px;
   margin-left: 35%;
   margin-right: 35%;
 }
@@ -523,7 +527,3 @@
     flex: 1 1 100%;
   }
 }
-
-
-
-

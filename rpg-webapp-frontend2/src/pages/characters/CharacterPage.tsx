@@ -215,7 +215,9 @@ export function CharacterPage() {
               </div>
             </div>
             <NavLink to={`/characters/${id}/spellcard`}>
-              <button className="spell-card-button">S</button>
+              <button className=" btn-secondary spell-card-button">
+                Spell Card
+              </button>
             </NavLink>
 
             <CharacterFirstInfo
