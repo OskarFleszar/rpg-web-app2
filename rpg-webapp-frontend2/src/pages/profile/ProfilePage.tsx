@@ -4,6 +4,7 @@ import "./ProfilePage.css";
 import defaultPfp from "../../assets/images/nig.jpg";
 import { ProfilePageContent } from "./ProfilePageContent";
 import { ProfilePageEditing } from "./ProfilePageEditing";
+import { API_URL } from "../../config";
 
 export function ProfilePage() {
   const [basicUserData, setBasicUserData] = useState({
@@ -23,9 +24,7 @@ export function ProfilePage() {
 
   const loadBasicUserData = async () => {
     const response = await axios.get(
-      `http://localhost:8080/api/user/one/basic/${localStorage.getItem(
-        "userId"
-      )}`,
+      `${API_URL}/api/user/one/basic/${localStorage.getItem("userId")}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -38,15 +37,12 @@ export function ProfilePage() {
 
   const fetchProfileImage = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/user/profileImage",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          responseType: "blob",
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/user/profileImage`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        responseType: "blob",
+      });
 
       const imageUrl = URL.createObjectURL(response.data);
       if (image) URL.revokeObjectURL(image);

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import "./SpellsCard.css";
 import { BackgroundFog } from "../../../styles/stypecomponents/BackgroundFog";
+import { API_URL } from "../../../config";
 
 type Spell = {
   spellName: string;
@@ -31,7 +32,7 @@ export function SpellsCard() {
   const fetchSpells = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/character/${id}/getSpells`,
+        `${API_URL}/api/character/${id}/getSpells`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -48,15 +49,11 @@ export function SpellsCard() {
   const handleSaveSpells = async () => {
     try {
       console.log(spells);
-      await axios.post(
-        `http://localhost:8080/api/character/${id}/saveSpells`,
-        spells,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      await axios.post(`${API_URL}/api/character/${id}/saveSpells`, spells, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       fetchSpells();
     } catch (error) {
       console.error("there was an error saving spells", error);

@@ -5,6 +5,7 @@ import { CharacterSelectCard } from "./CharacterSelectCard";
 import "../characters/CharactersPage.css";
 import { useNavigate, useParams } from "react-router";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
+import { API_URL } from "../../config";
 
 export function CharacterSelectScreen() {
   const { id } = useParams();
@@ -20,14 +21,11 @@ export function CharacterSelectScreen() {
 
   const fetchBasicCharacterData = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/character/basic",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/character/basic`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       setCharacters(response.data);
     } catch (error) {
       console.error("Błąd przy pobieraniu postaci uzytkownika:", error);

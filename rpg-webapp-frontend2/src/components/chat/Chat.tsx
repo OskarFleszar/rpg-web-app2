@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "./Chat.css";
 import { useChannel, usePublish } from "../../ws/hooks";
 import axios from "axios";
+import { API_URL } from "../../config";
 
 type RollInfo = {
   rollType: string;
@@ -76,12 +77,9 @@ export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
 
   const fetchChatHistory = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/chat/${campaignId}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/chat/${campaignId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
 
       setMessages(response.data);
       console.log(response.data);

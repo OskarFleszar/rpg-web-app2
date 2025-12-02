@@ -9,6 +9,7 @@ import { WSProvider } from "../../ws/WSProvider";
 import BoardCanvas from "../../components/board/BoardCanvas";
 import { GMPanel } from "../../components/gmpanel/GMPanel";
 import { CalendarComponent } from "../../components/calendar/Calendar";
+import { API_URL } from "../../config";
 
 export function CampaignPage() {
   const baseUrl = "http://localhost:8080";
@@ -34,7 +35,7 @@ export function CampaignPage() {
   const fetchActiveBoard = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/campaign/${id}/activeBoard`,
+        `${API_URL}/api/campaign/${id}/activeBoard`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -49,7 +50,7 @@ export function CampaignPage() {
   const fetchCharactersData = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8080/api/character/chosencharacters",
+        `${API_URL}/api/character/chosencharacters`,
         {
           params: { ids: characterIds.join(",") },
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -63,14 +64,11 @@ export function CampaignPage() {
 
   const fetchiSGM = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/campaign/${id}/GM`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/campaign/${id}/GM`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       if (response.data === Number(localStorage.getItem("userId")))
         setIsGM(true);
 

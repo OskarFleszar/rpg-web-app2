@@ -4,6 +4,7 @@ import { CharacterCard } from "./CharacterCard";
 import "./CharactersPage.css";
 import { NavLink } from "react-router";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
+import { API_URL } from "../../config";
 
 export type CharacterBasic = {
   characterId: number;
@@ -21,14 +22,11 @@ export function CharactersPage() {
 
   const fetchBasicCharacterData = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/character/basic",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/character/basic`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       setCharacters(response.data);
     } catch (error) {
       console.error("Błąd przy pobieraniu postaci uzytkownika:", error);

@@ -12,6 +12,7 @@ import { CharacterArmor } from "./CharacterArmor";
 import { CharacterGoldNotes } from "./CharacterGoldNotes";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 import { CharacterFirstInfo } from "./CharacterFirstInfo";
+import { API_URL } from "../../config";
 
 export type Items = {
   name: string;
@@ -80,7 +81,7 @@ export function CharacterPage() {
   const fetchCharacterImage = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/character/characterImage/${id}`,
+        `${API_URL}/api/character/characterImage/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -100,14 +101,11 @@ export function CharacterPage() {
 
   const fetchCharacterData = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/character/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/character/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       setCharacter(response.data);
       setWeapons(response.data.weapons);
       setArmor(response.data.armor);
@@ -136,15 +134,11 @@ export function CharacterPage() {
     };
     console.log(character);
     try {
-      await axios.put(
-        `http://localhost:8080/api/character/${id}`,
-        characterData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      await axios.put(`${API_URL}/api/character/${id}`, characterData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
     } catch (error) {
       console.error("Problem przy zapisie karty postaci", error);
     }
@@ -154,7 +148,7 @@ export function CharacterPage() {
         const formData = new FormData();
         formData.append("file", selectedImageFile);
         await axios.post(
-          `http://localhost:8080/api/character/uploadCharacterImage/${id}`,
+          `${API_URL}/api/character/uploadCharacterImage/${id}`,
           formData,
           {
             headers: {
@@ -176,7 +170,7 @@ export function CharacterPage() {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8080/api/character/${id}`, {
+      await axios.delete(`${API_URL}/api/character/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       navigate("/characters");

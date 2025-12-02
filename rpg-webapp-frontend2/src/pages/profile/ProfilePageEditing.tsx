@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import "../../styles/utilities.css";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
+import { API_URL } from "../../config";
 
 type BasicUserData = { nickname: string; email: string; password: string };
 
@@ -32,15 +33,11 @@ export function ProfilePageEditing({
     formData.append("file", selectedImageFile);
 
     try {
-      await axios.post(
-        "http://localhost:8080/api/user/uploadProfileImage",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      await axios.post(`${API_URL}/api/user/uploadProfileImage`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       alert("Profile picture uppdated");
       fetchProfileImage();
     } catch (error) {
@@ -63,7 +60,7 @@ export function ProfilePageEditing({
   const handleSave = async () => {
     try {
       await axios.put(
-        "http://localhost:8080/api/user",
+        `${API_URL}/api/user`,
         {
           nickname: basicUserData.nickname,
           email: basicUserData.email,

@@ -13,6 +13,7 @@ import type { Armors, Items, Weapons } from "./CharacterPage";
 import { useNavigate } from "react-router";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 import { CharacterFirstInfo } from "./CharacterFirstInfo";
+import { API_URL } from "../../config";
 
 export function CreateCharacterPage() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ export function CreateCharacterPage() {
   const getDefaultSkillsAndAttributes = async () => {
     try {
       const responseSkills = await axios.get(
-        "http://localhost:8080/api/character/default-skills",
+        `${API_URL}/api/character/default-skills`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -68,7 +69,7 @@ export function CreateCharacterPage() {
         }
       );
       const responseAttributes = await axios.get(
-        "http://localhost:8080/api/character/default-attributes",
+        `${API_URL}/api/character/default-attributes`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -95,7 +96,7 @@ export function CreateCharacterPage() {
     };
     try {
       const response = await axios.post(
-        `http://localhost:8080/api/character`,
+        `${API_URL}/api/character`,
         characterData,
         {
           headers: {
@@ -109,7 +110,7 @@ export function CreateCharacterPage() {
         const formData = new FormData();
         formData.append("file", selectedImageFile);
         await axios.post(
-          `http://localhost:8080/api/character/uploadCharacterImage/${id}`,
+          `${API_URL}/api/character/uploadCharacterImage/${id}`,
           formData,
           {
             headers: {

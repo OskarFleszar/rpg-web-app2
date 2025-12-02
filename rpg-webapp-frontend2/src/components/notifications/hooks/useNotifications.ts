@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import axios from "axios";
 import { useWS } from "../../../ws/WSProvider"; // Twój kontekst WS
+import { API_URL } from "../../../config";
 
 export type NotificationType =
   | "NEW_SESSION_PROPOSED"
@@ -18,7 +19,7 @@ export type NotificationDTO = {
   createdAt: string; // ISO
 };
 
-const API = "http://localhost:8080/api/notifications";
+const API = `${API_URL}/api/notifications`;
 
 export function useNotifications(userId: number | null) {
   const ws = useWS();

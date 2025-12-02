@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import type { Drawable } from "../types";
 import { apiObjectToDrawable } from "../utils/apiToDrawable";
+import { API_URL } from "../../../config";
 
 type ApiStroke = {
   type: "stroke";
@@ -38,12 +39,9 @@ export function useSnapshot(
     let cancelled = false;
 
     async function loadBoard() {
-      const res = await axios.get(
-        `http://localhost:8080/api/board/${boardId}/state`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      const res = await axios.get(`${API_URL}/api/board/${boardId}/state`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
 
       if (cancelled) return;
 

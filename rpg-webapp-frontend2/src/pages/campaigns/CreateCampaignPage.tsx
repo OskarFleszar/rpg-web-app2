@@ -4,6 +4,7 @@ import "./CreateCampaignPage.css";
 import defaultPfp from "../../assets/images/nig.jpg";
 import { useNavigate } from "react-router";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
+import { API_URL } from "../../config";
 
 export function CreateCampaignPage() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export function CreateCampaignPage() {
     }
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/campaign/create",
+        `${API_URL}/api/campaign/create`,
         { campaignName: newCampaignName },
         {
           headers: {
@@ -34,7 +35,7 @@ export function CreateCampaignPage() {
         const formData = new FormData();
         formData.append("file", selectedImageFile);
         await axios.post(
-          `http://localhost:8080/api/campaign/uploadCampaignImage/${id}`,
+          `${API_URL}/api/campaign/uploadCampaignImage/${id}`,
           formData,
           {
             headers: {

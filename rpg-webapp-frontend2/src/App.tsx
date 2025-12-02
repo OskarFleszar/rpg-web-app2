@@ -17,20 +17,18 @@ import { UpcomingSessionsPage } from "./pages/upcoming-sessions/UpcomingSessions
 import { RequireAuth } from "./RequireAuth";
 import { CreateCampaignPage } from "./pages/campaigns/CreateCampaignPage";
 import { SpellsCard } from "./pages/characters/SpellsCard/SpellsCard";
+import { API_URL } from "./config";
 
 function App() {
   const [logedIn, setLogedIn] = useState(() => !!localStorage.getItem("token"));
 
   const loadUserData = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/user/one/id",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/user/one/id`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       localStorage.setItem("userId", response.data);
     } catch (error) {
       localStorage.removeItem("token");

@@ -9,6 +9,7 @@ import {
   useNotifications,
   type NotificationDTO,
 } from "./hooks/useNotifications";
+import { API_URL } from "../../config";
 
 export function NotificationBell() {
   const [actingId, setActingId] = useState<number | null>(null);
@@ -63,16 +64,12 @@ export function NotificationBell() {
     const userId = Number(localStorage.getItem("userId"));
     try {
       setActingId(n.id);
-      await axios.post(
-        `http://localhost:8080/api/campaign/${cid}/accept`,
-        userId,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.post(`${API_URL}/api/campaign/${cid}/accept`, userId, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
       setDecision((d) => ({ ...d, [n.id]: "accepted" }));
       await markRead(n.id);
     } finally {

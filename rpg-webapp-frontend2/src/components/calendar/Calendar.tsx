@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import Calendar from "react-calendar";
 import "./Calendar.css";
+import { API_URL } from "../../config";
 
 type Props = {
   campaignId: string | undefined;
@@ -24,7 +25,7 @@ export function CalendarComponent({ campaignId }: Props) {
       d.setHours(hours ?? 0, minutes ?? 0, 0, 0);
 
       await axios.post(
-        `http://localhost:8080/api/campaign/${campaignId}/calendar/propose`,
+        `${API_URL}/api/campaign/${campaignId}/calendar/propose`,
         {
           dateTimeUtc: d.toISOString(),
           userId: localStorage.getItem("userId"),

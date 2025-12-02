@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { BackgroundFog } from "../styles/stypecomponents/BackgroundFog";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { API_URL } from "../config";
 
 type RegisterPageProps = { setLogedIn: (logedIn: boolean) => void };
 
@@ -15,13 +16,10 @@ export function LoginPage({ setLogedIn }: RegisterPageProps) {
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const response = await axios.post(
-      "http://localhost:8080/api/auth/authenticate",
-      {
-        email,
-        password,
-      }
-    );
+    const response = await axios.post(`${API_URL}/api/auth/authenticate`, {
+      email,
+      password,
+    });
     const { token } = response.data;
     localStorage.setItem("token", token);
     setLogedIn(true);

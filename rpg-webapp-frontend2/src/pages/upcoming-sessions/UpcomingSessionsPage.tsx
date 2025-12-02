@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./UpcomingSessionsPage.css";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
+import { API_URL } from "../../config";
 
 type SessionVoteDto = {
   userId: number;
@@ -28,7 +29,7 @@ export function UpcomingSessionsPage() {
       setLoading(true);
       const userId = localStorage.getItem("userId");
       const res = await axios.get<SessionProposalDto[]>(
-        `http://localhost:8080/api/calendar/my-upcoming-sessions/${userId}`,
+        `${API_URL}/api/calendar/my-upcoming-sessions/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -56,7 +57,7 @@ export function UpcomingSessionsPage() {
     try {
       console.log(vote, localStorage.getItem("userId"));
       await axios.post(
-        `http://localhost:8080/api/campaign/${campaignId}/calendar/${proposalId}/vote`,
+        `${API_URL}/api/campaign/${campaignId}/calendar/${proposalId}/vote`,
         { vote, userId: localStorage.getItem("userId") },
         {
           headers: {

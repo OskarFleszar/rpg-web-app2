@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import "./GMPanel.css";
 import { usePublish } from "../../ws/hooks";
+import { API_URL } from "../../config";
 
 type GMPanelProps = {
   campaignId?: string;
@@ -58,7 +59,7 @@ export function GMPanel({
     try {
       if (!isGM) return;
       const res = await axios.get(
-        `http://localhost:8080/api/campaign/${campaignId}/getBoards`,
+        `${API_URL}/api/campaign/${campaignId}/getBoards`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -78,7 +79,7 @@ export function GMPanel({
     try {
       if (!isGM) return;
       await axios.post(
-        `http://localhost:8080/api/campaign/${campaignId}/sendInvite`,
+        `${API_URL}/api/campaign/${campaignId}/sendInvite`,
         { nickname: nicknameToAdd },
         {
           headers: {
@@ -99,7 +100,7 @@ export function GMPanel({
       if (!isGM || !boardToAdd) return;
       console.log(boardToAdd);
       await axios.post(
-        `http://localhost:8080/api/campaign/${campaignId}/addBoard`,
+        `${API_URL}/api/campaign/${campaignId}/addBoard`,
         { name: boardToAdd },
         {
           headers: {

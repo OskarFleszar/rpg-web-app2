@@ -4,6 +4,7 @@ import { CampaignCard } from "./CamapignCard";
 import "./CampaignsPage.css";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 import { NavLink } from "react-router";
+import { API_URL } from "../../config";
 
 type CampaignBasic = {
   campaignId: number;
@@ -22,14 +23,11 @@ export function CampaignsPage() {
 
   const fetchBasicCampaignData = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/user/campaigns/basic",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/user/campaigns/basic`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       console.log("kampanie: ", response.data);
       setCampaigns(response.data);
     } catch (error) {
