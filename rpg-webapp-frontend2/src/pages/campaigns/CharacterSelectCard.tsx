@@ -1,5 +1,5 @@
 import { toImgSrc, type CharacterCardProps } from "../characters/CharacterCard";
-import defaultPfp from "../../assets/images/nig.jpg";
+import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
 import "../characters/CharacterCard.css";
 import type React from "react";
 

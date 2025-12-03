@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import "./CreateCampaignPage.css";
-import defaultPfp from "../../assets/images/nig.jpg";
+import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
 import { useNavigate } from "react-router";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 import { API_URL } from "../../config";

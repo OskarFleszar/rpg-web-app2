@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import "./CharacterCard.css";
-import defaultPfp from "../../assets/images/nig.jpg";
+import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
 
 export type CharacterCardProps = {
   character: {

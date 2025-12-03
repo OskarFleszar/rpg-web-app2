@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import defaultPfp from "../../assets/images/nig.jpg";
+import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
 import "./CharacterPage.css";
 import { CharacterBasicInfo } from "./CharacterBasicInfo";
 import { CharacterAttributes } from "./CharacterAttributes";

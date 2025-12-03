@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import "./ProfilePage.css";
-import defaultPfp from "../../assets/images/nig.jpg";
+import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
 import { ProfilePageContent } from "./ProfilePageContent";
 import { ProfilePageEditing } from "./ProfilePageEditing";
 import { API_URL } from "../../config";
