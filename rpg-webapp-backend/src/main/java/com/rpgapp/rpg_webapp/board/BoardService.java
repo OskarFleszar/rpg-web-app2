@@ -16,6 +16,7 @@ import com.rpgapp.rpg_webapp.campaign.CampaignService;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
@@ -25,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BoardService {
 
     public record RemoveObject (String layerId, BoardObject object){}
@@ -92,11 +94,12 @@ public class BoardService {
         stroke.setObjectId(dto.pathId());
         stroke.setColor(dto.color());
         stroke.setWidth((int) dto.width());
-        stroke.setOwnerId(owner.getId());
+
         stroke.setCreatedAt(java.time.LocalDateTime.now());
 
         if (stroke.getPoints() == null) stroke.setPoints(new java.util.ArrayList<>());
-
+        log.info("WS stroke.start: boardId={}, pathId={}, user={}",
+                dto.boardId(), dto.pathId(), owner.getId());
 
         snap.addStroke(dto.layerId(), stroke);
         writeSnapshot(st, snap);
@@ -130,6 +133,7 @@ public class BoardService {
         BoardState st = getOrCreateState(dto.boardId());
         Snapshot snap = readSnapshot(st);
 
+        log.info("WS stroke.end: boardId={}, pathId={}", dto.boardId(), dto.pathId());
         boolean ok = snap.appendPoints(dto.pathId(), pts);
         if (ok) {
             writeSnapshot(st, snap);

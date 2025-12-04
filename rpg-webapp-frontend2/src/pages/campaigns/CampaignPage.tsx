@@ -12,7 +12,7 @@ import { CalendarComponent } from "../../components/calendar/Calendar";
 import { API_URL } from "../../config";
 
 export function CampaignPage() {
-  const baseUrl = "http://localhost:8080";
+  const baseUrl = API_URL;
   const { id } = useParams();
 
   const [characters, setCharacters] = useState([]);

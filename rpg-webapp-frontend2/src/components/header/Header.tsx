@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router";
 import "./Header.css";
 import { NotificationBell } from "../notifications/NotificationBell";
 import { WSProvider } from "../../ws/WSProvider";
+import { API_URL } from "../../config";
 
 type HeaderProps = {
   logedIn: boolean;
@@ -9,7 +10,7 @@ type HeaderProps = {
 };
 
 export function Header({ logedIn, setLogedIn }: HeaderProps) {
-  const baseUrl = "http://localhost:8080";
+  const baseUrl = API_URL;
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("token");

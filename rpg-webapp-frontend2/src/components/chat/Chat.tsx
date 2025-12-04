@@ -239,7 +239,7 @@ export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
             />
           </div>
           <div className="single-input-container">
-            <p className="input-label">Number of dice</p>
+            <p className="input-label">Roll For</p>
             <select
               value={rollData.rollFor}
               onChange={handleRollDataChange}

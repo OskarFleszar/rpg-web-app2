@@ -3,6 +3,7 @@ import type { Drawable } from "../types";
 import { usePublish } from "../../../ws/hooks";
 import { useCallback, useRef } from "react";
 import { getPointerOnLayer } from "../utils/konvaCoords";
+import { fallbackUUID } from "./usePencil";
 
 type Kind = "rect" | "ellipse";
 
@@ -44,7 +45,10 @@ export function useShape(opts: {
     const p = getPointerOnLayer(stageRef, layerRef);
     if (!p) return;
     startRef.current = { x: p.x, y: p.y };
-    const id = crypto?.randomUUID?.() ?? `${Date.now()} - ${Math.random()}`;
+    const id =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : fallbackUUID();
     tempIdRef.current = id;
 
     const { x, y, width, height } = boxFrom(p, p);
