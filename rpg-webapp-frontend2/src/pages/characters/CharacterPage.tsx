@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router";
 import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
 import "./CharacterPage.css";
@@ -13,6 +13,7 @@ import { CharacterGoldNotes } from "./CharacterGoldNotes";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 import { CharacterFirstInfo } from "./CharacterFirstInfo";
 import { API_URL } from "../../config";
+import { toImgSrc } from "./CharacterCard";
 
 export type Items = {
   name: string;
@@ -31,6 +32,11 @@ export type Armors = {
   armorType: string;
   location: string;
   armorPoints: number | null;
+};
+
+type CharacterImageDTO = {
+  characterImage: string | null;
+  imageType: string | null;
 };
 
 export function CharacterPage() {
@@ -69,33 +75,39 @@ export function CharacterPage() {
   const [armor, setArmor] = useState<Armors[]>([]);
   const [equipment, setEquipment] = useState<Items[]>([]);
   const [talents, setTalents] = useState<Items[]>([]);
-  const [characterImage, setCharacterImage] = useState<string | undefined>(
-    undefined
+  const [characterImageRaw, setCharacterImageRaw] = useState<string | null>(
+    null
   );
+  const [imageType, setImageType] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!id) return;
     fetchCharacterData();
     fetchCharacterImage();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const imgSrc = useMemo(() => {
+    return toImgSrc(characterImageRaw, imageType || undefined);
+  }, [characterImageRaw, imageType]);
 
   const fetchCharacterImage = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.get<CharacterImageDTO>(
         `${API_URL}/api/character/characterImage/${id}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          responseType: "blob",
         }
       );
 
-      const imageUrl = URL.createObjectURL(response.data);
-      if (characterImage) URL.revokeObjectURL(characterImage);
-      setCharacterImage(imageUrl);
+      setCharacterImageRaw(response.data?.characterImage ?? null);
+      setImageType(response.data?.imageType ?? null);
     } catch (error) {
       console.error("Błąd przy pobieraniu zdjęcia profilowego:", error);
-      setCharacterImage(defaultPfp);
+      setCharacterImageRaw(null);
+      setImageType(null);
     }
   };
 
@@ -183,7 +195,8 @@ export function CharacterPage() {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedImageFile(file);
-      setCharacterImage(URL.createObjectURL(file));
+      setCharacterImageRaw(URL.createObjectURL(file));
+      setImageType(file.type || "image/jpeg");
     }
   };
 
@@ -194,7 +207,14 @@ export function CharacterPage() {
           <div className="charcter-card-first-row">
             <div className="picture-container">
               <div className="character-card-page-image-wrapper">
-                <img className="character-image" src={characterImage} />
+                <img
+                  className="character-image"
+                  src={imgSrc || defaultPfp}
+                  alt={`${character.name} profile`}
+                  onError={(e) => {
+                    e.currentTarget.src = defaultPfp;
+                  }}
+                />
               </div>
               <div className="custom-file-upload">
                 <label htmlFor="fileInput" className="file-label">

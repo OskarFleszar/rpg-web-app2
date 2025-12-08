@@ -125,21 +125,29 @@ export function usePencil(opts: {
 
   const onPointerMove = useCallback(() => {
     const pt = getPointerOnLayer(stageRef, layerRef);
-    if (!pt || !pathIdRef.current) return;
+    const pid = pathIdRef.current;
+    if (!pt || !pid) return;
 
     setObjects((prev) => {
-      if (prev.length === 0) return prev;
-      const last = prev[prev.length - 1];
-      if (!isStroke(last)) return prev;
-      const L = last.points.length;
+      const idx = prev.findIndex((o) => isStroke(o) && o.id === pid);
+      if (idx === -1) return prev;
+
+      const stroke = prev[idx];
+      if (!isStroke(stroke)) return prev;
+
+      const L = stroke.points.length;
       if (L >= 2) {
-        const dx = pt.x - last.points[L - 2];
-        const dy = pt.y - last.points[L - 1];
+        const dx = pt.x - stroke.points[L - 2];
+        const dy = pt.y - stroke.points[L - 1];
         if (dx * dx + dy * dy < 1) return prev;
       }
+
       pendingPointsRef.current.push([pt.x, pt.y]);
-      const updated = { ...last, points: [...last.points, pt.x, pt.y] };
-      return [...prev.slice(0, -1), updated];
+
+      const updated = { ...stroke, points: [...stroke.points, pt.x, pt.y] };
+      const copy = prev.slice();
+      copy[idx] = updated;
+      return copy;
     });
   }, [layerRef, setObjects, stageRef]);
 

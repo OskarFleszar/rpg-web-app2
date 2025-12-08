@@ -72,12 +72,13 @@ public class CharacterController {
     }
 
     @GetMapping("/characterImage/{characterId}")
-    public ResponseEntity<byte[]> getCharacterImage(@PathVariable("characterId") Long characterId) {
-        Character character = characterRepository.findById(characterId)
-                .orElseThrow(() -> new IllegalStateException("Character with id: " + characterId + " doesn't exist"));
-        byte[] image = character.getCharacterImage();
-        return ResponseEntity.ok().contentType(MediaType.valueOf(character.getImageType())).body(image);
+    public ResponseEntity<CharacterImageDTO> getCharacterImage(
+            @PathVariable Long characterId
+    ) {
+        CharacterImageDTO dto = characterService.getCharacterImage(characterId);
+        return ResponseEntity.ok(dto);
     }
+
 
     @PostMapping(
             path = "/uploadCharacterImage/{characterId}",

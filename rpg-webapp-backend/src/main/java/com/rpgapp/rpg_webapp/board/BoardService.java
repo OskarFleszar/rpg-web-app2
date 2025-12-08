@@ -81,7 +81,8 @@ public class BoardService {
 
     @Transactional
     public void handleStrokeStart(StrokeStartDTO dto, User owner) throws Exception {
-        tempPaths.computeIfAbsent(dto.boardId(), k -> new ConcurrentHashMap<>()).put(dto.pathId(), new ArrayList<>());
+        tempPaths.computeIfAbsent(dto.boardId(), k -> new ConcurrentHashMap<>())
+                .put(dto.pathId(), new ArrayList<>());
 
         BoardState st = getOrCreateState(dto.boardId());
         Snapshot snap = readSnapshot(st);
@@ -94,12 +95,10 @@ public class BoardService {
         stroke.setObjectId(dto.pathId());
         stroke.setColor(dto.color());
         stroke.setWidth((int) dto.width());
+        stroke.setOwnerId(owner.getId()); 
+        stroke.setCreatedAt(LocalDateTime.now());
 
-        stroke.setCreatedAt(java.time.LocalDateTime.now());
-
-        if (stroke.getPoints() == null) stroke.setPoints(new java.util.ArrayList<>());
-        log.info("WS stroke.start: boardId={}, pathId={}, user={}",
-                dto.boardId(), dto.pathId(), owner.getId());
+        if (stroke.getPoints() == null) stroke.setPoints(new ArrayList<>());
 
         snap.addStroke(dto.layerId(), stroke);
         writeSnapshot(st, snap);

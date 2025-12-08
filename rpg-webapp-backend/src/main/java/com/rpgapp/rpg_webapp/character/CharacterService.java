@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -70,17 +71,27 @@ public class CharacterService {
     }
 
     public List<CharacterBasicDTO> getCharactersBasic() {
+        User user = getCurrentUser();
+        return user.getCharacters()
+            .stream()
+            .map(character -> new CharacterBasicDTO(
+                character.getCharacterId(),
+                character.getName(),
+                character.getCharacterImage(),
+                character.getImageType()
+            ))
+            .toList(); 
+    }
+
+    public CharacterImageDTO getCharacterImage(Long characterId) {
     User user = getCurrentUser();
-    return user.getCharacters()
-        .stream()
-        .map(character -> new CharacterBasicDTO(
-            character.getCharacterId(),
-            character.getName(),
-            character.getCharacterImage(),
-            character.getImageType()
-        ))
-        .toList(); 
+    Character character = getOneCharacter(characterId).orElseThrow();
+    return new CharacterImageDTO(
+        character.getCharacterImage(),
+        character.getImageType()
+    );
 }
+
 
     public Optional<Character> getOneCharacter(Long characterId) {
         return characterRepository.findById(characterId);

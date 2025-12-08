@@ -45,6 +45,7 @@ com\rpgapp\rpg_webapp\WarhammerRpgWebApplication.class
 com\rpgapp\rpg_webapp\messages\Message.class
 com\rpgapp\rpg_webapp\notifications\NotificationType.class
 com\rpgapp\rpg_webapp\campaign\CampaignRepository.class
+com\rpgapp\rpg_webapp\character\CharacterImageDTO.class
 com\rpgapp\rpg_webapp\calendar\SessionReminderJob.class
 com\rpgapp\rpg_webapp\character\Skills$SkillType.class
 com\rpgapp\rpg_webapp\board\BoardService.class
