@@ -1,16 +1,48 @@
 .characters-page {
   width: 100%;
-  max-width: calc(5 * 300px + 4 * 2rem);
+  /* możesz zostawić swój max-width, ale ten będzie bardziej elastyczny */
+  max-width: 1400px;
   margin: 100px auto;
   padding: 0 2rem;
 }
 
+/* Uwaga: zostawiam Twoją nazwę klasy (z literówką),
+   żeby nie rozwalić importów */
 .charater-cards-grid {
   margin-top: 5rem;
-  display: flex;
-  flex-wrap: wrap;
+
+  --card-width: 280px;
+  --img-size: 200px;
+  --card-height: 380px;
+
+  --name-scale: 1;
+
+  display: grid;
   gap: 2rem;
-  justify-content: center; 
+  justify-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(var(--card-width), 1fr));
+}
+
+.charater-cards-grid.few {
+  --card-width: 340px;
+  --img-size: 240px;
+  --card-height: 440px;
+  --name-scale: 1;
+}
+
+.charater-cards-grid.normal {
+  --card-width: 280px;
+  --img-size: 200px;
+  --card-height: 380px;
+  --name-scale: 1;
+}
+
+.charater-cards-grid.many {
+  --card-width: 240px;
+  --img-size: 180px;
+  --card-height: 340px;
+
+  --name-scale: 0.92;
 }
 
 .create-character-btn {

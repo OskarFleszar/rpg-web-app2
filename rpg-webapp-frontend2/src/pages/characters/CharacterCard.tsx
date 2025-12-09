@@ -31,6 +31,19 @@ export function CharacterCard({ character }: CharacterCardProps) {
     character.imageType || undefined
   );
 
+  const name = character.name || "Character Name";
+  const len = name.length;
+
+  // Progi możesz łatwo dostroić pod swój font
+  const nameSizeClass =
+    len > 40
+      ? "name-xl"
+      : len > 28
+      ? "name-lg"
+      : len > 20
+      ? "name-md"
+      : "name-sm";
+
   return (
     <Link
       to={`/characters/${character.characterId}`}
@@ -41,14 +54,14 @@ export function CharacterCard({ character }: CharacterCardProps) {
           <img
             className="character-image"
             src={imgSrc}
-            alt={`${character.name} profile`}
+            alt={`${name} profile`}
             loading="lazy"
             onError={(e) => {
               e.currentTarget.src = defaultPfp;
             }}
           />
         </div>
-        <p>{character.name || "Character Name"}</p>
+        <p className={`character-name ${nameSizeClass}`}>{name}</p>
       </div>
     </Link>
   );

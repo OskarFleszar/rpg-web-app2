@@ -1,10 +1,32 @@
+.character-link,
+.character-link:visited,
+.character-link:hover,
+.character-link:active {
+  text-decoration: none;
+  color: inherit;
+}
+
+.character-link {
+  display: block;
+  width: var(--card-width, 280px);
+  max-width: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
 .character-card {
   position: relative;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  padding: 1.5rem 1.5rem 0 1.5rem;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.2rem;
+
+  width: 100%;
+  height: var(--card-height, 380px);
+  box-sizing: border-box;
+
+  padding: 2.5rem 1.5rem 0 1.5rem;
   background-color: var(--color-bg);
   border-radius: 14px;
   border: 2px solid var(--color-border);
@@ -27,26 +49,9 @@
   text-shadow: 0 0 0;
 }
 
-.character-link,
-.character-link:visited,
-.character-link:hover,
-.character-link:active {
-  text-decoration: none;
-  color: inherit;
-}
-
-.character-card p {
-  color: var(--color-text);
-  text-align: center;
-  font-size: 1.7rem;
-  text-decoration: none;
-  margin-bottom: 36px;
-  font-family: var(--font-heading);
-}
-
 .character-image-wrapper {
-  width: 200px;
-  height: 200px;
+  width: var(--img-size, 200px);
+  height: var(--img-size, 200px);
   border-radius: 10%;
   overflow: hidden;
   border: 3px solid rgba(176, 141, 87, 0.9);
@@ -61,8 +66,8 @@
 }
 
 .character-checkbox-wrapper {
-  position: absolute; 
-  bottom: 10px; 
+  position: absolute;
+  bottom: 10px;
   left: 10px;
   cursor: pointer;
 }
@@ -80,11 +85,10 @@
   border: 2px solid rgb(176, 140, 87);
   background: #070709;
   box-sizing: border-box;
-  display: flex; 
+  display: flex;
   align-items: center;
   justify-content: center;
 }
-
 
 .character-select-checkbox:checked + .character-checkbox-custom {
   background: rgb(176, 140, 87);
@@ -95,4 +99,40 @@
   font-size: 14px;
   color: var(--color-text);
   line-height: 1;
+}
+
+.character-name {
+  margin-top: 1.2rem;
+  margin-bottom: 1.2rem;
+
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-heading);
+  color: var(--color-text);
+
+  line-height: 1.15;
+
+  min-height: 2.6em;
+  max-height: 3.6em;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.character-name.name-sm {
+  font-size: calc(1.7rem * var(--name-scale, 1));
+}
+.character-name.name-md {
+  font-size: calc(1.5rem * var(--name-scale, 1));
+}
+.character-name.name-lg {
+  font-size: calc(1.3rem * var(--name-scale, 1));
+}
+.character-name.name-xl {
+  font-size: calc(1.15rem * var(--name-scale, 1));
 }
