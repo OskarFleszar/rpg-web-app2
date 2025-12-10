@@ -34,7 +34,6 @@ export function CharacterCard({ character }: CharacterCardProps) {
   const name = character.name || "Character Name";
   const len = name.length;
 
-  // Progi możesz łatwo dostroić pod swój font
   const nameSizeClass =
     len > 40
       ? "name-xl"

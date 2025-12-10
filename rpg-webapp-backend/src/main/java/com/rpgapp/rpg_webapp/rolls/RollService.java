@@ -52,6 +52,7 @@ public class RollService {
     public boolean getRollOutcome(Character character, Roll roll) {
         String rollFor = roll.getRollFor();
         Skills.SkillLevel SkillLevel = character.getSkills().getSkillLevel(rollFor);
+        Skills.RollFor SkillRollsFor = character.getSkills().getRollFor(rollFor);
         double dzielnik = 1;
         int dodatek = 0;
         int bonus = roll.getBonus();
@@ -64,12 +65,12 @@ public class RollService {
 
         int totalBonus = dodatek + bonus;
         if(totalBonus > 30) totalBonus = 30;
-        else if (totalBonus < -30) {
+        else if (totalBonus < -30) { 
             totalBonus = -30;
         }
 
 
-        return switch (rollFor) {
+       /*  return switch (rollFor) {
             case "Disguise","Command","Gossip","Charm","Haggle" -> {
                 Attribute.Attributes FellowshipAttribute = character.getAttributes().getAttributes().get("Fellowship");
                 int FellowshipValue = FellowshipAttribute.getCurrentValue();
@@ -96,7 +97,12 @@ public class RollService {
                 yield roll.getRollResult() <= ((StrengthValue/dzielnik)+totalBonus);
             }
             default -> throw new IllegalArgumentException("Unknown rollFor: " + rollFor);
-        };
+        };*/
+
+        String attributeKey = SkillRollsFor.name();
+        Attribute.Attributes Attribute = character.getAttributes().getAttributes().get(attributeKey);
+        int AttributeValue = Attribute.getCurrentValue();
+        return  (roll.getRollResult() <= ((AttributeValue/dzielnik)+totalBonus));
     }
 
 

@@ -7,6 +7,7 @@ import java.util.*;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rpgapp.rpg_webapp.rolls.Roll;
 
 @Embeddable
 @Data
@@ -24,6 +25,15 @@ public class Skills {
         ADVANCED       // Umiejętności zaawansowane
     }
 
+    public enum RollFor {
+        Fellowship,
+        Intelligence,
+        Agility,
+        Toughness,
+        Strength,
+        Willpower,
+    }
+
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "skill_name")
     @Column(name = "skill_info")
@@ -37,10 +47,12 @@ public class Skills {
     public static class SkillInfo {
         private SkillLevel level;
         private SkillType type;
+        private RollFor rollFor;
 
-        public SkillInfo(SkillLevel level, SkillType type) {
+        public SkillInfo(SkillLevel level, SkillType type, RollFor rollFor) {
             this.level = level;
             this.type = type;
+            this.rollFor = rollFor;
         }
     }
 
@@ -49,7 +61,7 @@ public class Skills {
         return skills;
     }
 
-    // opcjonalnie, by deserializacja też działała bezpośrednio z mapy
+
     @JsonAnySetter
     public void set(String name, SkillInfo value) {
         skills.put(name, value);
@@ -60,31 +72,31 @@ public class Skills {
     }
 
     private void initializeBasicSkills() {
-        addSkill("Disguise", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Command", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Gamble", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Ride", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Consume Alcohol", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Animal Care", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Gossip", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Swim", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Drive", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Charm", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Search", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Silent Move", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Perception", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Outdoor Survival", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Haggle", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Concealment", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Row", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Scale Sheer Surface", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Evaluate", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
-        addSkill("Intimidate", SkillLevel.NOT_PURCHASED, SkillType.BASIC);
+        addSkill("Disguise", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Fellowship);
+        addSkill("Command", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Fellowship);
+        addSkill("Gamble", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Intelligence);
+        addSkill("Ride", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Agility);
+        addSkill("Consume Alcohol", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Toughness);
+        addSkill("Animal Care", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Intelligence);
+        addSkill("Gossip", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Fellowship);
+        addSkill("Swim", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Strength);
+        addSkill("Drive", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Strength);
+        addSkill("Charm", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Fellowship);
+        addSkill("Search", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Intelligence);
+        addSkill("Silent Move", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Agility);
+        addSkill("Perception", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Intelligence);
+        addSkill("Outdoor Survival", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Intelligence);
+        addSkill("Haggle", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Fellowship);
+        addSkill("Concealment", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Agility);
+        addSkill("Row", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Strength);
+        addSkill("Scale Sheer Surface", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Strength);
+        addSkill("Evaluate", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Intelligence);
+        addSkill("Intimidate", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Strength);
 
     }
 
-    public void addSkill(String skillName, SkillLevel level, SkillType type) {
-        skills.put(skillName, new SkillInfo(level, type));
+    public void addSkill(String skillName, SkillLevel level, SkillType type, RollFor rollFor) {
+        skills.put(skillName, new SkillInfo(level, type, rollFor));
     }
 
     public void updateSkillLevel(String skillName, SkillLevel level) {
@@ -99,5 +111,9 @@ public class Skills {
 
     public SkillType getSkillType(String skillName) {
         return skills.containsKey(skillName) ? skills.get(skillName).getType() : null;
+    }
+
+    public RollFor getRollFor(String rollFor) {
+        return skills.containsKey(rollFor) ? skills.get(rollFor).getRollFor() : null;
     }
 }

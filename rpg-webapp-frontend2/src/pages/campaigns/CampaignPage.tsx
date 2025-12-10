@@ -25,9 +25,6 @@ export function CampaignPage() {
   const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
-    if (characterIds) {
-      fetchCharactersData();
-    }
     fetchiSGM();
     fetchActiveBoard();
   }, []);
@@ -44,21 +41,6 @@ export function CampaignPage() {
       setActiveBoardId(response.data);
     } catch (error) {
       console.error("An error occured while fetching active board id", error);
-    }
-  };
-
-  const fetchCharactersData = async () => {
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/character/chosencharacters`,
-        {
-          params: { ids: characterIds.join(",") },
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      setCharacters(response.data);
-    } catch (error) {
-      console.error("An error occured while fetching character data", error);
     }
   };
 
@@ -103,7 +85,7 @@ export function CampaignPage() {
 
         <Chat
           campaignId={id}
-          characters={characters}
+          characterIds={characterIds}
           GMRoll={GMRoll}
           isGM={isGM}
         />

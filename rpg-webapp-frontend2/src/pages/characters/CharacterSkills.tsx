@@ -11,9 +11,27 @@ const LEVEL_LABELS: Record<Level, string> = {
   PLUS_20: "+20",
 };
 
+const ROLL_FOR_OPTIONS: RollFor[] = [
+  "Fellowship",
+  "Intelligence",
+  "Agility",
+  "Toughness",
+  "Strength",
+  "Willpower",
+];
+
+type RollFor =
+  | "Fellowship"
+  | "Intelligence"
+  | "Agility"
+  | "Toughness"
+  | "Strength"
+  | "Willpower";
+
 type SkillInfo = {
   level: "NOT_PURCHASED" | "PURCHASED" | "PLUS_10" | "PLUS_20";
   type: "BASIC" | "ADVANCED";
+  rollFor: RollFor;
 };
 
 type Skills = Record<string, SkillInfo>;
@@ -25,6 +43,8 @@ type CharacterSkillsProps = {
 
 export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
   const [newSkillName, setNewSkillName] = useState("");
+  const [newSkillRollFor, setNewSkillRollFor] =
+    useState<RollFor>("Intelligence");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,14 +59,13 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
   };
 
   const handleAddSkill = () => {
-    if (!newSkillName) {
-      return;
-    }
+    if (!newSkillName || !newSkillRollFor) return;
     setSkills((prevSkills) => ({
       ...prevSkills,
       [newSkillName]: {
         level: "PURCHASED",
         type: "ADVANCED",
+        rollFor: newSkillRollFor,
       },
     }));
     setNewSkillName("");
@@ -124,11 +143,22 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
             value={newSkillName}
             onChange={(e) => setNewSkillName(e.target.value)}
           />
+          <select
+            className="input-primary"
+            value={newSkillRollFor}
+            onChange={(e) => setNewSkillName(e.target.value)}
+          >
+            {ROLL_FOR_OPTIONS.map((attribute) => (
+              <option value={attribute} key={attribute}>
+                {attribute}
+              </option>
+            ))}
+          </select>
           <button
             className="btn-primary add-skill-btn"
             onClick={handleAddSkill}
           >
-            Add Skill
+            Add
           </button>
         </div>
       </div>

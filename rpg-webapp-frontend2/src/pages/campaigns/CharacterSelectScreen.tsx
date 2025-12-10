@@ -50,6 +50,7 @@ export function CharacterSelectScreen() {
             navigate(`/campaigns/${id}`, {
               state: { characterIds: charactersSelectedId },
             });
+            console.log("selected character ids:", charactersSelectedId);
             setCharactersSelectedId([]);
           }}
         >

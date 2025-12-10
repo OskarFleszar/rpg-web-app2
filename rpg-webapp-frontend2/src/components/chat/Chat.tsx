@@ -31,19 +31,26 @@ type DiceRoll = ChatEntryBase & { type: "roll"; roll: RollInfo };
 
 type MessageItem = SystemEntry | ChatMessage | DiceRoll;
 
-type CharacterOption = {
+type SkillInfo = {
+  level: string;
+  type: string;
+  rollFor: string;
+};
+
+type Character = {
   characterId: number;
   name: string;
+  skills: Record<string, SkillInfo>;
 };
 
 type ChatProps = {
   campaignId?: string;
-  characters?: CharacterOption[];
+  characterIds: number[];
   GMRoll: boolean;
   isGM: boolean;
 };
 
-export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
+export function Chat({ campaignId, characterIds, GMRoll, isGM }: ChatProps) {
   const publish = usePublish();
   useChannel<MessageItem>(`/chatroom/${campaignId}`, (msg) => {
     console.log(msg);
@@ -58,18 +65,31 @@ export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
     rollFor: "Other",
     bonus: 0,
   });
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<
     number | "" | null
   >("");
 
+  const selectedCharacter =
+    selectedCharacterId && selectedCharacterId !== ""
+      ? characters.find((c) => c.characterId === selectedCharacterId)
+      : undefined;
+
+  const selectedSkills = selectedCharacter?.skills
+    ? Object.entries(selectedCharacter.skills).map(([name]) => name)
+    : [];
+
   useEffect(() => {
     fetchChatHistory();
+    if (characterIds) {
+      fetchCharactersData();
+    }
+    console.log("characters: ", characters);
   }, [campaignId]);
 
   useEffect(() => {
     if (!characters || characters.length === 0) {
       setSelectedCharacterId("");
-      console.log(characters);
       return;
     }
     setSelectedCharacterId(characters[0].characterId);
@@ -85,6 +105,22 @@ export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
       console.log(response.data);
     } catch (error) {
       console.error("An error occured while fetching chat history", error);
+    }
+  };
+
+  const fetchCharactersData = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/character/chosencharacters`,
+        {
+          params: { ids: characterIds.join(",") },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      setCharacters(response.data);
+      console.log("fetched characters", response.data);
+    } catch (error) {
+      console.error("An error occured while fetching character data", error);
     }
   };
 
@@ -166,7 +202,8 @@ export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
               <strong>{m.nickname}</strong> Rolled{" "}
               {m.roll.GMRoll ? "(GM) " : ""} {m.roll.numberOfDice}×
               {m.roll.rollType}
-              {m.roll.rollFor ? ` for ${m.roll.rollFor}` : ""}:{" [ "}
+              {m.roll.rollType === "d100" ? ` for ${m.roll.rollFor}` : ""}:
+              {" [ "}
               {m.roll.results?.join(", ") ?? "…"}
               {" ] "}
               {typeof m.roll.total === "number" ? (
@@ -245,30 +282,15 @@ export function Chat({ campaignId, characters, GMRoll, isGM }: ChatProps) {
               onChange={handleRollDataChange}
               name="rollFor"
             >
-              <option value="Disguise">Disguise</option>
-              <option value="Command">Command</option>
-              <option value="Gamble">Gamble</option>
-              <option value="Ride">Ride</option>
-              <option value="Consume Alcohol">Consume Alcohol</option>
-              <option value="Animal Care">Animal Care</option>
-              <option value="Gossip">Gossip</option>
-              <option value="Swim">Swim</option>
-              <option value="Drive">Drive</option>
-              <option value="Charm">Charm</option>
-              <option value="Search">Search</option>
-              <option value="Silent Move">Silent Move</option>
-              <option value="Perception">Perception</option>
-              <option value="Outdoor Survival">Outdoor Survival</option>
-              <option value="Haggle">Haggle</option>
-              <option value="Concealment">Concealment</option>
-              <option value="Row">Row</option>
-              <option value="Scale Sheer Surface">Scale Sheer Surface</option>
-              <option value="Evaluate">Evaluate</option>
-              <option value="Intimidate">Intimidate</option>
+              {selectedSkills.map((skill) => (
+                <option key={skill} value={skill}>
+                  {skill}
+                </option>
+              ))}
               <option value="Other">Other</option>
             </select>
           </div>
-          <div className="single-input-container">
+          <div className="single-input-container character-select">
             <p className="input-label">Character</p>
             {(characters?.length ?? 0) > 0 ? (
               <select

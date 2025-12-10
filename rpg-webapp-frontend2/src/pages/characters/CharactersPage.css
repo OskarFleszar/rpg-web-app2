@@ -1,13 +1,10 @@
 .characters-page {
   width: 100%;
-  /* możesz zostawić swój max-width, ale ten będzie bardziej elastyczny */
   max-width: 1400px;
   margin: 100px auto;
   padding: 0 2rem;
 }
 
-/* Uwaga: zostawiam Twoją nazwę klasy (z literówką),
-   żeby nie rozwalić importów */
 .charater-cards-grid {
   margin-top: 5rem;
 
