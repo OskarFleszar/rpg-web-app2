@@ -128,7 +128,7 @@ export function CharacterPage() {
       console.log(response.data);
     } catch (error) {
       console.error(
-        "An error occured while trying to upload the character picture",
+        "An error occured while trying to upload the character data",
         error
       );
     }

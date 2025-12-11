@@ -15,7 +15,6 @@ export function CampaignPage() {
   const baseUrl = API_URL;
   const { id } = useParams();
 
-  const [characters, setCharacters] = useState([]);
   const { state } = useLocation();
   const characterIds = state?.characterIds as number[];
   const [isGM, setIsGM] = useState(false);

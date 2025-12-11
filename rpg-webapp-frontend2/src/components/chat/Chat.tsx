@@ -71,7 +71,7 @@ export function Chat({ campaignId, characterIds, GMRoll, isGM }: ChatProps) {
   >("");
 
   const selectedCharacter =
-    selectedCharacterId && selectedCharacterId !== ""
+    typeof selectedCharacterId === "number"
       ? characters.find((c) => c.characterId === selectedCharacterId)
       : undefined;
 

@@ -28,15 +28,17 @@ public class CharacterController {
     }
 
     @GetMapping
-    public List<Character> getCharacters() {return characterService.getCharacters();}
+    public List<Character> getCharacters() {
+        return characterService.getCharacters();
+    }
 
-    @GetMapping(path ="{characterId}")
-    public Optional<Character> getOneCharacter(@PathVariable("characterId") Long characterId) {
-        return characterService.getOneCharacter(characterId);
+    @GetMapping(path = "{characterId}")
+    public CharacterDetailsDTO getOneCharacter(@PathVariable Long characterId) {
+        return characterService.getCharacterDetails(characterId);
     }
 
     @GetMapping(path = "/basic")
-    public List<CharacterBasicDTO> getCharacterBasic(){
+    public List<CharacterBasicDTO> getCharacterBasic() {
         return characterService.getCharactersBasic();
     }
 
@@ -49,15 +51,19 @@ public class CharacterController {
     }
 
     @PostMapping
-    public Long makeNewCharacter(@RequestBody Character character) {characterService.addNewCharacter(character);
-    return characterService.getCharacterId(character);}
+    public Long makeNewCharacter(@RequestBody Character character) {
+        characterService.addNewCharacter(character);
+        return characterService.getCharacterId(character);
+    }
 
-    @DeleteMapping(path ="{characterId}")
-    public void deleteCharacter(@PathVariable("characterId") Long characterId) {characterService.deleteCharacter(characterId);}
+    @DeleteMapping(path = "{characterId}")
+    public void deleteCharacter(@PathVariable("characterId") Long characterId) {
+        characterService.deleteCharacter(characterId);
+    }
 
     @PutMapping(path = "{characterId}")
     public void updateCharacter(@PathVariable("characterId") Long characterId,
-                                @RequestBody Character character) {
+            @RequestBody Character character) {
         characterService.updateCharacter(characterId, character);
     }
 
@@ -73,37 +79,31 @@ public class CharacterController {
 
     @GetMapping("/characterImage/{characterId}")
     public ResponseEntity<CharacterImageDTO> getCharacterImage(
-            @PathVariable Long characterId
-    ) {
+            @PathVariable Long characterId) {
         CharacterImageDTO dto = characterService.getCharacterImage(characterId);
         return ResponseEntity.ok(dto);
     }
 
-
-    @PostMapping(
-            path = "/uploadCharacterImage/{characterId}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(path = "/uploadCharacterImage/{characterId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> uploadCharacterImage(
             @PathVariable Long characterId,
-            @RequestPart("file") MultipartFile file
-    ) throws IOException {
+            @RequestPart("file") MultipartFile file) throws IOException {
 
         if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
         characterService.saveCharacterImage(file, characterId);
-        return ResponseEntity.noContent().build(); // 204
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(path = "/{characterId}/saveSpells")
-    public void addNewSpell (@PathVariable Long characterId,@RequestBody List<Spell> spells) {
+    public void addNewSpell(@PathVariable Long characterId, @RequestBody List<Spell> spells) {
         characterService.addNewSpell(spells, characterId);
     }
 
     @GetMapping(path = "/{characterId}/getSpells")
-    public List<Spell> getCharacterSpells (@PathVariable Long characterId) {
+    public List<Spell> getCharacterSpells(@PathVariable Long characterId) {
         return characterService.getCharacterSpels(characterId);
     }
 }

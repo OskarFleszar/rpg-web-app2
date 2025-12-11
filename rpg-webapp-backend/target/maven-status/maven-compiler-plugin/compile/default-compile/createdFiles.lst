@@ -38,6 +38,7 @@ com\rpgapp\rpg_webapp\calendar\SessionProposal$Status.class
 com\rpgapp\rpg_webapp\user\UserBasicDTO.class
 com\rpgapp\rpg_webapp\board\entity\BoardObjectIndex.class
 com\rpgapp\rpg_webapp\board\snapshot\BoardObject$BoardObjectBuilder.class
+com\rpgapp\rpg_webapp\character\CharacterDetailsDTO.class
 com\rpgapp\rpg_webapp\calendar\SessionVote.class
 com\rpgapp\rpg_webapp\calendar\dto\ProposeSessionRequestDTO.class
 com\rpgapp\rpg_webapp\character\Spell.class
@@ -63,6 +64,7 @@ com\rpgapp\rpg_webapp\character\Attribute$Attributes.class
 com\rpgapp\rpg_webapp\calendar\SessionProposal.class
 com\rpgapp\rpg_webapp\board\BoardController.class
 com\rpgapp\rpg_webapp\board\dto\BoardOpDTO.class
+com\rpgapp\rpg_webapp\character\Skills$RollFor.class
 com\rpgapp\rpg_webapp\character\CharacterBasicDTO.class
 com\rpgapp\rpg_webapp\config\ApplicationConfig.class
 com\rpgapp\rpg_webapp\board\snapshot\Snapshot$ObjView.class

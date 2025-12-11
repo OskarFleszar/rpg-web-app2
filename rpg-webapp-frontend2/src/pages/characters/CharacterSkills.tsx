@@ -146,7 +146,7 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
           <select
             className="input-primary"
             value={newSkillRollFor}
-            onChange={(e) => setNewSkillName(e.target.value)}
+            onChange={(e) => setNewSkillRollFor(e.target.value as RollFor)}
           >
             {ROLL_FOR_OPTIONS.map((attribute) => (
               <option value={attribute} key={attribute}>

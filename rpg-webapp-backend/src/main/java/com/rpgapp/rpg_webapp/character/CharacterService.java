@@ -29,25 +29,25 @@ public class CharacterService {
     }
 
     public User getCurrentUser() {
-    var auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth == null) throw new IllegalStateException("User not authenticated");
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null)
+            throw new IllegalStateException("User not authenticated");
 
-    Object principal = auth.getPrincipal();
-    if (principal instanceof org.springframework.security.core.userdetails.User userDetails) {
-        Long userId = Long.parseLong(userDetails.getUsername()); // ID jako String → Long
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found"));
+        Object principal = auth.getPrincipal();
+        if (principal instanceof org.springframework.security.core.userdetails.User userDetails) {
+            Long userId = Long.parseLong(userDetails.getUsername()); // ID jako String → Long
+            return userRepository.findById(userId)
+                    .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException(
+                            "User not found"));
+        }
+        throw new IllegalStateException("User not authenticated");
     }
-    throw new IllegalStateException("User not authenticated");
-}
-
 
     public User getCurrentUserWS(SimpMessageHeaderAccessor headers) {
         Principal p = headers.getUser();
         if (p == null) {
             throw new IllegalStateException("No WS Principal on session");
         }
-
 
         String name = p.getName();
         Long userId;
@@ -73,25 +73,19 @@ public class CharacterService {
     public List<CharacterBasicDTO> getCharactersBasic() {
         User user = getCurrentUser();
         return user.getCharacters()
-            .stream()
-            .map(character -> new CharacterBasicDTO(
-                character.getCharacterId(),
-                character.getName(),
-                character.getCharacterImage(),
-                character.getImageType()
-            ))
-            .toList(); 
+                .stream()
+                .map(character -> new CharacterBasicDTO(
+                        character.getCharacterId(),
+                        character.getName(),
+                        character.getCharacterImage(),
+                        character.getImageType()))
+                .toList();
     }
 
     public CharacterImageDTO getCharacterImage(Long characterId) {
-    User user = getCurrentUser();
-    Character character = getOneCharacter(characterId).orElseThrow();
-    return new CharacterImageDTO(
-        character.getCharacterImage(),
-        character.getImageType()
-    );
-}
-
+        // opcjonalnie: walidacja właściciela
+        return characterRepository.findImageDtoById(characterId);
+    }
 
     public Optional<Character> getOneCharacter(Long characterId) {
         return characterRepository.findById(characterId);
@@ -109,7 +103,7 @@ public class CharacterService {
         getCharacterId(character);
     }
 
-    public Long getCharacterId (Character character) {
+    public Long getCharacterId(Character character) {
         return character.getCharacterId();
     }
 
@@ -121,31 +115,74 @@ public class CharacterService {
         characterRepository.deleteById(characterId);
     }
 
-
     @Transactional
     public void saveCharacterImage(MultipartFile file, Long characterId) throws IOException {
-        Character character = characterRepository.findById(characterId)
-                .orElseThrow(() -> new IllegalStateException("Character with id: " + characterId + " doesn't exist"));
+        User user = getCurrentUser();
+
+        Character character = characterRepository
+                .findByCharacterIdAndUser_UserId(characterId, user.getUserId())
+                .orElseThrow(() -> new IllegalStateException("Character not found for this user"));
 
         character.setImageType(file.getContentType());
         character.setCharacterImage(file.getBytes());
         characterRepository.save(character);
     }
 
-    public void addNewSpell (List<Spell> spells, Long characterId) {
+    public void addNewSpell(List<Spell> spells, Long characterId) {
         Character character = characterRepository.getReferenceById(characterId);
 
         character.getSpellCard().setSpells(spells);
         characterRepository.save(character);
     }
 
-    public List<Spell> getCharacterSpels (Long characterId) {
+    public List<Spell> getCharacterSpels(Long characterId) {
         Character character = characterRepository.getReferenceById(characterId);
 
         return character.getSpellCard().getSpells();
     }
 
-   @Transactional
+    public CharacterDetailsDTO getCharacterDetails(Long characterId) {
+        User user = getCurrentUser();
+
+        Character c = characterRepository
+                .findByCharacterIdAndUser_UserId(characterId, user.getUserId())
+                .orElseThrow(() -> new IllegalStateException("Character not found for this user"));
+
+        return new CharacterDetailsDTO(
+                c.getCharacterId(),
+                c.getName(),
+                c.getRace(),
+                c.getCurrentProfession(),
+                c.getLastProfession(),
+                c.getAge(),
+                c.getGender(),
+                c.getEyeColor(),
+                c.getWeight(),
+                c.getHairColor(),
+                c.getHeight(),
+                c.getStarSign(),
+                c.getSiblings(),
+                c.getBirthPlace(),
+                c.getSpecialSigns(),
+                c.getCampaignName(),
+                c.getCampaignYear(),
+                c.getDmName(),
+                c.getTotalExp(),
+                c.getCurrentExp(),
+                c.getGold(),
+                c.getSilver(),
+                c.getBronze(),
+                c.getAttributes(),
+                c.getSkills(),
+                c.getWeapons(),
+                c.getArmor(),
+                c.getTalents(),
+                c.getEquipment(),
+                c.getBackstory(),
+                c.getNotes());
+    }
+
+    @Transactional
     public void updateCharacter(Long characterId, Character updatedCharacter) {
         Character existingCharacter = characterRepository.findById(characterId)
                 .orElseThrow(() -> new IllegalStateException("Character with id: " + characterId + " doesn't exist"));
@@ -244,6 +281,4 @@ public class CharacterService {
         characterRepository.save(existingCharacter);
     }
 
-
 }
-
