@@ -127,7 +127,7 @@ export function Chat({ campaignId, characterIds, GMRoll, isGM }: ChatProps) {
   const sendMessage = () => {
     const content = newMessage.trim();
     if (!content) return;
-    publish(`/app/message/${campaignId}`, { content }); // tylko content
+    publish(`/app/message/${campaignId}`, { content });
     setNewMessage("");
   };
 

@@ -1,5 +1,9 @@
 package com.rpgapp.rpg_webapp.character;
 
+import com.rpgapp.rpg_webapp.character.dto.CharacterBasicDTO;
+import com.rpgapp.rpg_webapp.character.dto.CharacterDetailsDTO;
+import com.rpgapp.rpg_webapp.character.dto.CharacterImageDTO;
+import com.rpgapp.rpg_webapp.character.dto.ChatCharacterDTO;
 import com.rpgapp.rpg_webapp.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,11 +47,13 @@ public class CharacterController {
     }
 
     @GetMapping(path = "/chosencharacters")
-    public List<Character> getCharactersByIds(@RequestParam List<Long> ids) {
+
+    public List<ChatCharacterDTO> getCharactersByIds(@RequestParam List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametr 'ids' is required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametr 'ids' jest wymagany");
+
         }
-        return characterService.getByIds(ids);
+        return characterService.getChatCharactersByIds(ids);
     }
 
     @PostMapping

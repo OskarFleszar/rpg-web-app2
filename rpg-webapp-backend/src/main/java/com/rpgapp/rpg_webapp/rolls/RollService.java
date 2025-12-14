@@ -69,36 +69,6 @@ public class RollService {
             totalBonus = -30;
         }
 
-
-       /*  return switch (rollFor) {
-            case "Disguise","Command","Gossip","Charm","Haggle" -> {
-                Attribute.Attributes FellowshipAttribute = character.getAttributes().getAttributes().get("Fellowship");
-                int FellowshipValue = FellowshipAttribute.getCurrentValue();
-                yield roll.getRollResult() <= ((FellowshipValue/dzielnik)+totalBonus);
-            }
-            case "Gamble","Animal Care","Search","Outdoor Survival","Evaluate","Perception" -> {
-                Attribute.Attributes intelligenceAttribute = character.getAttributes().getAttributes().get("Intelligence");
-                int intelligenceValue = intelligenceAttribute.getCurrentValue();
-                yield roll.getRollResult() <= ((intelligenceValue/dzielnik)+totalBonus);
-            }
-            case "Ride","Silent Move","Concealment" -> {
-                Attribute.Attributes AgilityAttribute = character.getAttributes().getAttributes().get("Agility");
-                int AgilityValue = AgilityAttribute.getCurrentValue();
-                yield roll.getRollResult() <= ((AgilityValue/dzielnik)+totalBonus);
-            }
-            case "Consume Alcohol" -> {
-                Attribute.Attributes ToughnessAttribute = character.getAttributes().getAttributes().get("Toughness");
-                int ToughnessValue = ToughnessAttribute.getCurrentValue();
-                yield roll.getRollResult() <= ((ToughnessValue/dzielnik)+totalBonus);
-            }
-            case "Swim","Drive","Row","Scale Sheer Surface","Intimidate" -> {
-                Attribute.Attributes StrengthAttribute = character.getAttributes().getAttributes().get("Strength");
-                int StrengthValue = StrengthAttribute.getCurrentValue();
-                yield roll.getRollResult() <= ((StrengthValue/dzielnik)+totalBonus);
-            }
-            default -> throw new IllegalArgumentException("Unknown rollFor: " + rollFor);
-        };*/
-
         String attributeKey = SkillRollsFor.name();
         Attribute.Attributes Attribute = character.getAttributes().getAttributes().get(attributeKey);
         int AttributeValue = Attribute.getCurrentValue();
