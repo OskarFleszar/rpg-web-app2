@@ -45,7 +45,7 @@ public class CharacterController {
     @GetMapping(path = "/chosencharacters")
     public List<Character> getCharactersByIds(@RequestParam List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametr 'ids' jest wymagany");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametr 'ids' is required");
         }
         return characterService.getByIds(ids);
     }

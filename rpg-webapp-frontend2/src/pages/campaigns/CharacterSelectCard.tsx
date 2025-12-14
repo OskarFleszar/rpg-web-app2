@@ -26,28 +26,44 @@ export function CharacterSelectCard({
         : prev.filter((id) => id !== character.characterId)
     );
 
+  const name = character.name || "Character Name";
+  const len = name.length;
+
+  const nameSizeClass =
+    len > 40
+      ? "name-xl"
+      : len > 28
+      ? "name-lg"
+      : len > 20
+      ? "name-md"
+      : "name-sm";
+
   return (
-    <div className="character-card select">
-      <div className="character-image-wrapper">
-        <img
-          className="character-image"
-          src={imgSrc}
-          alt={`${character.name} profile`}
-          loading="lazy"
-          onError={(e) => {
-            e.currentTarget.src = defaultPfp;
-          }}
-        />
+    <div className="character-link">
+      <div className="character-card select">
+        <div className="character-image-wrapper">
+          <img
+            className="character-image"
+            src={imgSrc}
+            alt={`${character.name} profile`}
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.src = defaultPfp;
+            }}
+          />
+        </div>
+        <p className={`character-name ${nameSizeClass}`}>
+          {name || "Character Name"}
+        </p>
+        <label className="character-checkbox-wrapper">
+          <input
+            type="checkbox"
+            className="character-select-checkbox"
+            onChange={handleChange}
+          />
+          <span className="character-checkbox-custom" />
+        </label>
       </div>
-      <p>{character.name || "Character Name"}</p>
-      <label className="character-checkbox-wrapper">
-        <input
-          type="checkbox"
-          className="character-select-checkbox"
-          onChange={handleChange}
-        />
-        <span className="character-checkbox-custom" />
-      </label>
     </div>
   );
 }

@@ -60,7 +60,9 @@ export function CharacterCard({ character }: CharacterCardProps) {
             }}
           />
         </div>
-        <p className={`character-name ${nameSizeClass}`}>{name}</p>
+        <p className={`character-name ${nameSizeClass}`}>
+          {name || "Character Name"}
+        </p>
       </div>
     </Link>
   );

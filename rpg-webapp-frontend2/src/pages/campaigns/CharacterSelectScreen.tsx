@@ -32,10 +32,13 @@ export function CharacterSelectScreen() {
     }
   };
 
+  const sizeClass =
+    characters.length <= 2 ? "few" : characters.length >= 9 ? "many" : "normal";
+
   return (
     <div className="page-wrapper">
       <div className="characters-page">
-        <div className="charater-cards-grid">
+        <div className={`charater-cards-grid ${sizeClass}`}>
           {characters.map((character) => (
             <CharacterSelectCard
               key={character.characterId}
