@@ -1,5 +1,9 @@
 package com.rpgapp.rpg_webapp.character;
 
+import com.rpgapp.rpg_webapp.character.dto.CharacterBasicDTO;
+import com.rpgapp.rpg_webapp.character.dto.CharacterDetailsDTO;
+import com.rpgapp.rpg_webapp.character.dto.CharacterImageDTO;
+import com.rpgapp.rpg_webapp.character.dto.ChatCharacterDTO;
 import com.rpgapp.rpg_webapp.user.User;
 import com.rpgapp.rpg_webapp.user.UserRepository;
 import jakarta.transaction.Transactional;
@@ -12,9 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CharacterService {
@@ -66,9 +73,21 @@ public class CharacterService {
         return user.getCharacters();
     }
 
-    public List<Character> getByIds(List<Long> ids) {
-        return characterRepository.findAllById(ids).stream().toList();
-    }
+  public List<ChatCharacterDTO> getChatCharactersByIds(List<Long> ids) {
+    User user = getCurrentUser();
+
+    return characterRepository
+            .findChatCharactersForUser(user.getUserId(), ids)  
+            .stream()
+            .map(c -> new ChatCharacterDTO(
+                    c.getCharacterId(),
+                    c.getName(),
+                    c.getSkills() != null
+                            ? new HashMap<>(c.getSkills().any()) 
+                            : new HashMap<>()
+            ))
+            .toList();
+}
 
     public List<CharacterBasicDTO> getCharactersBasic() {
         User user = getCurrentUser();

@@ -1,6 +1,12 @@
-package com.rpgapp.rpg_webapp.character;
+package com.rpgapp.rpg_webapp.character.dto;
 
 import java.util.List;
+
+import com.rpgapp.rpg_webapp.character.Armor;
+import com.rpgapp.rpg_webapp.character.Attribute;
+import com.rpgapp.rpg_webapp.character.Items;
+import com.rpgapp.rpg_webapp.character.Skills;
+import com.rpgapp.rpg_webapp.character.Weapons;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

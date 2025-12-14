@@ -8,9 +8,11 @@ com\rpgapp\rpg_webapp\rolls\RollController.class
 com\rpgapp\rpg_webapp\campaign\CampaignController.class
 com\rpgapp\rpg_webapp\auth\AuthenticationResponse.class
 com\rpgapp\rpg_webapp\board\dto\TransformApplyDTO.class
+com\rpgapp\rpg_webapp\character\dto\CharacterBasicDTO.class
 com\rpgapp\rpg_webapp\rolls\RollRepository.class
 com\rpgapp\rpg_webapp\messages\MessageService.class
 com\rpgapp\rpg_webapp\character\Items.class
+com\rpgapp\rpg_webapp\character\dto\ChatCharacterDTO.class
 com\rpgapp\rpg_webapp\drawings\DrawingService.class
 com\rpgapp\rpg_webapp\drawings\Point.class
 com\rpgapp\rpg_webapp\calendar\SessionProposalRepository.class
@@ -38,7 +40,6 @@ com\rpgapp\rpg_webapp\calendar\SessionProposal$Status.class
 com\rpgapp\rpg_webapp\user\UserBasicDTO.class
 com\rpgapp\rpg_webapp\board\entity\BoardObjectIndex.class
 com\rpgapp\rpg_webapp\board\snapshot\BoardObject$BoardObjectBuilder.class
-com\rpgapp\rpg_webapp\character\CharacterDetailsDTO.class
 com\rpgapp\rpg_webapp\calendar\SessionVote.class
 com\rpgapp\rpg_webapp\calendar\dto\ProposeSessionRequestDTO.class
 com\rpgapp\rpg_webapp\character\Spell.class
@@ -46,7 +47,6 @@ com\rpgapp\rpg_webapp\WarhammerRpgWebApplication.class
 com\rpgapp\rpg_webapp\messages\Message.class
 com\rpgapp\rpg_webapp\notifications\NotificationType.class
 com\rpgapp\rpg_webapp\campaign\CampaignRepository.class
-com\rpgapp\rpg_webapp\character\CharacterImageDTO.class
 com\rpgapp\rpg_webapp\calendar\SessionReminderJob.class
 com\rpgapp\rpg_webapp\character\Skills$SkillType.class
 com\rpgapp\rpg_webapp\board\BoardService.class
@@ -65,7 +65,6 @@ com\rpgapp\rpg_webapp\calendar\SessionProposal.class
 com\rpgapp\rpg_webapp\board\BoardController.class
 com\rpgapp\rpg_webapp\board\dto\BoardOpDTO.class
 com\rpgapp\rpg_webapp\character\Skills$RollFor.class
-com\rpgapp\rpg_webapp\character\CharacterBasicDTO.class
 com\rpgapp\rpg_webapp\config\ApplicationConfig.class
 com\rpgapp\rpg_webapp\board\snapshot\Snapshot$ObjView.class
 com\rpgapp\rpg_webapp\calendar\CalendarController.class
@@ -76,6 +75,7 @@ com\rpgapp\rpg_webapp\character\CharacterRepository.class
 com\rpgapp\rpg_webapp\notifications\NotificationRepository.class
 com\rpgapp\rpg_webapp\board\snapshot\StrokeObject.class
 com\rpgapp\rpg_webapp\campaign\Campaign.class
+com\rpgapp\rpg_webapp\character\dto\CharacterDetailsDTO.class
 com\rpgapp\rpg_webapp\chat\dto\ChatMessagePostDTO.class
 com\rpgapp\rpg_webapp\board\entity\Board.class
 com\rpgapp\rpg_webapp\character\Skills.class
@@ -104,6 +104,7 @@ com\rpgapp\rpg_webapp\calendar\SessionVoteRepository.class
 com\rpgapp\rpg_webapp\auth\AuthenticationRequest$AuthenticationRequestBuilder.class
 com\rpgapp\rpg_webapp\character\Skills$SkillInfo.class
 com\rpgapp\rpg_webapp\messages\MessageController.class
+com\rpgapp\rpg_webapp\character\dto\CharacterImageDTO.class
 com\rpgapp\rpg_webapp\character\SpellCard.class
 com\rpgapp\rpg_webapp\character\Character$CharacterBuilder.class
 com\rpgapp\rpg_webapp\character\Armor.class

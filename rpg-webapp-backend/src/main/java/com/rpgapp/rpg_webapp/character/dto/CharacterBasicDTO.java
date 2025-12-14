@@ -1,4 +1,4 @@
-package com.rpgapp.rpg_webapp.character;
+package com.rpgapp.rpg_webapp.character.dto;
 
 import lombok.Data;
 
