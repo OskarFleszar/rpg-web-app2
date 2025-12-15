@@ -39,31 +39,34 @@ export function CharacterSelectCard({
       : "name-sm";
 
   return (
-    <div className="character-link">
-      <div className="character-card select">
-        <div className="character-image-wrapper">
-          <img
-            className="character-image"
-            src={imgSrc}
-            alt={`${character.name} profile`}
-            loading="lazy"
-            onError={(e) => {
-              e.currentTarget.src = defaultPfp;
-            }}
-          />
+    <label htmlFor={String(character.characterId)}>
+      <div className="character-link">
+        <div className="character-card select">
+          <div className="character-image-wrapper">
+            <img
+              className="character-image"
+              src={imgSrc}
+              alt={`${character.name} profile`}
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = defaultPfp;
+              }}
+            />
+          </div>
+          <p className={`character-name ${nameSizeClass}`}>
+            {name || "Character Name"}
+          </p>
+          <label className="character-checkbox-wrapper">
+            <input
+              id={String(character.characterId)}
+              type="checkbox"
+              className="character-select-checkbox"
+              onChange={handleChange}
+            />
+            <span className="character-checkbox-custom" />
+          </label>
         </div>
-        <p className={`character-name ${nameSizeClass}`}>
-          {name || "Character Name"}
-        </p>
-        <label className="character-checkbox-wrapper">
-          <input
-            type="checkbox"
-            className="character-select-checkbox"
-            onChange={handleChange}
-          />
-          <span className="character-checkbox-custom" />
-        </label>
       </div>
-    </div>
+    </label>
   );
 }

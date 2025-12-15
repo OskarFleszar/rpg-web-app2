@@ -89,16 +89,18 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
               <div className="skill-name">{skillName}</div>
               <div className="skill-values">
                 {LEVELS.map((level) => {
+                  const inputId = `${skillName}-${level}`;
                   return (
                     <div className="skill-levels-container" key={level}>
                       <input
+                        id={inputId}
                         type="radio"
                         name={skillName}
                         value={level}
                         checked={skillInfo.level === level}
                         onChange={handleChange}
                       />
-                      <label>{LEVEL_LABELS[level]}</label>
+                      <label htmlFor={inputId}>{LEVEL_LABELS[level]}</label>
                     </div>
                   );
                 })}
@@ -116,16 +118,18 @@ export function CharacterSkills({ skills, setSkills }: CharacterSkillsProps) {
                 <div className="skill-name">{skillName}</div>
                 <div className="skill-values">
                   {LEVELS.map((level) => {
+                    const inputId = `${skillName}-${level}`;
                     return (
                       <div className="skill-levels-container" key={level}>
                         <input
+                          id={inputId}
                           type="radio"
                           name={skillName}
                           value={level}
                           checked={skillInfo.level === level}
                           onChange={handleChange}
                         />{" "}
-                        <label>{LEVEL_LABELS[level]}</label>
+                        <label htmlFor={inputId}>{LEVEL_LABELS[level]}</label>
                       </div>
                     );
                   })}

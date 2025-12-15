@@ -25,7 +25,7 @@ public class Attribute {
         private int currentValue;
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @MapKeyColumn(name = "attribute_name")
     @Column(name = "attribute")
     @JsonIgnore

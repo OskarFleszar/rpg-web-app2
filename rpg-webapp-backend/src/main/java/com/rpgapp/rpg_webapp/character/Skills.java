@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rpgapp.rpg_webapp.rolls.Roll;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Embeddable
 @Data
@@ -34,11 +37,14 @@ public class Skills {
         Willpower,
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @MapKeyColumn(name = "skill_name")
     @Column(name = "skill_info")
     @JsonIgnore
     @Getter(AccessLevel.NONE)
+    @Fetch(FetchMode.SUBSELECT)
+    @BatchSize(size = 50)
+
     private Map<String, SkillInfo> skills = new HashMap<>();
 
     @Data
@@ -68,8 +74,12 @@ public class Skills {
     }
 
     public Skills() {
-        initializeBasicSkills();
+
+        if (skills == null || skills.isEmpty()) {
+            initializeBasicSkills();
+        }
     }
+
 
     private void initializeBasicSkills() {
         addSkill("Disguise", SkillLevel.NOT_PURCHASED, SkillType.BASIC, RollFor.Fellowship);
