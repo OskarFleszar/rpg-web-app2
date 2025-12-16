@@ -1,7 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from "react";
 import {
   Circle,
   Ellipse,
+  Group,
   Layer,
   Line,
   Rect,
@@ -38,10 +46,21 @@ export default function BoardCanvas({
   setActiveBoardId,
   campaignId,
 }: Props) {
+  const cols = 20;
+  const rows = 20;
+  const cellSizePx = 80;
+
+  const boardWidth = cols * cellSizePx;
+  const boardHeight = rows * cellSizePx;
+
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
+
+  const isInsideBoard = (pt: { x: number; y: number }) =>
+    pt.x >= 0 && pt.y >= 0 && pt.x <= boardWidth && pt.y <= boardHeight;
+
   useEffect(() => {
     const onResize = () =>
       setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -85,6 +104,7 @@ export default function BoardCanvas({
   const {
     stageScale,
     stagePos,
+    setStagePos,
     isPanning,
     onWheel,
     onDragMove,
@@ -93,6 +113,50 @@ export default function BoardCanvas({
     enabled,
     setEnabled,
   } = usePanZoom();
+
+  useEffect(() => {
+    setStagePos({
+      x: (size.width - boardWidth * stageScale) / 2,
+      y: (size.height - boardHeight * stageScale) / 2,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boardId]);
+
+  const gridLines = useMemo(() => {
+    const lines: JSX.Element[] = [];
+
+    for (let i = 0; i <= cols; i++) {
+      const x = i * cellSizePx;
+      lines.push(
+        <Line
+          key={`v-${i}`}
+          points={[x, 0, x, boardHeight]}
+          stroke="black"
+          strokeWidth={1}
+          opacity={0.15}
+          listening={false}
+          perfectDrawEnabled={false}
+        />
+      );
+    }
+
+    for (let j = 0; j <= rows; j++) {
+      const y = j * cellSizePx;
+      lines.push(
+        <Line
+          key={`h-${j}`}
+          points={[0, y, boardWidth, y]}
+          stroke="black"
+          strokeWidth={1}
+          opacity={0.15}
+          listening={false}
+          perfectDrawEnabled={false}
+        />
+      );
+    }
+
+    return lines;
+  }, [cols, rows, cellSizePx, boardWidth, boardHeight]);
 
   const cursor =
     tool === "hand"
@@ -194,16 +258,22 @@ export default function BoardCanvas({
   } | null>(null);
   const updatePointer = () => {
     const pt = getPointerOnLayer(stageRef, layerRef);
-    if (pt) setPointerOnLayer(pt);
+    if (pt && isInsideBoard(pt)) setPointerOnLayer(pt);
+    else setPointerOnLayer(null);
   };
 
   function onPointerDown(e: any) {
+    const pt = getPointerOnLayer(stageRef, layerRef);
+
+    if (!pt || !isInsideBoard(pt)) return;
+
     if (tool === "pencil") return pencil.onPointerDown();
     if (tool === "eraser") return erDown();
     if (tool === "rect" || tool === "ellipse") return shapes.onPointerDown();
     if (tool === "pointer") return pointer.onStagePointerDown(e);
   }
   function onPointerMove() {
+    const pt = getPointerOnLayer(stageRef, layerRef);
     if (
       tool === "eraser" ||
       tool === "pencil" ||
@@ -212,6 +282,8 @@ export default function BoardCanvas({
     ) {
       updatePointer();
     }
+    if (!pt || !isInsideBoard(pt)) return;
+
     if (tool === "pencil") return pencil.onPointerMove();
     if (tool === "eraser") return erMove();
     if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
@@ -219,6 +291,8 @@ export default function BoardCanvas({
   }
 
   function onPointerUp() {
+    setPointerOnLayer(null);
+
     if (tool === "pencil") return pencil.onPointerUp();
     if (tool === "eraser") return erUp();
     if (tool === "rect" || tool === "ellipse") {
@@ -279,78 +353,97 @@ export default function BoardCanvas({
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         onPointerCancel={onPointerUp}
-        style={{ cursor, background: "#fff" }}
+        style={{ cursor, background: "#919191ff" }}
       >
         <Layer ref={layerRef}>
-          {objects.map((o) => {
-            if (o.type === "stroke") {
-              return (
-                <Line
-                  key={o.id}
-                  {...selectableProps(o)}
-                  points={o.points}
-                  stroke={o.color}
-                  strokeWidth={o.strokeWidth}
-                  lineCap="round"
-                  lineJoin="round"
-                  opacity={
-                    (erasePreview.has(o.id) && isMine(o.id)) ||
-                    pendingRemoval.has(o.id)
-                      ? 0
-                      : 1
-                  }
-                />
-              );
-            }
+          <Group
+            clipX={0}
+            clipY={0}
+            clipWidth={boardWidth}
+            clipHeight={boardHeight}
+          >
+            <Rect
+              x={0}
+              y={0}
+              width={boardWidth}
+              height={boardHeight}
+              fill="white"
+              stroke="black"
+              listening={false}
+            />
 
-            if (o.type === "rect") {
-              const cx = o.x + o.width / 2;
-              const cy = o.y + o.height / 2;
-              return (
-                <Rect
-                  key={o.id}
-                  {...selectableProps(o)}
-                  x={cx}
-                  y={cy}
-                  width={o.width}
-                  height={o.height}
-                  stroke={o.color}
-                  strokeWidth={o.strokeWidth}
-                  rotation={o.rotation ?? 0}
-                  offsetX={o.width / 2}
-                  offsetY={o.height / 2}
-                />
-              );
-            }
+            {gridLines}
 
-            if (o.type === "ellipse") {
-              const cx = o.x + o.width / 2;
-              const cy = o.y + o.height / 2;
-              return (
-                <Ellipse
-                  key={o.id}
-                  {...selectableProps(o)}
-                  x={cx}
-                  y={cy}
-                  radiusX={o.width / 2}
-                  radiusY={o.height / 2}
-                  stroke={o.color}
-                  strokeWidth={o.strokeWidth}
-                  rotation={o.rotation ?? 0}
-                />
-              );
-            }
+            {objects.map((o) => {
+              if (o.type === "stroke") {
+                return (
+                  <Line
+                    key={o.id}
+                    {...selectableProps(o)}
+                    points={o.points}
+                    stroke={o.color}
+                    strokeWidth={o.strokeWidth}
+                    lineCap="round"
+                    lineJoin="round"
+                    opacity={
+                      (erasePreview.has(o.id) && isMine(o.id)) ||
+                      pendingRemoval.has(o.id)
+                        ? 0
+                        : 1
+                    }
+                  />
+                );
+              }
 
-            return null;
-          })}
+              if (o.type === "rect") {
+                const cx = o.x + o.width / 2;
+                const cy = o.y + o.height / 2;
+                return (
+                  <Rect
+                    key={o.id}
+                    {...selectableProps(o)}
+                    x={cx}
+                    y={cy}
+                    width={o.width}
+                    height={o.height}
+                    stroke={o.color}
+                    strokeWidth={o.strokeWidth}
+                    rotation={o.rotation ?? 0}
+                    offsetX={o.width / 2}
+                    offsetY={o.height / 2}
+                  />
+                );
+              }
 
-          <Rect
-            visible={false}
-            listening={false}
-            fill="rgba(59,130,246,0.15)"
-            stroke="#3b82f6"
-            dash={[4, 4]}
-          />
+              if (o.type === "ellipse") {
+                const cx = o.x + o.width / 2;
+                const cy = o.y + o.height / 2;
+                return (
+                  <Ellipse
+                    key={o.id}
+                    {...selectableProps(o)}
+                    x={cx}
+                    y={cy}
+                    radiusX={o.width / 2}
+                    radiusY={o.height / 2}
+                    stroke={o.color}
+                    strokeWidth={o.strokeWidth}
+                    rotation={o.rotation ?? 0}
+                  />
+                );
+              }
+
+              return null;
+            })}
+
+            <Rect
+              visible={false}
+              listening={false}
+              fill="rgba(59,130,246,0.15)"
+              stroke="#3b82f6"
+              dash={[4, 4]}
+            />
+          </Group>
 
           <Transformer
             ref={pointer.trRef}

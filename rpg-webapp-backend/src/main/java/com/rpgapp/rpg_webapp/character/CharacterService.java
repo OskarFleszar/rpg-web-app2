@@ -42,7 +42,7 @@ public class CharacterService {
 
         Object principal = auth.getPrincipal();
         if (principal instanceof org.springframework.security.core.userdetails.User userDetails) {
-            Long userId = Long.parseLong(userDetails.getUsername()); // ID jako String → Long
+            Long userId = Long.parseLong(userDetails.getUsername()); 
             return userRepository.findById(userId)
                     .orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException(
                             "User not found"));
@@ -102,7 +102,7 @@ public class CharacterService {
     }
 
     public CharacterImageDTO getCharacterImage(Long characterId) {
-        // opcjonalnie: walidacja właściciela
+        
         return characterRepository.findImageDtoById(characterId);
     }
 
