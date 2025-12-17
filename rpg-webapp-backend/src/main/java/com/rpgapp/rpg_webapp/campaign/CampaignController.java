@@ -59,7 +59,7 @@ public class CampaignController {
     public void addNewBoard(@PathVariable Long campaignId,
                             @RequestBody BoardAddRequestDTO req) {
         Campaign campaign = campaignService.getCampaignData(campaignId).orElseThrow();
-        campaignService.addNewBoard(campaign, req.name());
+        campaignService.addNewBoard(campaign, req.name(), req.cols(), req.rows());
     }
 
     @GetMapping("/{campaignId}/getBoards")

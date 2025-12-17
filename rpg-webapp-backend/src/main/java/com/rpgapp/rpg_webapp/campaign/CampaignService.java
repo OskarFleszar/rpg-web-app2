@@ -53,6 +53,9 @@ public class CampaignService {
         Board b = new Board();
         b.setCampaign(campaign);
         b.setName("Board 1");
+        b.setCols(20);
+        b.setRows(20);
+        b.setCellSize(80);
         b = boardRepository.save(b);
 
         campaign.setActiveBoard(b);
@@ -116,11 +119,26 @@ public class CampaignService {
 
     }
 
-    public void addNewBoard(Campaign campaign, String name) {
+    public void addNewBoard(Campaign campaign, String name, Integer cols, Integer rows) {
 
         Board b = new Board();
         b.setCampaign(campaign);
         b.setName(name);
+        b.setCellSize(80);
+        if (cols <= 0) {
+           b.setCols(1); 
+        } else if (cols > 100) {
+            b.setCols(100);
+        } else {
+            b.setCols(cols);
+        }
+        if (rows <= 0) {
+           b.setRows(1); 
+        } else if (rows > 100) {
+            b.setRows(100);
+        } else {
+            b.setRows(rows);
+        }
         campaign.getBoards().add(b);
         b = boardRepository.save(b);
     }

@@ -27,4 +27,9 @@ public class Board {
             orphanRemoval = true,
             fetch = FetchType.LAZY)
     private BoardState state;
+
+    private int cols;
+    private int rows;
+
+    private int cellSize;
 }

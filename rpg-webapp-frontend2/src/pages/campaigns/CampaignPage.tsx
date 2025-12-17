@@ -36,7 +36,6 @@ export function CampaignPage() {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      console.log(response.data);
       setActiveBoardId(response.data);
     } catch (error) {
       console.error("An error occured while fetching active board id", error);

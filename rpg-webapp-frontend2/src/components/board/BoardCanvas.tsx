@@ -28,6 +28,7 @@ import { type Tool, type Drawable } from "./types";
 import { useUndo } from "./hooks/useUndo";
 import { useShape } from "./hooks/useShape";
 import { usePointer } from "./hooks/usePointer";
+import { useBoardMeta } from "./hooks/useBoardMeta";
 
 type Props = {
   boardId: number;
@@ -40,18 +41,26 @@ type PushUndo = (
   a: { kind: "draw"; objectId: string } | { kind: "erase"; objectIds: string[] }
 ) => void;
 
+export type BoardMeta = {
+  cols: number;
+  rows: number;
+  cellSize: number;
+};
+
 export default function BoardCanvas({
   boardId,
   isGM,
   setActiveBoardId,
   campaignId,
 }: Props) {
-  const cols = 20;
-  const rows = 20;
-  const cellSizePx = 80;
+  const [boardMeta, setBoardMeta] = useState<BoardMeta | null>(null);
 
-  const boardWidth = cols * cellSizePx;
-  const boardHeight = rows * cellSizePx;
+  const meta = boardMeta ?? { cols: 20, rows: 20, cellSize: 80 };
+
+  useBoardMeta(boardId, setBoardMeta);
+
+  const boardWidth = meta.cols * meta.cellSize;
+  const boardHeight = meta.rows * meta.cellSize;
 
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
@@ -125,8 +134,8 @@ export default function BoardCanvas({
   const gridLines = useMemo(() => {
     const lines: JSX.Element[] = [];
 
-    for (let i = 0; i <= cols; i++) {
-      const x = i * cellSizePx;
+    for (let i = 0; i <= meta.cols; i++) {
+      const x = i * meta.cellSize;
       lines.push(
         <Line
           key={`v-${i}`}
@@ -140,8 +149,8 @@ export default function BoardCanvas({
       );
     }
 
-    for (let j = 0; j <= rows; j++) {
-      const y = j * cellSizePx;
+    for (let j = 0; j <= meta.rows; j++) {
+      const y = j * meta.cellSize;
       lines.push(
         <Line
           key={`h-${j}`}
@@ -156,7 +165,7 @@ export default function BoardCanvas({
     }
 
     return lines;
-  }, [cols, rows, cellSizePx, boardWidth, boardHeight]);
+  }, [meta.cols, meta.rows, meta.cellSize, boardWidth, boardHeight]);
 
   const cursor =
     tool === "hand"
@@ -335,147 +344,151 @@ export default function BoardCanvas({
         setEraserSize={setEraserSize}
       />
 
-      <Stage
-        ref={stageRef}
-        width={size.width}
-        height={size.height}
-        x={stagePos.x}
-        y={stagePos.y}
-        scaleX={stageScale}
-        scaleY={stageScale}
-        draggable={tool === "hand" && enabled}
-        onDragStart={onDragStart}
-        onDragMove={onDragMove}
-        onDragEnd={onDragEnd}
-        onWheel={onWheel}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-        onPointerCancel={onPointerUp}
-        style={{ cursor, background: "#919191ff" }}
-      >
-        <Layer ref={layerRef}>
-          <Group
-            clipX={0}
-            clipY={0}
-            clipWidth={boardWidth}
-            clipHeight={boardHeight}
-          >
-            <Rect
-              x={0}
-              y={0}
-              width={boardWidth}
-              height={boardHeight}
-              fill="white"
-              stroke="black"
-              listening={false}
+      {!boardMeta ? (
+        <div>Loading...</div>
+      ) : (
+        <Stage
+          ref={stageRef}
+          width={size.width}
+          height={size.height}
+          x={stagePos.x}
+          y={stagePos.y}
+          scaleX={stageScale}
+          scaleY={stageScale}
+          draggable={tool === "hand" && enabled}
+          onDragStart={onDragStart}
+          onDragMove={onDragMove}
+          onDragEnd={onDragEnd}
+          onWheel={onWheel}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerLeave={onPointerUp}
+          onPointerCancel={onPointerUp}
+          style={{ cursor, background: "#919191ff" }}
+        >
+          <Layer ref={layerRef}>
+            <Group
+              clipX={0}
+              clipY={0}
+              clipWidth={boardWidth}
+              clipHeight={boardHeight}
+            >
+              <Rect
+                x={0}
+                y={0}
+                width={boardWidth}
+                height={boardHeight}
+                fill="white"
+                stroke="black"
+                listening={false}
+              />
+
+              {gridLines}
+
+              {objects.map((o) => {
+                if (o.type === "stroke") {
+                  return (
+                    <Line
+                      key={o.id}
+                      {...selectableProps(o)}
+                      points={o.points}
+                      stroke={o.color}
+                      strokeWidth={o.strokeWidth}
+                      lineCap="round"
+                      lineJoin="round"
+                      opacity={
+                        (erasePreview.has(o.id) && isMine(o.id)) ||
+                        pendingRemoval.has(o.id)
+                          ? 0
+                          : 1
+                      }
+                    />
+                  );
+                }
+
+                if (o.type === "rect") {
+                  const cx = o.x + o.width / 2;
+                  const cy = o.y + o.height / 2;
+                  return (
+                    <Rect
+                      key={o.id}
+                      {...selectableProps(o)}
+                      x={cx}
+                      y={cy}
+                      width={o.width}
+                      height={o.height}
+                      stroke={o.color}
+                      strokeWidth={o.strokeWidth}
+                      rotation={o.rotation ?? 0}
+                      offsetX={o.width / 2}
+                      offsetY={o.height / 2}
+                    />
+                  );
+                }
+
+                if (o.type === "ellipse") {
+                  const cx = o.x + o.width / 2;
+                  const cy = o.y + o.height / 2;
+                  return (
+                    <Ellipse
+                      key={o.id}
+                      {...selectableProps(o)}
+                      x={cx}
+                      y={cy}
+                      radiusX={o.width / 2}
+                      radiusY={o.height / 2}
+                      stroke={o.color}
+                      strokeWidth={o.strokeWidth}
+                      rotation={o.rotation ?? 0}
+                    />
+                  );
+                }
+
+                return null;
+              })}
+
+              <Rect
+                visible={false}
+                listening={false}
+                fill="rgba(59,130,246,0.15)"
+                stroke="#3b82f6"
+                dash={[4, 4]}
+              />
+            </Group>
+
+            <Transformer
+              ref={pointer.trRef}
+              rotateEnabled
+              enabledAnchors={[
+                "top-left",
+                "top-center",
+                "top-right",
+                "middle-left",
+                "middle-right",
+                "bottom-left",
+                "bottom-center",
+                "bottom-right",
+              ]}
+              boundBoxFunc={(oldBox, newBox) =>
+                newBox.width < 5 || newBox.height < 5 ? oldBox : newBox
+              }
             />
 
-            {gridLines}
-
-            {objects.map((o) => {
-              if (o.type === "stroke") {
-                return (
-                  <Line
-                    key={o.id}
-                    {...selectableProps(o)}
-                    points={o.points}
-                    stroke={o.color}
-                    strokeWidth={o.strokeWidth}
-                    lineCap="round"
-                    lineJoin="round"
-                    opacity={
-                      (erasePreview.has(o.id) && isMine(o.id)) ||
-                      pendingRemoval.has(o.id)
-                        ? 0
-                        : 1
-                    }
-                  />
-                );
-              }
-
-              if (o.type === "rect") {
-                const cx = o.x + o.width / 2;
-                const cy = o.y + o.height / 2;
-                return (
-                  <Rect
-                    key={o.id}
-                    {...selectableProps(o)}
-                    x={cx}
-                    y={cy}
-                    width={o.width}
-                    height={o.height}
-                    stroke={o.color}
-                    strokeWidth={o.strokeWidth}
-                    rotation={o.rotation ?? 0}
-                    offsetX={o.width / 2}
-                    offsetY={o.height / 2}
-                  />
-                );
-              }
-
-              if (o.type === "ellipse") {
-                const cx = o.x + o.width / 2;
-                const cy = o.y + o.height / 2;
-                return (
-                  <Ellipse
-                    key={o.id}
-                    {...selectableProps(o)}
-                    x={cx}
-                    y={cy}
-                    radiusX={o.width / 2}
-                    radiusY={o.height / 2}
-                    stroke={o.color}
-                    strokeWidth={o.strokeWidth}
-                    rotation={o.rotation ?? 0}
-                  />
-                );
-              }
-
-              return null;
-            })}
-
-            <Rect
-              visible={false}
-              listening={false}
-              fill="rgba(59,130,246,0.15)"
-              stroke="#3b82f6"
-              dash={[4, 4]}
-            />
-          </Group>
-
-          <Transformer
-            ref={pointer.trRef}
-            rotateEnabled
-            enabledAnchors={[
-              "top-left",
-              "top-center",
-              "top-right",
-              "middle-left",
-              "middle-right",
-              "bottom-left",
-              "bottom-center",
-              "bottom-right",
-            ]}
-            boundBoxFunc={(oldBox, newBox) =>
-              newBox.width < 5 || newBox.height < 5 ? oldBox : newBox
-            }
-          />
-
-          {tool === "eraser" && pointerOnLayer && (
-            <Circle
-              x={pointerOnLayer.x}
-              y={pointerOnLayer.y}
-              radius={eraserSize / 2}
-              stroke="#3b82f6"
-              dash={[6, 4]}
-              opacity={0.9}
-              listening={false}
-            />
-          )}
-        </Layer>
-      </Stage>
+            {tool === "eraser" && pointerOnLayer && (
+              <Circle
+                x={pointerOnLayer.x}
+                y={pointerOnLayer.y}
+                radius={eraserSize / 2}
+                stroke="#3b82f6"
+                dash={[6, 4]}
+                opacity={0.9}
+                listening={false}
+              />
+            )}
+          </Layer>
+        </Stage>
+      )}
     </div>
   );
 }

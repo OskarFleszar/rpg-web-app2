@@ -16,6 +16,12 @@ type GMPanelProps = {
   setShowCalendar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+type BoardMeta = {
+  name: string;
+  cols: number;
+  rows: number;
+};
+
 type BoardBasic = {
   id: number;
   name: string;
@@ -37,7 +43,11 @@ export function GMPanel({
   const [nicknameToAdd, setNicknameToAdd] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [addingBoard, setAddingBoard] = useState(false);
-  const [boardToAdd, setBoardToAdd] = useState("");
+  const [boardToAdd, setBoardToAdd] = useState<BoardMeta>({
+    name: "",
+    cols: 0,
+    rows: 0,
+  });
   const [boardBasicData, setboardBasicData] = useState<BoardBasic[]>([]);
   const userId = localStorage.getItem("userId");
 
@@ -101,7 +111,11 @@ export function GMPanel({
       console.log(boardToAdd);
       await axios.post(
         `${API_URL}/api/campaign/${campaignId}/addBoard`,
-        { name: boardToAdd },
+        {
+          name: boardToAdd.name,
+          cols: Number(boardToAdd.cols),
+          rows: Number(boardToAdd.rows),
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -109,13 +123,19 @@ export function GMPanel({
         }
       );
 
-      setBoardToAdd("");
+      setBoardToAdd({ name: "", cols: 0, rows: 0 });
       setAddingBoard(false);
       getBoardNames();
     } catch (error) {
       console.error("An error occured while adding board", error);
     }
   };
+
+  const handleChangeBordData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setBoardToAdd((prevBoardData) => ({ ...prevBoardData, [name]: value }));
+  };
+
   return (
     <div className={`GM-panel ${isOpen ? "open" : ""}`}>
       <div className={`GM-panel-tools ${isOpen ? "open" : ""}`}>
@@ -208,10 +228,25 @@ export function GMPanel({
         {addingBoard ? (
           <div>
             <input
+              type="number"
+              name="rows"
+              placeholder="Board Rows"
+              value={boardToAdd.rows}
+              onChange={(e) => handleChangeBordData(e)}
+            ></input>
+            <input
+              type="number"
+              name="cols"
+              placeholder="Board cols"
+              value={boardToAdd.cols}
+              onChange={(e) => handleChangeBordData(e)}
+            ></input>
+            <input
               type="text"
+              name="name"
               placeholder="Board Name"
-              value={boardToAdd}
-              onChange={(e) => setBoardToAdd(e.target.value)}
+              value={boardToAdd.name}
+              onChange={(e) => handleChangeBordData(e)}
             ></input>
             <button className="confirm-button" onClick={handleAddBoard}>
               ✔️
