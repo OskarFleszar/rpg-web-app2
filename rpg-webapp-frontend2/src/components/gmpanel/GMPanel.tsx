@@ -226,21 +226,27 @@ export function GMPanel({
         </div>
 
         {addingBoard ? (
-          <div>
-            <input
-              type="number"
-              name="rows"
-              placeholder="Board Rows"
-              value={boardToAdd.rows}
-              onChange={(e) => handleChangeBordData(e)}
-            ></input>
-            <input
-              type="number"
-              name="cols"
-              placeholder="Board cols"
-              value={boardToAdd.cols}
-              onChange={(e) => handleChangeBordData(e)}
-            ></input>
+          <div className="add-board-inputs">
+            <div>
+              <p className="input-label">Rows</p>
+              <input
+                type="number"
+                name="rows"
+                placeholder="Board Rows"
+                value={boardToAdd.rows}
+                onChange={(e) => handleChangeBordData(e)}
+              ></input>
+            </div>
+            <div>
+              <p className="input-label">Columns</p>
+              <input
+                type="number"
+                name="cols"
+                placeholder="Board cols"
+                value={boardToAdd.cols}
+                onChange={(e) => handleChangeBordData(e)}
+              ></input>
+            </div>
             <input
               type="text"
               name="name"

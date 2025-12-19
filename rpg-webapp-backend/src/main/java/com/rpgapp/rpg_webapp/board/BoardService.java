@@ -374,6 +374,6 @@ public class BoardService {
         campaignService.changeActiveBoard(campaignId, boardId);
     }
 
-
+    
 
 }

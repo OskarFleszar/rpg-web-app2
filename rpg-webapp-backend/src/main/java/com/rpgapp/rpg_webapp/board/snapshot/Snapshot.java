@@ -42,6 +42,11 @@ public class Snapshot {
         l.getObjects().add(obj);
     }
 
+    public void addToken(String layerId, TokenObject obj) {
+        Layer l = getOrCreateLayer(layerId, 20);
+        l.getObjects().add(obj);
+    }
+
     public boolean appendPoints(String pathId, List<int[]> pts) {
         for (Layer l : layers) {
             for (BoardObject o : l.getObjects()) {
@@ -129,6 +134,19 @@ public class Snapshot {
                     so.setX(x); so.setY(y);
                     so.setWidth(width); so.setHeight(height);
                     if (rotation != null) so.setRotation(rotation);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void updateTokenCell(String objectId, int col, int row) {
+         for (var layer : this.layers) {
+            for (var o : layer.getObjects()) {
+                if (objectId.equals(o.getObjectId()) && "token".equals(o.getType())) {
+                    var t = (TokenObject)o;
+                    t.setCol(col);
+                    t.setRow(row);
                     return;
                 }
             }

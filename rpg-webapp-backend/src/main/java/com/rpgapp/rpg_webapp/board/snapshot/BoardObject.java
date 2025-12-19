@@ -12,11 +12,12 @@ import java.time.LocalDateTime;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")   // kluczowe!
 @JsonSubTypes({
         @JsonSubTypes.Type(value = StrokeObject.class, name = "stroke"),
-        @JsonSubTypes.Type(value = ShapeObject.class,  name = "shape")
+        @JsonSubTypes.Type(value = ShapeObject.class,  name = "shape"),
+        @JsonSubTypes.Type(value = TokenObject.class,  name = "token")
 })
 public abstract class BoardObject {
-    private String type;          // "stroke" | "shape"  (musi być w JSON)
-    private String objectId;      // UUID w stringu
+    private String type;          
+    private String objectId;     
     private Long ownerId;
     private LocalDateTime createdAt;
 }

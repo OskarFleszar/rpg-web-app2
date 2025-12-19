@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class ShapeObject extends BoardObject{
 
-    private String objectId;
+    
     private String shape;
 
     private String color;
@@ -15,13 +15,10 @@ public class ShapeObject extends BoardObject{
     private double x;
     private double y;
 
-    // RECT:
+
     private Double width;
     private Double height;
 
-    private Double rotation;              // opcjonalnie
+    private Double rotation;            
 
-
-
-    // gettery/settery
 }
