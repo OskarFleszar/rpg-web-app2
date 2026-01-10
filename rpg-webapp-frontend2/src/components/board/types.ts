@@ -4,7 +4,8 @@ export type Tool =
   | "eraser"
   | "rect"
   | "ellipse"
-  | "pointer";
+  | "pointer"
+  | "token";
 
 export type Stroke = {
   type: "stroke";
@@ -41,8 +42,18 @@ export type Ellipse = {
   ownerId: string;
 };
 
-export type Drawable = Stroke | Rect | Ellipse;
+export type Token = {
+  type: "token";
+  id: string;
+  col: number;
+  row: number;
+  ownerId: string;
+  characterId: number;
+};
+
+export type Drawable = Stroke | Rect | Ellipse | Token;
 
 export const isStroke = (o: Drawable): o is Stroke => o.type === "stroke";
 export const isRect = (o: Drawable): o is Rect => o.type === "rect";
 export const isEllipse = (o: Drawable): o is Ellipse => o.type === "ellipse";
+export const isToken = (o: Drawable): o is Token => o.type === "token";

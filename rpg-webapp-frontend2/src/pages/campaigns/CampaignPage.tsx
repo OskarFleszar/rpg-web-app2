@@ -21,6 +21,9 @@ export function CampaignPage() {
   const [GMRoll, setGMRoll] = useState(false);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
   const [GMBoardId, setGMBoardId] = useState<number | null>(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<
+    number | "" | null
+  >("");
   const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
@@ -86,6 +89,8 @@ export function CampaignPage() {
           characterIds={characterIds}
           GMRoll={GMRoll}
           isGM={isGM}
+          selectedCharacterId={selectedCharacterId}
+          setSelectedCharacterId={setSelectedCharacterId}
         />
         <BoardCanvas
           boardId={Number(
@@ -94,6 +99,7 @@ export function CampaignPage() {
           isGM={isGM}
           setActiveBoardId={setActiveBoardId}
           campaignId={id}
+          selectedCharacterId={selectedCharacterId}
         />
       </WSProvider>
       {showCalendar && (

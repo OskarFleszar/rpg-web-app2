@@ -115,6 +115,17 @@ export type ShapeAddOp = {
   clientId?: string;
 };
 
+export type TokenAddOp = {
+  type: "token.add";
+  id: string;
+  boardId: number;
+  layerId: string;
+  col: number;
+  row: number;
+  characterId: number;
+  clientId?: string;
+};
+
 export type EraseAppliedOp = {
   type: "erase.applied";
   boardId: number;
@@ -184,4 +195,5 @@ export type BoardOp =
   | EraseUndoAppliedOp
   | BoardClearedOp
   | TransformAppliedOp
-  | ChangeBoardOp;
+  | ChangeBoardOp
+  | TokenAddOp;

@@ -27,7 +27,16 @@ type ApiShape = {
   ownerId: string | number;
 };
 
-type ApiObject = ApiStroke | ApiShape;
+type ApiToken = {
+  type: "token";
+  objectId: string;
+  col: number;
+  row: number;
+  ownerId: string | number;
+  chcaracterId: number | null;
+};
+
+type ApiObject = ApiStroke | ApiShape | ApiToken;
 type ApiLayer = { id: string; locked: boolean; objects: ApiObject[] };
 type ApiSnapshot = { version: number; layers: ApiLayer[] };
 

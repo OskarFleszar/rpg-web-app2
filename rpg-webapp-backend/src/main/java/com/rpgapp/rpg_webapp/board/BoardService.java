@@ -8,10 +8,7 @@ import com.rpgapp.rpg_webapp.board.entity.BoardState;
 import com.rpgapp.rpg_webapp.board.repositories.BoardObjectIndexRepository;
 import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.board.repositories.BoardStateRepository;
-import com.rpgapp.rpg_webapp.board.snapshot.BoardObject;
-import com.rpgapp.rpg_webapp.board.snapshot.ShapeObject;
-import com.rpgapp.rpg_webapp.board.snapshot.Snapshot;
-import com.rpgapp.rpg_webapp.board.snapshot.StrokeObject;
+import com.rpgapp.rpg_webapp.board.snapshot.*;
 import com.rpgapp.rpg_webapp.campaign.CampaignService;
 import com.rpgapp.rpg_webapp.character.CharacterService;
 import com.rpgapp.rpg_webapp.user.User;
@@ -224,6 +221,37 @@ public class BoardService {
         idx.setLayerId(dto.layerId());
         idx.setCreatedAt(java.time.LocalDateTime.now());
         indexRepo.save(idx);
+    }
+
+    public void addToken (long boardId, TokenObjectDTO dto, User owner) throws Exception {
+
+
+        BoardState st = getOrCreateState(boardId);
+        Snapshot snap = readSnapshot(st);
+
+        TokenObject tokenObject = new TokenObject();
+        tokenObject.setType("token");
+        tokenObject.setObjectId(dto.id().toString());
+        tokenObject.setOwnerId(owner.getId());
+        tokenObject.setCreatedAt(LocalDateTime.now());
+        tokenObject.setRow(dto.row());
+        tokenObject.setCol(dto.col());
+        tokenObject.setCharacterId(dto.characterId());
+
+        snap.addToken(dto.layerId(),tokenObject);
+        writeSnapshot(st, snap);
+        states.save(st);
+
+        var idx = new BoardObjectIndex();
+        idx.setObjectId(dto.id());
+        idx.setBoard(st.getBoard());
+        idx.setOwner(owner);
+        idx.setType("token");
+        idx.setLayerId(dto.layerId());
+        idx.setCreatedAt(LocalDateTime.now());
+        indexRepo.save(idx);
+
+
     }
     @Transactional
     public List<RemoveObject> eraseCommit(long boardId, List<UUID> ids, User who, boolean isGM) throws Exception {

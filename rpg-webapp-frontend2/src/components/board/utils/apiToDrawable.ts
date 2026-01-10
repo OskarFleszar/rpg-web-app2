@@ -42,5 +42,16 @@ export function apiObjectToDrawable(o: any) {
     };
   }
 
+  if (o.type === "token") {
+    return {
+      type: "token" as const,
+      id: o.objectId,
+      col: o.col,
+      row: o.row,
+      characterId: o.characterId,
+      ownerId: String(o.ownerId ?? ""),
+    };
+  }
+
   return null;
 }

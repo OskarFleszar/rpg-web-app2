@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @Getter @Setter @NoArgsConstructor @SuperBuilder
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")   // kluczowe!
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = StrokeObject.class, name = "stroke"),
         @JsonSubTypes.Type(value = ShapeObject.class,  name = "shape"),

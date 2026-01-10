@@ -114,6 +114,16 @@ export default function Toolbar(props: Props) {
           setWidth={setWidth}
         />
       </div>
+
+      <div className={`pencil-select ${tool === "token" ? "open" : ""}`}>
+        <button
+          className={`tool-button ${tool === "token" ? "active" : ""}`}
+          title="Token"
+          onClick={() => setTool("token")}
+        >
+          <span> T </span>
+        </button>
+      </div>
     </div>
   );
 }

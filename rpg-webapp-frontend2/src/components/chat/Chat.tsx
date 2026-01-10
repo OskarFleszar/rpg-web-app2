@@ -48,9 +48,20 @@ type ChatProps = {
   characterIds: number[];
   GMRoll: boolean;
   isGM: boolean;
+  selectedCharacterId: number | "" | null;
+  setSelectedCharacterId: React.Dispatch<
+    React.SetStateAction<number | "" | null>
+  >;
 };
 
-export function Chat({ campaignId, characterIds, GMRoll, isGM }: ChatProps) {
+export function Chat({
+  campaignId,
+  characterIds,
+  GMRoll,
+  isGM,
+  selectedCharacterId,
+  setSelectedCharacterId,
+}: ChatProps) {
   const publish = usePublish();
   useChannel<MessageItem>(`/chatroom/${campaignId}`, (msg) => {
     console.log(msg);
@@ -66,9 +77,6 @@ export function Chat({ campaignId, characterIds, GMRoll, isGM }: ChatProps) {
     bonus: 0,
   });
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [selectedCharacterId, setSelectedCharacterId] = useState<
-    number | "" | null
-  >("");
 
   const selectedCharacter =
     typeof selectedCharacterId === "number"

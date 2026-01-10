@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   useCallback,
   useEffect,
@@ -29,12 +30,14 @@ import { useUndo } from "./hooks/useUndo";
 import { useShape } from "./hooks/useShape";
 import { usePointer } from "./hooks/usePointer";
 import { useBoardMeta } from "./hooks/useBoardMeta";
+import { useToken } from "./hooks/useToken";
 
 type Props = {
   boardId: number;
   isGM: boolean;
   setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>;
   campaignId: string | undefined;
+  selectedCharacterId: number | "" | null;
 };
 
 type PushUndo = (
@@ -52,10 +55,14 @@ export default function BoardCanvas({
   isGM,
   setActiveBoardId,
   campaignId,
+  selectedCharacterId,
 }: Props) {
   const [boardMeta, setBoardMeta] = useState<BoardMeta | null>(null);
 
   const meta = boardMeta ?? { cols: 20, rows: 20, cellSize: 80 };
+
+  const selectedCharacterIdNum =
+    typeof selectedCharacterId === "number" ? selectedCharacterId : null;
 
   useBoardMeta(boardId, setBoardMeta);
 
@@ -193,6 +200,19 @@ export default function BoardCanvas({
     setPanZoomEnabled: setEnabled,
   });
 
+  const token = useToken({
+    active: tool === "token",
+    boardId,
+    stageRef,
+    layerRef,
+    clientId,
+    currentUserId,
+    setObjects,
+    boardMeta: meta,
+    layerId: "tokens",
+    characterId: selectedCharacterIdNum,
+  });
+
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
     useWsIncoming(boardId, setObjects, clientId, setActiveBoardId, campaignId, {
       pushUndo: (a) => pushUndoRef.current?.(a),
@@ -280,6 +300,7 @@ export default function BoardCanvas({
     if (tool === "eraser") return erDown();
     if (tool === "rect" || tool === "ellipse") return shapes.onPointerDown();
     if (tool === "pointer") return pointer.onStagePointerDown(e);
+    if (tool === "token") return token.onPointerDown();
   }
   function onPointerMove() {
     const pt = getPointerOnLayer(stageRef, layerRef);
@@ -441,6 +462,24 @@ export default function BoardCanvas({
                       stroke={o.color}
                       strokeWidth={o.strokeWidth}
                       rotation={o.rotation ?? 0}
+                    />
+                  );
+                }
+
+                if (o.type === "token") {
+                  const x = (o.col + 0.5) * boardMeta.cellSize;
+                  const y = (o.row + 0.5) * boardMeta.cellSize;
+
+                  return (
+                    <Circle
+                      key={o.id}
+                      {...selectableProps(o)}
+                      x={x}
+                      y={y}
+                      radius={boardMeta.cellSize * 0.35}
+                      stroke="black"
+                      strokeWidth={2}
+                      fill="rgba(0,0,0,0.15)"
                     />
                   );
                 }

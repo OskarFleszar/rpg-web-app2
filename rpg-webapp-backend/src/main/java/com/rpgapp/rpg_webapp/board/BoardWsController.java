@@ -141,6 +141,25 @@ public class BoardWsController {
                 service.addShape(id, dto, owner);
                 broker.convertAndSend("/topic/board." + id + ".op", body);
             }
+
+            case "token.add" -> {
+                var dto = mapper.convertValue(body.get("token"), TokenObjectDTO.class);
+                if(dto == null) return;
+
+                var lid = (String) body.get("layerId");
+                if (dto.layerId() == null && lid != null) {
+                    dto = new TokenObjectDTO(
+                           dto.id(), dto.characterId(), dto.col(), dto.row(), lid
+                    );
+                }
+
+                var owner = users.findUserById(userId).orElse(null);
+                if (owner == null) return;
+
+                service.addToken(id, dto, owner);
+                broker.convertAndSend("/topic/board." + id + ".op", body);
+
+            }
             case "board.clearAll" -> {
                 var who = users.findById(userId).orElse(null);
                 service.clearBoardHard(board.getId(), who);
