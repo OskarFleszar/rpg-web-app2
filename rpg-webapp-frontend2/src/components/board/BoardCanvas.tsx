@@ -198,6 +198,7 @@ export default function BoardCanvas({
     isGM,
     layerRef,
     setPanZoomEnabled: setEnabled,
+    boardMeta: meta,
   });
 
   const token = useToken({

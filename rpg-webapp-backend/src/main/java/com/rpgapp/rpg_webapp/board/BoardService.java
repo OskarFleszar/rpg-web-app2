@@ -222,10 +222,8 @@ public class BoardService {
         idx.setCreatedAt(java.time.LocalDateTime.now());
         indexRepo.save(idx);
     }
-
+    @Transactional
     public void addToken (long boardId, TokenObjectDTO dto, User owner) throws Exception {
-
-
         BoardState st = getOrCreateState(boardId);
         Snapshot snap = readSnapshot(st);
 
@@ -250,9 +248,29 @@ public class BoardService {
         idx.setLayerId(dto.layerId());
         idx.setCreatedAt(LocalDateTime.now());
         indexRepo.save(idx);
-
-
     }
+
+    @Transactional
+    public void moveToken(long boardId, boolean isGM, TokenMoveDTO dto, User owner) throws Exception {
+        BoardState st = getOrCreateState(boardId);
+        Snapshot snap = readSnapshot(st);
+
+        var obj = snap.findObjectById(dto.id().toString());
+        if (obj == null) return;
+
+        Long ownerId = obj.ownerId();
+        if (!isGM && (ownerId == null || !Objects.equals(ownerId, owner.getId()))) {
+            return;
+        }
+
+        snap.updateTokenCell(dto.id().toString(), dto.col(), dto.row());
+
+
+
+        writeSnapshot(st, snap);
+        states.save(st);
+    }
+
     @Transactional
     public List<RemoveObject> eraseCommit(long boardId, List<UUID> ids, User who, boolean isGM) throws Exception {
 

@@ -126,6 +126,13 @@ export type TokenAddOp = {
   clientId?: string;
 };
 
+export type TokenMoveOp = {
+  type: "token.moved";
+  id: string;
+  col: number;
+  row: number;
+};
+
 export type EraseAppliedOp = {
   type: "erase.applied";
   boardId: number;
@@ -196,4 +203,5 @@ export type BoardOp =
   | BoardClearedOp
   | TransformAppliedOp
   | ChangeBoardOp
-  | TokenAddOp;
+  | TokenAddOp
+  | TokenMoveOp;

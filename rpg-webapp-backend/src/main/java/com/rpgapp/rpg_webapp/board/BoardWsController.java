@@ -160,6 +160,34 @@ public class BoardWsController {
                 broker.convertAndSend("/topic/board." + id + ".op", body);
 
             }
+
+            case "token.move" -> {
+                var dto = mapper.convertValue(body, TokenMoveDTO.class);
+                if (dto == null) return;
+
+                var owner = users.findUserById(userId).orElse(null);
+                if (owner == null) return;
+
+                var lid = (String) body.get("layerId");
+                if (dto.layerId() == null && lid != null) {
+                    dto = new TokenMoveDTO(dto.id(), dto.col(), dto.row(), lid);
+                }
+
+                boolean isGM = Boolean.TRUE.equals(body.get("isGM"));
+
+                service.moveToken(id, isGM, dto, owner);
+
+                var out = new HashMap<String, Object>();
+                out.put("type", "token.moved");
+                out.put("boardId", id);
+                out.put("id", dto.id().toString());
+                out.put("col", dto.col());
+                out.put("row", dto.row());
+                out.put("clientId", body.get("clientId"));
+
+                broker.convertAndSend("/topic/board." + id + ".op", out);
+            }
+
             case "board.clearAll" -> {
                 var who = users.findById(userId).orElse(null);
                 service.clearBoardHard(board.getId(), who);

@@ -15,6 +15,8 @@ type ChangedShape = {
   rotation?: number;
 };
 
+type ChangedToken = { id: string; kind: "token"; col: number; row: number };
+
 export function usePointer(opts: {
   active: boolean;
   boardId: number;
@@ -25,6 +27,7 @@ export function usePointer(opts: {
   isGM: boolean;
   layerRef: React.RefObject<Konva.Layer | null>;
   setPanZoomEnabled?: (v: boolean) => void;
+  boardMeta: { cols: number; rows: number; cellSize: number };
 }) {
   const {
     active,
@@ -35,8 +38,10 @@ export function usePointer(opts: {
     isGM,
     layerRef,
     setPanZoomEnabled,
+    boardMeta,
   } = opts;
 
+  const { cols, rows, cellSize } = boardMeta;
   const publish = usePublish();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -63,7 +68,7 @@ export function usePointer(opts: {
     (id: string) => {
       const o = objects.find((x) => x.id === id);
       if (!o) return false;
-      console.log(isGM);
+
       return isGM || o.ownerId === String(currentUserId);
     },
     [objects, isGM, currentUserId]
@@ -103,11 +108,15 @@ export function usePointer(opts: {
 
       setSelection(id);
       const node = nodeRefs.current.get(id);
+      const obj = objects.find((x) => x.id === id);
+      const isToken = obj?.type === "token";
+
       if (node && trRef.current) {
-        trRef.current.nodes([node]);
+        trRef.current.nodes(isToken ? [] : [node]);
         trRef.current.getLayer()?.batchDraw();
         layerRef.current?.batchDraw();
       }
+
       e.cancelBubble = true;
     },
     [active, canEdit, setSelection, layerRef]
@@ -203,6 +212,26 @@ export function usePointer(opts: {
       return { id: before.id, kind: "stroke", points: pts } as ChangedStroke;
     }
 
+    if (before.type === "token") {
+      const center = sceneToLayerPoint(node);
+
+      const col = Math.max(
+        0,
+        Math.min(cols - 1, Math.floor(center.x / cellSize))
+      );
+      const row = Math.max(
+        0,
+        Math.min(rows - 1, Math.floor(center.y / cellSize))
+      );
+
+      node.position({
+        x: (col + 0.5) * cellSize,
+        y: (row + 0.5) * cellSize,
+      });
+
+      return { id: before.id, kind: "token", col, row } as ChangedToken;
+    }
+
     return null;
   }
 
@@ -236,6 +265,22 @@ export function usePointer(opts: {
       return;
     }
 
+    if (ch.kind === "token") {
+      publish(`/app/board.${boardId}.op`, {
+        type: "token.move",
+        boardId,
+        clientId,
+        isGM,
+        id: ch.id,
+        col: ch.col,
+        row: ch.row,
+        layerId: "tokens",
+      } as const);
+
+      lockCamera(false);
+      return;
+    }
+
     publish(`/app/board.${boardId}.op`, {
       type: "transform.apply",
       boardId,
@@ -243,7 +288,6 @@ export function usePointer(opts: {
       isGM,
       changed: [ch],
     } as const);
-    console.log(ch);
 
     lockCamera(false);
   }, [active, canEdit, publish, boardId, clientId, lockCamera]);

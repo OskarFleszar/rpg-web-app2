@@ -209,6 +209,17 @@ export function useWsIncoming(
         break;
       }
 
+      case "token.moved": {
+        setObjects((prev) =>
+          prev.map((o) =>
+            o.type === "token" && o.id === op.id
+              ? { ...o, col: op.col, row: op.row }
+              : o
+          )
+        );
+        break;
+      }
+
       case "object.remove": {
         setPendingRemoval((prev) => {
           const next = new Set(prev);
