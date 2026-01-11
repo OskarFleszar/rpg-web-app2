@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  forwardRef,
   useCallback,
   useEffect,
   useMemo,
@@ -31,6 +32,12 @@ import { useShape } from "./hooks/useShape";
 import { usePointer } from "./hooks/usePointer";
 import { useBoardMeta } from "./hooks/useBoardMeta";
 import { useToken } from "./hooks/useToken";
+import type { CharacterImageDTO } from "../../pages/characters/CharacterPage";
+import { API_URL } from "../../config";
+import axios from "axios";
+import { toImgSrc } from "../../pages/characters/CharacterCard";
+import useImage from "use-image";
+import { Image as KonvaImage } from "react-konva";
 
 type Props = {
   boardId: number;
@@ -49,6 +56,51 @@ export type BoardMeta = {
   rows: number;
   cellSize: number;
 };
+
+type TokenSpriteProps = {
+  x: number;
+  y: number;
+  size: number;
+  src: string;
+} & any;
+
+export const TokenSprite = forwardRef<Konva.Node, TokenSpriteProps>(
+  function TokenSprite({ x, y, size, src, ...rest }, ref) {
+    const [img] = useImage(src, "anonymous");
+
+    if (!img) {
+      return (
+        <Rect
+          {...rest}
+          ref={ref as any}
+          x={x - size / 2}
+          y={y - size / 2}
+          width={size}
+          height={size}
+          fill="#e5e7eb"
+          stroke="#111827"
+          strokeWidth={2}
+          perfectDrawEnabled={false}
+        />
+      );
+    }
+
+    return (
+      <KonvaImage
+        {...rest}
+        ref={ref as any}
+        x={x - size / 2}
+        y={y - size / 2}
+        width={size}
+        height={size}
+        image={img}
+        perfectDrawEnabled={false}
+      />
+    );
+  }
+);
+
+TokenSprite.displayName = "TokenSprite";
 
 export default function BoardCanvas({
   boardId,
@@ -116,6 +168,42 @@ export default function BoardCanvas({
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const layerRef = useRef<Konva.Layer | null>(null);
+
+  const [charImg, setCharImg] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    const ids = Array.from(
+      new Set(
+        objects.filter((o) => o.type === "token").map((t) => t.characterId)
+      )
+    ).filter((x): x is number => typeof x === "number" && Number.isFinite(x));
+
+    ids.forEach(async (cid) => {
+      if (charImg[cid]) return;
+
+      try {
+        const res = await axios.get<CharacterImageDTO>(
+          `${API_URL}/api/character/characterImage/${cid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const src = toImgSrc(
+          res.data?.characterImage,
+          res.data?.imageType ?? "image/jpeg"
+        );
+
+        setCharImg((prev) => ({ ...prev, [cid]: src }));
+      } catch (e) {
+        console.error("token image fetch failed", e);
+        // możesz dać fallback:
+        setCharImg((prev) => ({ ...prev, [cid]: toImgSrc(null) }));
+      }
+    });
+  }, [objects, charImg]);
 
   const {
     stageScale,
@@ -342,10 +430,11 @@ export default function BoardCanvas({
         ? (e: Konva.KonvaEventObject<PointerEvent>) =>
             pointer.onNodePointerDown(e, o.id)
         : undefined,
+
     draggable:
       tool === "pointer" &&
-      pointer.selectedId === o.id &&
-      (isMine(o.id) || isGM),
+      (isMine(o.id) || isGM) &&
+      (o.type === "token" || pointer.selectedId === o.id),
 
     onDragStart: tool === "pointer" ? pointer.onDragStart : undefined,
     onDragEnd: tool === "pointer" ? pointer.onDragEnd : undefined,
@@ -471,16 +560,17 @@ export default function BoardCanvas({
                   const x = (o.col + 0.5) * boardMeta.cellSize;
                   const y = (o.row + 0.5) * boardMeta.cellSize;
 
+                  const src = charImg[o.characterId] ?? toImgSrc(null);
+                  const sizePx = boardMeta.cellSize * 0.9;
+
                   return (
-                    <Circle
+                    <TokenSprite
                       key={o.id}
                       {...selectableProps(o)}
                       x={x}
                       y={y}
-                      radius={boardMeta.cellSize * 0.35}
-                      stroke="black"
-                      strokeWidth={2}
-                      fill="rgba(0,0,0,0.15)"
+                      size={sizePx}
+                      src={src}
                     />
                   );
                 }

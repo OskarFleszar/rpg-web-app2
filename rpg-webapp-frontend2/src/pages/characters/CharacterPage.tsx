@@ -34,7 +34,7 @@ export type Armors = {
   armorPoints: number | null;
 };
 
-type CharacterImageDTO = {
+export type CharacterImageDTO = {
   characterImage: string | null;
   imageType: string | null;
 };
@@ -105,7 +105,7 @@ export function CharacterPage() {
       setCharacterImageRaw(response.data?.characterImage ?? null);
       setImageType(response.data?.imageType ?? null);
     } catch (error) {
-      console.error("Błąd przy pobieraniu zdjęcia profilowego:", error);
+      console.error("Error fetching character image:", error);
       setCharacterImageRaw(null);
       setImageType(null);
     }

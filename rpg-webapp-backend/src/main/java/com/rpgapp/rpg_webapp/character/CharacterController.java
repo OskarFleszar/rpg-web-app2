@@ -47,7 +47,6 @@ public class CharacterController {
     }
 
     @GetMapping(path = "/chosencharacters")
-
     public List<ChatCharacterDTO> getCharactersByIds(@RequestParam List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parametr 'ids' jest wymagany");

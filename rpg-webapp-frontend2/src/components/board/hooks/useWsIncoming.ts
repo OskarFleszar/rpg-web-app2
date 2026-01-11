@@ -110,7 +110,7 @@ export function useWsIncoming(
       case "stroke.append": {
         if (pendingRemoval.has(op.pathId)) return;
 
-        let state = remoteStrokesRef.current.get(op.pathId);
+        const state = remoteStrokesRef.current.get(op.pathId);
         const add = (op.points ?? []).flat();
         if (!add.length) break;
 

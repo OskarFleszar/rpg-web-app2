@@ -15,8 +15,6 @@ type ChangedShape = {
   rotation?: number;
 };
 
-type ChangedToken = { id: string; kind: "token"; col: number; row: number };
-
 export function usePointer(opts: {
   active: boolean;
   boardId: number;
@@ -62,6 +60,10 @@ export function usePointer(opts: {
   const trRef = useRef<Konva.Transformer | null>(null);
   const nodeRefs = useRef(new Map<string, Konva.Node>());
 
+  const refCallbacks = useRef(
+    new Map<string, (node: Konva.Node | null) => void>()
+  );
+
   const beforeRef = useRef<Drawable | null>(null);
 
   const canEdit = useCallback(
@@ -74,25 +76,44 @@ export function usePointer(opts: {
     [objects, isGM, currentUserId]
   );
 
-  const bindNodeRef = useCallback(
-    (id: string) => (node: Konva.Node | null) => {
+  const bindNodeRef = useCallback((id: string) => {
+    const existing = refCallbacks.current.get(id);
+    if (existing) return existing;
+
+    const cb = (node: Konva.Node | null) => {
       if (node) {
         node.setAttr("data-id", id);
         nodeRefs.current.set(id, node);
-        if (selectedId === id && trRef.current) {
-          trRef.current.nodes([node]);
-          layerRef.current?.batchDraw();
-        }
       } else {
         nodeRefs.current.delete(id);
       }
-    },
-    [selectedId, layerRef]
-  );
+    };
+
+    refCallbacks.current.set(id, cb);
+    return cb;
+  }, []);
 
   useEffect(() => {
     if (!active) clearSelection();
   }, [active, clearSelection]);
+
+  useEffect(() => {
+    if (!selectedId) {
+      trRef.current?.nodes([]);
+      layerRef.current?.batchDraw();
+      return;
+    }
+
+    const node = nodeRefs.current.get(selectedId);
+    const obj = objects.find((x) => x.id === selectedId);
+    const isToken = obj?.type === "token";
+
+    if (node && trRef.current) {
+      trRef.current.nodes(isToken ? [] : [node]);
+      trRef.current.getLayer()?.batchDraw();
+      layerRef.current?.batchDraw();
+    }
+  }, [selectedId, objects, layerRef]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -213,23 +234,29 @@ export function usePointer(opts: {
     }
 
     if (before.type === "token") {
-      const center = sceneToLayerPoint(node);
+      const nx = (node as any).x?.() ?? 0; // top-left
+      const ny = (node as any).y?.() ?? 0;
+      const w = (node as any).width?.() ?? 0;
+      const h = (node as any).height?.() ?? 0;
+
+      const centerX = nx + w / 2;
+      const centerY = ny + h / 2;
 
       const col = Math.max(
         0,
-        Math.min(cols - 1, Math.floor(center.x / cellSize))
+        Math.min(cols - 1, Math.floor(centerX / cellSize))
       );
       const row = Math.max(
         0,
-        Math.min(rows - 1, Math.floor(center.y / cellSize))
+        Math.min(rows - 1, Math.floor(centerY / cellSize))
       );
 
-      node.position({
-        x: (col + 0.5) * cellSize,
-        y: (row + 0.5) * cellSize,
+      (node as any).position({
+        x: (col + 0.5) * cellSize - w / 2,
+        y: (row + 0.5) * cellSize - h / 2,
       });
 
-      return { id: before.id, kind: "token", col, row } as ChangedToken;
+      return { id: before.id, kind: "token", col, row };
     }
 
     return null;
