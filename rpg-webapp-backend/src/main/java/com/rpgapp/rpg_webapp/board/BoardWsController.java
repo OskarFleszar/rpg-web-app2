@@ -161,6 +161,26 @@ public class BoardWsController {
 
             }
 
+            case "token.delete" -> {
+                var tokenId = (String) body.get("tokenId");
+                var tokenUUID = UUID.fromString(tokenId);
+                if(tokenId == null) return;
+
+                var owner = users.findUserById(userId).orElseThrow();
+                var isGM = body.get("isGM");
+
+                service.deleteToken(id, (Boolean) isGM, owner, tokenUUID);
+
+                var out = new HashMap<String, Object>();
+                out.put("type", "token.deleted");
+                out.put("boardId", id);
+                out.put("id", tokenId.toString());
+                out.put("clientId", body.get("clientId"));
+
+                broker.convertAndSend("/topic/board." + id + ".op", out);
+
+            }
+
             case "token.move" -> {
                 var dto = mapper.convertValue(body, TokenMoveDTO.class);
                 if (dto == null) return;
@@ -272,14 +292,14 @@ public void onOp(@DestinationVariable Long campaignId,
     switch (type) {
         case "change.board" -> {
             Long boardId = Long.valueOf(body.get("boardId").toString());
-            // opcjonalnie: persistuj activeBoard w DB
+
             service.changeBoard(campaignId, boardId);
 
             var out = new HashMap<String, Object>();
             out.put("type", "change-board");
             out.put("boardId", boardId);
 
-            // KLUCZ: broadcast po temacie kampanii
+
             broker.convertAndSend("/topic/campaign." + campaignId + ".op", out);
         }
         // ...

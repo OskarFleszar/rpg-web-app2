@@ -234,7 +234,7 @@ export function usePointer(opts: {
     }
 
     if (before.type === "token") {
-      const nx = (node as any).x?.() ?? 0; // top-left
+      const nx = (node as any).x?.() ?? 0;
       const ny = (node as any).y?.() ?? 0;
       const w = (node as any).width?.() ?? 0;
       const h = (node as any).height?.() ?? 0;
@@ -260,6 +260,20 @@ export function usePointer(opts: {
     }
 
     return null;
+  }
+
+  window.addEventListener("keydown", (e) => deleteToken(e));
+
+  function deleteToken(e: KeyboardEvent) {
+    if (e.code !== "Delete" || selectedId !== null) {
+      publish(`/app/board.${boardId}.op`, {
+        type: "token.delete",
+        boardId,
+        clientId,
+        isGM,
+        tokenId: selectedId,
+      } as const);
+    }
   }
 
   const commitSelection = useCallback(() => {

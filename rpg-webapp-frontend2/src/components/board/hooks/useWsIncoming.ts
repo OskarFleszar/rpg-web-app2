@@ -209,6 +209,17 @@ export function useWsIncoming(
         break;
       }
 
+      case "token.deleted": {
+        const t = (op as any).token ?? op;
+
+        const idToRemove = String(t.id ?? t.objectId ?? "");
+        if (!idToRemove) return;
+
+        setObjects((prev) => prev.filter((o) => o.id !== idToRemove));
+
+        break;
+      }
+
       case "token.moved": {
         setObjects((prev) =>
           prev.map((o) =>

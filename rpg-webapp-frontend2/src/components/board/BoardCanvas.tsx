@@ -268,8 +268,8 @@ export default function BoardCanvas({
         ? "grabbing"
         : "grab"
       : tool === "eraser"
-      ? "none"
-      : "crosshair";
+        ? "none"
+        : "crosshair";
 
   const clientId = useMemo(
     () => crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
@@ -497,86 +497,94 @@ export default function BoardCanvas({
 
               {gridLines}
 
-              {objects.map((o) => {
-                if (o.type === "stroke") {
-                  return (
-                    <Line
-                      key={o.id}
-                      {...selectableProps(o)}
-                      points={o.points}
-                      stroke={o.color}
-                      strokeWidth={o.strokeWidth}
-                      lineCap="round"
-                      lineJoin="round"
-                      opacity={
-                        (erasePreview.has(o.id) && isMine(o.id)) ||
-                        pendingRemoval.has(o.id)
-                          ? 0
-                          : 1
-                      }
-                    />
-                  );
-                }
+              {objects
+                .filter((o) => o.type !== "token")
+                .map((o) => {
+                  if (o.type === "stroke") {
+                    return (
+                      <Line
+                        key={o.id}
+                        {...selectableProps(o)}
+                        points={o.points}
+                        stroke={o.color}
+                        strokeWidth={o.strokeWidth}
+                        lineCap="round"
+                        lineJoin="round"
+                        opacity={
+                          (erasePreview.has(o.id) && isMine(o.id)) ||
+                          pendingRemoval.has(o.id)
+                            ? 0
+                            : 1
+                        }
+                      />
+                    );
+                  }
 
-                if (o.type === "rect") {
-                  const cx = o.x + o.width / 2;
-                  const cy = o.y + o.height / 2;
-                  return (
-                    <Rect
-                      key={o.id}
-                      {...selectableProps(o)}
-                      x={cx}
-                      y={cy}
-                      width={o.width}
-                      height={o.height}
-                      stroke={o.color}
-                      strokeWidth={o.strokeWidth}
-                      rotation={o.rotation ?? 0}
-                      offsetX={o.width / 2}
-                      offsetY={o.height / 2}
-                    />
-                  );
-                }
+                  if (o.type === "rect") {
+                    const cx = o.x + o.width / 2;
+                    const cy = o.y + o.height / 2;
+                    return (
+                      <Rect
+                        key={o.id}
+                        {...selectableProps(o)}
+                        x={cx}
+                        y={cy}
+                        width={o.width}
+                        height={o.height}
+                        stroke={o.color}
+                        strokeWidth={o.strokeWidth}
+                        rotation={o.rotation ?? 0}
+                        offsetX={o.width / 2}
+                        offsetY={o.height / 2}
+                      />
+                    );
+                  }
 
-                if (o.type === "ellipse") {
-                  const cx = o.x + o.width / 2;
-                  const cy = o.y + o.height / 2;
-                  return (
-                    <Ellipse
-                      key={o.id}
-                      {...selectableProps(o)}
-                      x={cx}
-                      y={cy}
-                      radiusX={o.width / 2}
-                      radiusY={o.height / 2}
-                      stroke={o.color}
-                      strokeWidth={o.strokeWidth}
-                      rotation={o.rotation ?? 0}
-                    />
-                  );
-                }
+                  if (o.type === "ellipse") {
+                    const cx = o.x + o.width / 2;
+                    const cy = o.y + o.height / 2;
+                    return (
+                      <Ellipse
+                        key={o.id}
+                        {...selectableProps(o)}
+                        x={cx}
+                        y={cy}
+                        radiusX={o.width / 2}
+                        radiusY={o.height / 2}
+                        stroke={o.color}
+                        strokeWidth={o.strokeWidth}
+                        rotation={o.rotation ?? 0}
+                      />
+                    );
+                  }
 
-                if (o.type === "token") {
-                  const x = (o.col + 0.5) * boardMeta.cellSize;
-                  const y = (o.row + 0.5) * boardMeta.cellSize;
+                  return null;
+                })}
 
-                  const src = charImg[o.characterId] ?? toImgSrc(null);
-                  const sizePx = boardMeta.cellSize * 0.9;
+              {objects
+                .filter((o) => o.type === "token")
+                .map((o) => {
+                  if (o.type === "token") {
+                    const x = (o.col + 0.5) * boardMeta.cellSize;
+                    const y = (o.row + 0.5) * boardMeta.cellSize;
 
-                  return (
-                    <TokenSprite
-                      key={o.id}
-                      {...selectableProps(o)}
-                      x={x}
-                      y={y}
-                      size={sizePx}
-                      src={src}
-                    />
-                  );
-                }
+                    const src = charImg[o.characterId] ?? toImgSrc(null);
+                    const sizePx = boardMeta.cellSize * 0.9;
 
-                return null;
-              })}
+                    return (
+                      <TokenSprite
+                        key={o.id}
+                        {...selectableProps(o)}
+                        x={x}
+                        y={y}
+                        size={sizePx}
+                        src={src}
+                      />
+                    );
+                  }
+
+                  return null;
+                })}
 
               <Rect
                 visible={false}

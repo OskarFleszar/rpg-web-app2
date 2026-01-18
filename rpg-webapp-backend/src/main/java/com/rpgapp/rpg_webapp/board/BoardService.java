@@ -265,7 +265,24 @@ public class BoardService {
 
         snap.updateTokenCell(dto.id().toString(), dto.col(), dto.row());
 
+        writeSnapshot(st, snap);
+        states.save(st);
+    }
 
+    @Transactional
+    public void deleteToken(long boardId, boolean isGM, User owner, UUID id) throws Exception {
+        BoardState st = getOrCreateState(boardId);
+        Snapshot snap = readSnapshot(st);
+
+        var obj = snap.findObjectById(id.toString());
+        if (obj == null) return;
+
+        Long ownerId = obj.ownerId();
+        if (!isGM && (ownerId == null || !Objects.equals(ownerId, owner.getId()))) {
+            return;
+        }
+
+        snap.removeObject(id.toString());
 
         writeSnapshot(st, snap);
         states.save(st);
