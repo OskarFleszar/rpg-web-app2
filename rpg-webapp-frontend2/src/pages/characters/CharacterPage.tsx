@@ -76,7 +76,7 @@ export function CharacterPage() {
   const [equipment, setEquipment] = useState<Items[]>([]);
   const [talents, setTalents] = useState<Items[]>([]);
   const [characterImageRaw, setCharacterImageRaw] = useState<string | null>(
-    null
+    null,
   );
   const [imageType, setImageType] = useState<string | null>(null);
 
@@ -99,7 +99,7 @@ export function CharacterPage() {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       setCharacterImageRaw(response.data?.characterImage ?? null);
@@ -129,7 +129,7 @@ export function CharacterPage() {
     } catch (error) {
       console.error(
         "An error occured while trying to upload the character data",
-        error
+        error,
       );
     }
   };
@@ -152,7 +152,7 @@ export function CharacterPage() {
         },
       });
     } catch (error) {
-      console.error("Problem przy zapisie karty postaci", error);
+      console.error("Error saving character card", error);
     }
 
     if (selectedImageFile) {
@@ -166,14 +166,14 @@ export function CharacterPage() {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
         await fetchCharacterImage();
         setSelectedImageFile(null);
       } catch (error) {
         console.error(
           `An error occured while trying to upload the character picture`,
-          error
+          error,
         );
       }
     }

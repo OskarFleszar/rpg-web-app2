@@ -32,4 +32,10 @@ public class Board {
     private int rows;
 
     private int cellSize;
+
+    private byte[] backgroundImage;
+
+    private String imageType;
+
+
 }

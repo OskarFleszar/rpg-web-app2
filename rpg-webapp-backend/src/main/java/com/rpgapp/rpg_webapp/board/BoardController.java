@@ -5,8 +5,13 @@ import com.rpgapp.rpg_webapp.board.repositories.BoardRepository;
 import com.rpgapp.rpg_webapp.board.repositories.BoardStateRepository;
 import com.rpgapp.rpg_webapp.campaign.dto.BoardMetaDTO;
 
+import com.rpgapp.rpg_webapp.character.dto.CharacterImageDTO;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 
 @RestController
@@ -16,9 +21,12 @@ public class BoardController {
     private final BoardStateRepository states;
     private final BoardRepository boardRepository;
 
-    public BoardController(BoardStateRepository states, BoardRepository boardRepository) {
+    private final BoardService boardService;
+
+    public BoardController(BoardStateRepository states, BoardRepository boardRepository, BoardService boardService) {
         this.states = states;
         this.boardRepository = boardRepository;
+        this.boardService = boardService;
     }
 
     @GetMapping("/{boardId}/state")
@@ -37,6 +45,29 @@ public class BoardController {
                 b.getCellSize()
             )))
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{boardId}/backgroundImage")
+    public ResponseEntity<CharacterImageDTO> getBoardBackground(@PathVariable long boardId) {
+        return boardRepository.findById(boardId)
+                .map(b -> ResponseEntity.ok(new CharacterImageDTO(
+                        b.getBackgroundImage(),
+                        b.getImageType()
+                )))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping(path = "/{boardId}/backgroundImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> uploadBoardBackground(
+            @PathVariable long boardId,
+            @RequestPart("file") MultipartFile file) throws IOException {
+
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        boardService.saveBoardBackground(file, boardId);
+        return ResponseEntity.noContent().build();
     }
 
 

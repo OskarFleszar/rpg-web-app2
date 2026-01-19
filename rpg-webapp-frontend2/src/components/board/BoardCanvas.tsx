@@ -48,7 +48,9 @@ type Props = {
 };
 
 type PushUndo = (
-  a: { kind: "draw"; objectId: string } | { kind: "erase"; objectIds: string[] }
+  a:
+    | { kind: "draw"; objectId: string }
+    | { kind: "erase"; objectIds: string[] },
 ) => void;
 
 export type BoardMeta = {
@@ -97,7 +99,7 @@ export const TokenSprite = forwardRef<Konva.Node, TokenSpriteProps>(
         perfectDrawEnabled={false}
       />
     );
-  }
+  },
 );
 
 TokenSprite.displayName = "TokenSprite";
@@ -110,6 +112,8 @@ export default function BoardCanvas({
   selectedCharacterId,
 }: Props) {
   const [boardMeta, setBoardMeta] = useState<BoardMeta | null>(null);
+  const [boardImageRaw, setBoardImageRaw] = useState<string | null>(null);
+  const [imageType, setImageType] = useState<string | null>(null);
 
   const meta = boardMeta ?? { cols: 20, rows: 20, cellSize: 80 };
 
@@ -128,6 +132,47 @@ export default function BoardCanvas({
 
   const isInsideBoard = (pt: { x: number; y: number }) =>
     pt.x >= 0 && pt.y >= 0 && pt.x <= boardWidth && pt.y <= boardHeight;
+
+  const fetchBoardImage = async () => {
+    try {
+      const response = await axios.get<CharacterImageDTO>(
+        `${API_URL}/api/board/${boardId}/backgroundImage`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
+      setBoardImageRaw(response.data?.characterImage ?? null);
+      setImageType(response.data?.imageType ?? null);
+    } catch (error) {
+      console.error("Error fetching board image:", error);
+      setBoardImageRaw(null);
+      setImageType(null);
+    }
+  };
+
+  const toImgSrcBackground = (val?: string | null, mime = "image/jpeg") => {
+    if (!val || val === "null" || val === "undefined" || val.trim() === "") {
+      return null;
+    }
+    if (
+      val.startsWith("data:") ||
+      val.startsWith("http") ||
+      val.startsWith("blob:")
+    ) {
+      return val;
+    }
+    return `data:${mime};base64,${val}`;
+  };
+
+  const imgSrc = useMemo(
+    () => toImgSrcBackground(boardImageRaw, imageType || undefined) ?? "",
+    [boardImageRaw, imageType],
+  );
+
+  const [bgImg] = useImage(imgSrc, "anonymous");
 
   useEffect(() => {
     const onResize = () =>
@@ -158,7 +203,7 @@ export default function BoardCanvas({
       const o = objectsRef.current.get(id);
       return !!o && o.ownerId === currentUserId;
     },
-    [currentUserId]
+    [currentUserId],
   );
 
   const [tool, setTool] = useState<Tool>("hand");
@@ -174,8 +219,8 @@ export default function BoardCanvas({
   useEffect(() => {
     const ids = Array.from(
       new Set(
-        objects.filter((o) => o.type === "token").map((t) => t.characterId)
-      )
+        objects.filter((o) => o.type === "token").map((t) => t.characterId),
+      ),
     ).filter((x): x is number => typeof x === "number" && Number.isFinite(x));
 
     ids.forEach(async (cid) => {
@@ -188,18 +233,18 @@ export default function BoardCanvas({
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
 
         const src = toImgSrc(
           res.data?.characterImage,
-          res.data?.imageType ?? "image/jpeg"
+          res.data?.imageType ?? "image/jpeg",
         );
 
         setCharImg((prev) => ({ ...prev, [cid]: src }));
       } catch (e) {
         console.error("token image fetch failed", e);
-        // możesz dać fallback:
+
         setCharImg((prev) => ({ ...prev, [cid]: toImgSrc(null) }));
       }
     });
@@ -219,6 +264,7 @@ export default function BoardCanvas({
   } = usePanZoom();
 
   useEffect(() => {
+    fetchBoardImage();
     setStagePos({
       x: (size.width - boardWidth * stageScale) / 2,
       y: (size.height - boardHeight * stageScale) / 2,
@@ -237,10 +283,10 @@ export default function BoardCanvas({
           points={[x, 0, x, boardHeight]}
           stroke="black"
           strokeWidth={1}
-          opacity={0.15}
+          opacity={0.25}
           listening={false}
           perfectDrawEnabled={false}
-        />
+        />,
       );
     }
 
@@ -252,10 +298,10 @@ export default function BoardCanvas({
           points={[0, y, boardWidth, y]}
           stroke="black"
           strokeWidth={1}
-          opacity={0.15}
+          opacity={0.25}
           listening={false}
           perfectDrawEnabled={false}
-        />
+        />,
       );
     }
 
@@ -273,7 +319,7 @@ export default function BoardCanvas({
 
   const clientId = useMemo(
     () => crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
-    []
+    [],
   );
 
   const pointer = usePointer({
@@ -485,15 +531,29 @@ export default function BoardCanvas({
               clipWidth={boardWidth}
               clipHeight={boardHeight}
             >
-              <Rect
-                x={0}
-                y={0}
-                width={boardWidth}
-                height={boardHeight}
-                fill="white"
-                stroke="black"
-                listening={false}
-              />
+              {bgImg && (
+                <KonvaImage
+                  image={bgImg}
+                  x={0}
+                  y={0}
+                  width={boardWidth}
+                  height={boardHeight}
+                  listening={false}
+                  perfectDrawEnabled={false}
+                />
+              )}
+
+              {!bgImg && (
+                <Rect
+                  x={0}
+                  y={0}
+                  width={boardWidth}
+                  height={boardHeight}
+                  fill="white"
+                  stroke="black"
+                  listening={false}
+                />
+              )}
 
               {gridLines}
 

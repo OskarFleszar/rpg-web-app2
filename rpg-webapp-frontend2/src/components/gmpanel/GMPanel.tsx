@@ -50,6 +50,11 @@ export function GMPanel({
   });
   const [boardBasicData, setboardBasicData] = useState<BoardBasic[]>([]);
   const userId = localStorage.getItem("userId");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [backgroundImageRaw, setBackgroundImageRaw] = useState<string | null>(
+    null,
+  );
+  const [imageType, setImageType] = useState<string | null>(null);
 
   useEffect(() => {
     getBoardNames();
@@ -74,7 +79,7 @@ export function GMPanel({
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       console.log(res.data);
@@ -95,7 +100,7 @@ export function GMPanel({
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       setNicknameToAdd("");
@@ -120,7 +125,7 @@ export function GMPanel({
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       setBoardToAdd({ name: "", cols: 0, rows: 0 });
@@ -134,6 +139,35 @@ export function GMPanel({
   const handleChangeBordData = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setBoardToAdd((prevBoardData) => ({ ...prevBoardData, [name]: value }));
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImageFile(file);
+      setBackgroundImageRaw(URL.createObjectURL(file));
+      setImageType(file.type || "image/jpeg");
+    }
+  };
+
+  const handleUploadBackground = () => {
+    if (selectedImageFile) {
+      try {
+        const formData = new FormData();
+        formData.append("file", selectedImageFile);
+        axios.post(
+          `${API_URL}/api/board/${boardId}/backgroundImage`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+      } catch (error) {
+        console.error("Error while uploading background image", error);
+      }
+    }
   };
 
   return (
@@ -267,6 +301,23 @@ export function GMPanel({
             Add board
           </button>
         )}
+        <div>
+          <div className="custom-file-upload">
+            <label htmlFor="fileInput" className="file-label">
+              Choose Background
+            </label>
+            <input
+              id="fileInput"
+              type="file"
+              style={{ display: "none" }}
+              onChange={handleImageChange}
+            />
+          </div>
+
+          <button className="gm-panel-button" onClick={handleUploadBackground}>
+            Save
+          </button>
+        </div>
         <button
           className="gm-panel-button"
           onClick={() => setShowCalendar((v) => !v)}

@@ -15,7 +15,9 @@ import com.rpgapp.rpg_webapp.user.User;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class BoardService {
+
+
 
     public record RemoveObject (String layerId, BoardObject object){}
     public record RestoredObject (String layerId, BoardObject object){}
@@ -71,6 +75,14 @@ public class BoardService {
 
             return states.save(st);
         });
+    }
+
+    public void saveBoardBackground(MultipartFile file, long boardId) throws IOException {
+        Board board = boards.findById(boardId).orElseThrow();
+
+        board.setImageType(file.getContentType());
+        board.setBackgroundImage(file.getBytes());
+        boards.save(board);
     }
 
 
