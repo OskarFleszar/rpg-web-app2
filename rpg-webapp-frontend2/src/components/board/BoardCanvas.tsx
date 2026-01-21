@@ -1,23 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type JSX,
-} from "react";
-import {
-  Circle,
-  Ellipse,
-  Group,
-  Layer,
-  Line,
-  Rect,
-  Stage,
-  Transformer,
-} from "react-konva";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Circle, Group, Layer, Stage, Transformer } from "react-konva";
 import Konva from "konva";
 import Toolbar from "./Toolbar";
 import { usePanZoom } from "./hooks/usePanZoom";
@@ -25,19 +8,21 @@ import { useSnapshot } from "./hooks/useSnapshot";
 import { useWsIncoming } from "./hooks/useWsIncoming";
 import { usePencil } from "./hooks/usePencil";
 import { useEraser } from "./hooks/useEraser";
-import { getPointerOnLayer } from "./utils/konvaCoords";
 import { type Tool, type Drawable } from "./types";
 import { useUndo } from "./hooks/useUndo";
 import { useShape } from "./hooks/useShape";
 import { usePointer } from "./hooks/usePointer";
 import { useBoardMeta } from "./hooks/useBoardMeta";
 import { useToken } from "./hooks/useToken";
-import type { CharacterImageDTO } from "../../pages/characters/CharacterPage";
-import { API_URL } from "../../config";
-import axios from "axios";
-import { toImgSrc } from "../../pages/characters/CharacterCard";
-import useImage from "use-image";
-import { Image as KonvaImage } from "react-konva";
+
+import { useBoardBackground } from "./hooks/useBoardBackground";
+import { BoardBackground } from "./boardrendercomponents/BoardBackground";
+import { Grid } from "./boardrendercomponents/Grid";
+import { DrawingsLayer } from "./boardrendercomponents/DrawingsLayer";
+import { TokenLayer } from "./boardrendercomponents/TokenLayer";
+import { useStageSize } from "./hooks/useStageSize";
+import { useToolHandlers } from "./hooks/useToolHandlers";
+import { useSelectableProps } from "./hooks/useSelectableProps";
 
 type Props = {
   boardId: number;
@@ -59,51 +44,6 @@ export type BoardMeta = {
   cellSize: number;
 };
 
-type TokenSpriteProps = {
-  x: number;
-  y: number;
-  size: number;
-  src: string;
-} & any;
-
-export const TokenSprite = forwardRef<Konva.Node, TokenSpriteProps>(
-  function TokenSprite({ x, y, size, src, ...rest }, ref) {
-    const [img] = useImage(src, "anonymous");
-
-    if (!img) {
-      return (
-        <Rect
-          {...rest}
-          ref={ref as any}
-          x={x - size / 2}
-          y={y - size / 2}
-          width={size}
-          height={size}
-          fill="#e5e7eb"
-          stroke="#111827"
-          strokeWidth={2}
-          perfectDrawEnabled={false}
-        />
-      );
-    }
-
-    return (
-      <KonvaImage
-        {...rest}
-        ref={ref as any}
-        x={x - size / 2}
-        y={y - size / 2}
-        width={size}
-        height={size}
-        image={img}
-        perfectDrawEnabled={false}
-      />
-    );
-  },
-);
-
-TokenSprite.displayName = "TokenSprite";
-
 export default function BoardCanvas({
   boardId,
   isGM,
@@ -112,8 +52,6 @@ export default function BoardCanvas({
   selectedCharacterId,
 }: Props) {
   const [boardMeta, setBoardMeta] = useState<BoardMeta | null>(null);
-  const [boardImageRaw, setBoardImageRaw] = useState<string | null>(null);
-  const [imageType, setImageType] = useState<string | null>(null);
 
   const meta = boardMeta ?? { cols: 20, rows: 20, cellSize: 80 };
 
@@ -125,62 +63,10 @@ export default function BoardCanvas({
   const boardWidth = meta.cols * meta.cellSize;
   const boardHeight = meta.rows * meta.cellSize;
 
-  const [size, setSize] = useState({
-    width: typeof window !== "undefined" ? window.innerWidth : 0,
-    height: typeof window !== "undefined" ? window.innerHeight : 0,
-  });
-
   const isInsideBoard = (pt: { x: number; y: number }) =>
     pt.x >= 0 && pt.y >= 0 && pt.x <= boardWidth && pt.y <= boardHeight;
 
-  const fetchBoardImage = async () => {
-    try {
-      const response = await axios.get<CharacterImageDTO>(
-        `${API_URL}/api/board/${boardId}/backgroundImage`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
-
-      setBoardImageRaw(response.data?.characterImage ?? null);
-      setImageType(response.data?.imageType ?? null);
-    } catch (error) {
-      console.error("Error fetching board image:", error);
-      setBoardImageRaw(null);
-      setImageType(null);
-    }
-  };
-
-  const toImgSrcBackground = (val?: string | null, mime = "image/jpeg") => {
-    if (!val || val === "null" || val === "undefined" || val.trim() === "") {
-      return null;
-    }
-    if (
-      val.startsWith("data:") ||
-      val.startsWith("http") ||
-      val.startsWith("blob:")
-    ) {
-      return val;
-    }
-    return `data:${mime};base64,${val}`;
-  };
-
-  const imgSrc = useMemo(
-    () => toImgSrcBackground(boardImageRaw, imageType || undefined) ?? "",
-    [boardImageRaw, imageType],
-  );
-
-  const [bgImg] = useImage(imgSrc, "anonymous");
-
-  useEffect(() => {
-    const onResize = () =>
-      setSize({ width: window.innerWidth, height: window.innerHeight });
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+  const size = useStageSize();
 
   const [objects, setObjects] = useState<Drawable[]>([]);
   const pushUndoRef = useRef<PushUndo | null>(null);
@@ -214,42 +100,6 @@ export default function BoardCanvas({
   const stageRef = useRef<Konva.Stage | null>(null);
   const layerRef = useRef<Konva.Layer | null>(null);
 
-  const [charImg, setCharImg] = useState<Record<number, string>>({});
-
-  useEffect(() => {
-    const ids = Array.from(
-      new Set(
-        objects.filter((o) => o.type === "token").map((t) => t.characterId),
-      ),
-    ).filter((x): x is number => typeof x === "number" && Number.isFinite(x));
-
-    ids.forEach(async (cid) => {
-      if (charImg[cid]) return;
-
-      try {
-        const res = await axios.get<CharacterImageDTO>(
-          `${API_URL}/api/character/characterImage/${cid}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          },
-        );
-
-        const src = toImgSrc(
-          res.data?.characterImage,
-          res.data?.imageType ?? "image/jpeg",
-        );
-
-        setCharImg((prev) => ({ ...prev, [cid]: src }));
-      } catch (e) {
-        console.error("token image fetch failed", e);
-
-        setCharImg((prev) => ({ ...prev, [cid]: toImgSrc(null) }));
-      }
-    });
-  }, [objects, charImg]);
-
   const {
     stageScale,
     stagePos,
@@ -264,49 +114,12 @@ export default function BoardCanvas({
   } = usePanZoom();
 
   useEffect(() => {
-    fetchBoardImage();
     setStagePos({
       x: (size.width - boardWidth * stageScale) / 2,
       y: (size.height - boardHeight * stageScale) / 2,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardId]);
-
-  const gridLines = useMemo(() => {
-    const lines: JSX.Element[] = [];
-
-    for (let i = 0; i <= meta.cols; i++) {
-      const x = i * meta.cellSize;
-      lines.push(
-        <Line
-          key={`v-${i}`}
-          points={[x, 0, x, boardHeight]}
-          stroke="black"
-          strokeWidth={1}
-          opacity={0.25}
-          listening={false}
-          perfectDrawEnabled={false}
-        />,
-      );
-    }
-
-    for (let j = 0; j <= meta.rows; j++) {
-      const y = j * meta.cellSize;
-      lines.push(
-        <Line
-          key={`h-${j}`}
-          points={[0, y, boardWidth, y]}
-          stroke="black"
-          strokeWidth={1}
-          opacity={0.25}
-          listening={false}
-          perfectDrawEnabled={false}
-        />,
-      );
-    }
-
-    return lines;
-  }, [meta.cols, meta.rows, meta.cellSize, boardWidth, boardHeight]);
 
   const cursor =
     tool === "hand"
@@ -412,81 +225,26 @@ export default function BoardCanvas({
     isGM,
   });
 
+  const background = useBoardBackground(boardId);
+
   useEffect(() => {
     if (tool !== "pointer") pointer.clearSelection();
   }, [tool]);
 
-  const [pointerOnLayer, setPointerOnLayer] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const updatePointer = () => {
-    const pt = getPointerOnLayer(stageRef, layerRef);
-    if (pt && isInsideBoard(pt)) setPointerOnLayer(pt);
-    else setPointerOnLayer(null);
-  };
+  const { onPointerDown, onPointerMove, onPointerUp, pointerOnLayer } =
+    useToolHandlers({
+      tool,
+      stageRef,
+      layerRef,
+      isInsideBoard,
+      pencil,
+      shapes,
+      token,
+      pointer,
+      eraser: { onDown: erDown, onMove: erMove, onUp: erUp },
+    });
 
-  function onPointerDown(e: any) {
-    const pt = getPointerOnLayer(stageRef, layerRef);
-
-    if (!pt || !isInsideBoard(pt)) return;
-
-    if (tool === "pencil") return pencil.onPointerDown();
-    if (tool === "eraser") return erDown();
-    if (tool === "rect" || tool === "ellipse") return shapes.onPointerDown();
-    if (tool === "pointer") return pointer.onStagePointerDown(e);
-    if (tool === "token") return token.onPointerDown();
-  }
-  function onPointerMove() {
-    const pt = getPointerOnLayer(stageRef, layerRef);
-    if (
-      tool === "eraser" ||
-      tool === "pencil" ||
-      tool === "rect" ||
-      tool === "ellipse"
-    ) {
-      updatePointer();
-    }
-    if (!pt || !isInsideBoard(pt)) return;
-
-    if (tool === "pencil") return pencil.onPointerMove();
-    if (tool === "eraser") return erMove();
-    if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
-    if (tool === "pointer") return;
-  }
-
-  function onPointerUp() {
-    setPointerOnLayer(null);
-
-    if (tool === "pencil") return pencil.onPointerUp();
-    if (tool === "eraser") return erUp();
-    if (tool === "rect" || tool === "ellipse") {
-      console.log("pointerup");
-      return shapes.onPointerUp();
-    }
-    if (tool === "pointer") return;
-  }
-
-  const selectableProps = (o: Drawable) => ({
-    name: "selectable",
-    ref: pointer.bindNodeRef(o.id),
-    id: o.id,
-    onPointerDown:
-      tool === "pointer"
-        ? (e: Konva.KonvaEventObject<PointerEvent>) =>
-            pointer.onNodePointerDown(e, o.id)
-        : undefined,
-
-    draggable:
-      tool === "pointer" &&
-      (isMine(o.id) || isGM) &&
-      (o.type === "token" || pointer.selectedId === o.id),
-
-    onDragStart: tool === "pointer" ? pointer.onDragStart : undefined,
-    onDragEnd: tool === "pointer" ? pointer.onDragEnd : undefined,
-    onTransformStart: tool === "pointer" ? pointer.onTransformStart : undefined,
-    onTransformEnd: tool === "pointer" ? pointer.onTransformEnd : undefined,
-  });
+  const selectableProps = useSelectableProps({ tool, isGM, isMine, pointer });
 
   return (
     <div className="canvas-container">
@@ -531,127 +289,30 @@ export default function BoardCanvas({
               clipWidth={boardWidth}
               clipHeight={boardHeight}
             >
-              {bgImg && (
-                <KonvaImage
-                  image={bgImg}
-                  x={0}
-                  y={0}
-                  width={boardWidth}
-                  height={boardHeight}
-                  listening={false}
-                  perfectDrawEnabled={false}
-                />
-              )}
+              <BoardBackground
+                background={background}
+                boardWidth={boardWidth}
+                boardHeight={boardHeight}
+              />
 
-              {!bgImg && (
-                <Rect
-                  x={0}
-                  y={0}
-                  width={boardWidth}
-                  height={boardHeight}
-                  fill="white"
-                  stroke="black"
-                  listening={false}
-                />
-              )}
+              <Grid
+                meta={meta}
+                boardWidth={boardWidth}
+                boardHeight={boardHeight}
+              />
 
-              {gridLines}
+              <DrawingsLayer
+                objects={objects}
+                selectableProps={selectableProps}
+                isMine={isMine}
+                erasePreview={erasePreview}
+                pendingRemoval={pendingRemoval}
+              />
 
-              {objects
-                .filter((o) => o.type !== "token")
-                .map((o) => {
-                  if (o.type === "stroke") {
-                    return (
-                      <Line
-                        key={o.id}
-                        {...selectableProps(o)}
-                        points={o.points}
-                        stroke={o.color}
-                        strokeWidth={o.strokeWidth}
-                        lineCap="round"
-                        lineJoin="round"
-                        opacity={
-                          (erasePreview.has(o.id) && isMine(o.id)) ||
-                          pendingRemoval.has(o.id)
-                            ? 0
-                            : 1
-                        }
-                      />
-                    );
-                  }
-
-                  if (o.type === "rect") {
-                    const cx = o.x + o.width / 2;
-                    const cy = o.y + o.height / 2;
-                    return (
-                      <Rect
-                        key={o.id}
-                        {...selectableProps(o)}
-                        x={cx}
-                        y={cy}
-                        width={o.width}
-                        height={o.height}
-                        stroke={o.color}
-                        strokeWidth={o.strokeWidth}
-                        rotation={o.rotation ?? 0}
-                        offsetX={o.width / 2}
-                        offsetY={o.height / 2}
-                      />
-                    );
-                  }
-
-                  if (o.type === "ellipse") {
-                    const cx = o.x + o.width / 2;
-                    const cy = o.y + o.height / 2;
-                    return (
-                      <Ellipse
-                        key={o.id}
-                        {...selectableProps(o)}
-                        x={cx}
-                        y={cy}
-                        radiusX={o.width / 2}
-                        radiusY={o.height / 2}
-                        stroke={o.color}
-                        strokeWidth={o.strokeWidth}
-                        rotation={o.rotation ?? 0}
-                      />
-                    );
-                  }
-
-                  return null;
-                })}
-
-              {objects
-                .filter((o) => o.type === "token")
-                .map((o) => {
-                  if (o.type === "token") {
-                    const x = (o.col + 0.5) * boardMeta.cellSize;
-                    const y = (o.row + 0.5) * boardMeta.cellSize;
-
-                    const src = charImg[o.characterId] ?? toImgSrc(null);
-                    const sizePx = boardMeta.cellSize * 0.9;
-
-                    return (
-                      <TokenSprite
-                        key={o.id}
-                        {...selectableProps(o)}
-                        x={x}
-                        y={y}
-                        size={sizePx}
-                        src={src}
-                      />
-                    );
-                  }
-
-                  return null;
-                })}
-
-              <Rect
-                visible={false}
-                listening={false}
-                fill="rgba(59,130,246,0.15)"
-                stroke="#3b82f6"
-                dash={[4, 4]}
+              <TokenLayer
+                objects={objects}
+                boardMeta={boardMeta}
+                selectableProps={selectableProps}
               />
             </Group>
 
