@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import "./GMPanel.css";
 import { usePublish } from "../../ws/hooks";
 import { API_URL } from "../../config";
+import { GMPanelUserAdd } from "./gmpanelcomponents/GMPanelUserAdd";
+import { GMPanelBoardpicker } from "./gmpanelcomponents/GMPanelBoardpicker";
+import { GMPanelBoardAdd } from "./gmpanelcomponents/GMPanelBoardAdd";
 
 type GMPanelProps = {
   campaignId?: string;
@@ -16,13 +19,7 @@ type GMPanelProps = {
   setShowCalendar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-type BoardMeta = {
-  name: string;
-  cols: number;
-  rows: number;
-};
-
-type BoardBasic = {
+export type BoardBasic = {
   id: number;
   name: string;
 };
@@ -39,16 +36,9 @@ export function GMPanel({
   setShowCalendar,
 }: GMPanelProps) {
   const publish = usePublish();
-  const [addingUser, setAddingUser] = useState(false);
-  const [nicknameToAdd, setNicknameToAdd] = useState("");
+
   const [isOpen, setIsOpen] = useState(false);
-  const [addingBoard, setAddingBoard] = useState(false);
-  const [boardToAdd, setBoardToAdd] = useState<BoardMeta>({
-    name: "",
-    cols: 0,
-    rows: 0,
-  });
-  const [boardBasicData, setboardBasicData] = useState<BoardBasic[]>([]);
+
   const userId = localStorage.getItem("userId");
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [backgroundImageRaw, setBackgroundImageRaw] = useState<string | null>(
@@ -56,9 +46,7 @@ export function GMPanel({
   );
   const [imageType, setImageType] = useState<string | null>(null);
 
-  useEffect(() => {
-    getBoardNames();
-  }, []);
+  const [boardBasicData, setBoardBasicData] = useState<BoardBasic[]>([]);
 
   useEffect(() => {
     if (!campaignId) return;
@@ -69,77 +57,6 @@ export function GMPanel({
       campaignId,
     } as const);
   }, [boardId, campaignId]);
-
-  const getBoardNames = async () => {
-    try {
-      if (!isGM) return;
-      const res = await axios.get(
-        `${API_URL}/api/campaign/${campaignId}/getBoards`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
-
-      console.log(res.data);
-
-      setboardBasicData(res.data);
-    } catch (error) {
-      console.error("An error occured while getting board names", error);
-    }
-  };
-
-  const handleInviteUser = async () => {
-    try {
-      if (!isGM) return;
-      await axios.post(
-        `${API_URL}/api/campaign/${campaignId}/sendInvite`,
-        { nickname: nicknameToAdd },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
-
-      setNicknameToAdd("");
-      setAddingUser(false);
-    } catch (error) {
-      console.error("An error occured while adding user", error);
-    }
-  };
-
-  const handleAddBoard = async () => {
-    try {
-      if (!isGM || !boardToAdd) return;
-      console.log(boardToAdd);
-      await axios.post(
-        `${API_URL}/api/campaign/${campaignId}/addBoard`,
-        {
-          name: boardToAdd.name,
-          cols: Number(boardToAdd.cols),
-          rows: Number(boardToAdd.rows),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
-
-      setBoardToAdd({ name: "", cols: 0, rows: 0 });
-      setAddingBoard(false);
-      getBoardNames();
-    } catch (error) {
-      console.error("An error occured while adding board", error);
-    }
-  };
-
-  const handleChangeBordData = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setBoardToAdd((prevBoardData) => ({ ...prevBoardData, [name]: value }));
-  };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -173,29 +90,8 @@ export function GMPanel({
   return (
     <div className={`GM-panel ${isOpen ? "open" : ""}`}>
       <div className={`GM-panel-tools ${isOpen ? "open" : ""}`}>
-        {addingUser ? (
-          <div>
-            <input
-              type="text"
-              placeholder="Nickname"
-              value={nicknameToAdd}
-              onChange={(e) => {
-                setNicknameToAdd(e.target.value);
-              }}
-            />
-            <button className="confirm-button" onClick={handleInviteUser}>
-              ✔️
-            </button>
-            <button onClick={() => setAddingUser(false)}>❌</button>
-          </div>
-        ) : (
-          <button
-            className="gm-panel-button"
-            onClick={() => setAddingUser(true)}
-          >
-            👤➕
-          </button>
-        )}
+        <GMPanelUserAdd isGM={isGM} campaignId={campaignId} />
+
         <button
           onClick={() => {
             if (!confirm("Are you sure you want to clear the board?")) return;
@@ -223,84 +119,22 @@ export function GMPanel({
           </label>
         </div>
 
-        <div className="board-picker">
-          <p>Main board</p>
-          <select
-            value={boardId ?? ""}
-            onChange={(e) => {
-              const v = e.target.value;
-              setActiveBoardId(v === "" ? null : Number(v));
+        <GMPanelBoardpicker
+          boardId={boardId}
+          setActiveBoardId={setActiveBoardId}
+          gmBoardId={gmBoardId}
+          setGmBoardId={setGmBoardId}
+          boardBasicData={boardBasicData}
+          setBoardBasicData={setBoardBasicData}
+          campaignId={campaignId}
+        />
 
-              console.log(boardId);
-            }}
-          >
-            {boardBasicData.map((boardData) => (
-              <option key={boardData.id} value={boardData.id}>
-                {boardData.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <GMPanelBoardAdd
+          isGM={isGM}
+          campaignId={campaignId}
+          setboardBasicData={setBoardBasicData}
+        />
 
-        <div className="board-picker">
-          <p>GM board</p>
-          <select
-            value={gmBoardId ?? ""}
-            onChange={(e) => {
-              const v = e.target.value;
-              setGmBoardId(v === "" ? null : Number(v));
-            }}
-          >
-            {boardBasicData.map((boardData) => (
-              <option key={boardData.id} value={boardData.id}>
-                {boardData.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {addingBoard ? (
-          <div className="add-board-inputs">
-            <div>
-              <p className="input-label">Rows</p>
-              <input
-                type="number"
-                name="rows"
-                placeholder="Board Rows"
-                value={boardToAdd.rows}
-                onChange={(e) => handleChangeBordData(e)}
-              ></input>
-            </div>
-            <div>
-              <p className="input-label">Columns</p>
-              <input
-                type="number"
-                name="cols"
-                placeholder="Board cols"
-                value={boardToAdd.cols}
-                onChange={(e) => handleChangeBordData(e)}
-              ></input>
-            </div>
-            <input
-              type="text"
-              name="name"
-              placeholder="Board Name"
-              value={boardToAdd.name}
-              onChange={(e) => handleChangeBordData(e)}
-            ></input>
-            <button className="confirm-button" onClick={handleAddBoard}>
-              ✔️
-            </button>
-            <button onClick={() => setAddingBoard(false)}>❌</button>
-          </div>
-        ) : (
-          <button
-            className="gm-panel-button"
-            onClick={() => setAddingBoard(true)}
-          >
-            Add board
-          </button>
-        )}
         <div>
           <div className="custom-file-upload">
             <label htmlFor="fileInput" className="file-label">
