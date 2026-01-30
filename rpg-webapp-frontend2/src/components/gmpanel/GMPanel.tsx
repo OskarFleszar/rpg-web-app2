@@ -129,9 +129,9 @@ export function GMPanel({
           setboardBasicData={setBoardBasicData}
         />
 
-        <div>
-          <div className="custom-file-upload">
-            <label htmlFor="fileInput" className="file-label">
+        <div className="upload-save-background-div">
+          <div>
+            <label htmlFor="fileInput" className="gm-panel-button file-input">
               Choose Background
             </label>
             <input

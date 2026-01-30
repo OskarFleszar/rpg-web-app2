@@ -26,7 +26,7 @@ export const Grid = memo(function Grid({
         points={[x, 0, x, boardHeight]}
         stroke="black"
         strokeWidth={1}
-        opacity={0.25}
+        opacity={0.45}
         listening={false}
         perfectDrawEnabled={false}
       />,
@@ -41,7 +41,7 @@ export const Grid = memo(function Grid({
         points={[0, y, boardWidth, y]}
         stroke="black"
         strokeWidth={1}
-        opacity={0.25}
+        opacity={0.45}
         listening={false}
         perfectDrawEnabled={false}
       />,
