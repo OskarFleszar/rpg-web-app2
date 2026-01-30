@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { forwardRef, memo, useEffect, useState } from "react";
-import { toImgSrc } from "../../../pages/characters/CharacterCard";
+import { toImgSrc } from "../../../pages/characters/charactercard/CharacterCard";
 import type { Drawable } from "../types";
 import type Konva from "konva";
 import { Rect } from "react-konva";
 import { Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 import axios from "axios";
-import type { CharacterImageDTO } from "../../../pages/characters/CharacterPage";
+import type { CharacterImageDTO } from "../../../pages/characters/singlecharacterpage/CharacterPage";
 import { API_URL } from "../../../config";
 
 type TokenLayerProps = {

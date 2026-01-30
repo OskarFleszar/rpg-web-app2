@@ -1,6 +1,9 @@
-import { toImgSrc, type CharacterCardProps } from "../characters/CharacterCard";
-import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
-import "../characters/CharacterCard.css";
+import defaultPfp from "../../../assets/images/braver-blank-pfp.jpg";
+import {
+  toImgSrc,
+  type CharacterCardProps,
+} from "../../characters/charactercard/CharacterCard";
+import "../../characters/charactercard/CharacterCard.css";
 import type React from "react";
 
 type Character = CharacterCardProps["character"];
@@ -16,14 +19,14 @@ export function CharacterSelectCard({
 }: CharacterSelectCardProps) {
   const imgSrc = toImgSrc(
     character.characterImage,
-    character.imageType || undefined
+    character.imageType || undefined,
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setCharactersSelectedId((prev) =>
       e.target.checked
         ? [...prev, character.characterId]
-        : prev.filter((id) => id !== character.characterId)
+        : prev.filter((id) => id !== character.characterId),
     );
 
   const name = character.name || "Character Name";
@@ -33,10 +36,10 @@ export function CharacterSelectCard({
     len > 40
       ? "name-xl"
       : len > 28
-      ? "name-lg"
-      : len > 20
-      ? "name-md"
-      : "name-sm";
+        ? "name-lg"
+        : len > 20
+          ? "name-md"
+          : "name-sm";
 
   return (
     <label htmlFor={String(character.characterId)}>

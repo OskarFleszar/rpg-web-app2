@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Weapons } from "./CharacterPage";
+import type { Weapons } from "../singlecharacterpage/CharacterPage";
 
 type CharacterWeaponsProps = {
   weapons: Weapons[];
@@ -20,13 +20,13 @@ export function CharacterWeapons({
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    idx: number
+    idx: number,
   ) => {
     const { name, value } = e.target;
     setWeapons((prevWeapons) =>
       prevWeapons.map((weapon, i) =>
-        i === idx ? { ...weapon, [name]: value } : weapon
-      )
+        i === idx ? { ...weapon, [name]: value } : weapon,
+      ),
     );
   };
 

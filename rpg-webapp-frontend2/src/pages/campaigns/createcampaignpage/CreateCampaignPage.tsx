@@ -1,17 +1,17 @@
 import axios from "axios";
 import { useState } from "react";
 import "./CreateCampaignPage.css";
-import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
+import defaultPfp from "../../../assets/images/braver-blank-pfp.jpg";
 import { useNavigate } from "react-router";
-import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
-import { API_URL } from "../../config";
+import { API_URL } from "../../../config";
+import { BackgroundFog } from "../../../styles/stypecomponents/BackgroundFog";
 
 export function CreateCampaignPage() {
   const navigate = useNavigate();
   const [newCampaignName, setNewCampaignName] = useState("");
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [campaignImage, setCampaignImage] = useState<string | undefined>(
-    defaultPfp
+    defaultPfp,
   );
 
   const handleCreateCampaign = async () => {
@@ -27,7 +27,7 @@ export function CreateCampaignPage() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       console.log(response.data);
       const id = response.data;
@@ -41,7 +41,7 @@ export function CreateCampaignPage() {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
         console.log(formData);
         setSelectedImageFile(null);

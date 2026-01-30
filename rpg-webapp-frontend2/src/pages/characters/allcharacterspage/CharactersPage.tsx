@@ -1,11 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { CharacterCard } from "./CharacterCard";
+
 import "./CharactersPage.css";
 import { NavLink } from "react-router";
-import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
-import { API_URL } from "../../config";
-
+import { API_URL } from "../../../config";
+import { CharacterCard } from "../charactercard/CharacterCard";
+import { BackgroundFog } from "../../../styles/stypecomponents/BackgroundFog";
 export type CharacterBasic = {
   characterId: number;
   name: string;

@@ -1,7 +1,8 @@
 import { Link } from "react-router";
 import "./CampaignCard.css";
-import { toImgSrc } from "../characters/CharacterCard";
-import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
+
+import defaultPfp from "../../../assets/images/braver-blank-pfp.jpg";
+import { toImgSrc } from "../../characters/charactercard/CharacterCard";
 
 type CampaignCardProps = {
   campaign: {
@@ -16,7 +17,7 @@ type CampaignCardProps = {
 export function CampaignCard({ campaign }: CampaignCardProps) {
   const imgSrc = toImgSrc(
     campaign.campaignImage,
-    campaign.imageType || undefined
+    campaign.imageType || undefined,
   );
   return (
     <Link

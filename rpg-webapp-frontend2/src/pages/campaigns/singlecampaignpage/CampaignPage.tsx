@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import "./CampaignPage.css";
 
-import { Chat } from "../../components/chat/Chat";
-import { WSProvider } from "../../ws/WSProvider";
+import { Chat } from "../../../components/chat/Chat";
+import { WSProvider } from "../../../ws/WSProvider";
 
-import BoardCanvas from "../../components/board/BoardCanvas";
-import { GMPanel } from "../../components/gmpanel/GMPanel";
-import { CalendarComponent } from "../../components/calendar/Calendar";
-import { API_URL } from "../../config";
+import BoardCanvas from "../../../components/board/BoardCanvas";
+import { GMPanel } from "../../../components/gmpanel/GMPanel";
+import { CalendarComponent } from "../../../components/calendar/Calendar";
+import { API_URL } from "../../../config";
 
 export function CampaignPage() {
   const baseUrl = API_URL;
@@ -37,7 +37,7 @@ export function CampaignPage() {
         `${API_URL}/api/campaign/${id}/activeBoard`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        },
       );
       setActiveBoardId(response.data);
     } catch (error) {
@@ -57,8 +57,8 @@ export function CampaignPage() {
 
       console.log(
         `Backend gm: ${response.data}, localsotrage id: ${localStorage.getItem(
-          "userId"
-        )} ${isGM}`
+          "userId",
+        )} ${isGM}`,
       );
     } catch (error) {
       console.error("An error occured while fethcing gamemaster", error);
@@ -94,7 +94,7 @@ export function CampaignPage() {
         />
         <BoardCanvas
           boardId={Number(
-            isGM && GMBoardId != null ? GMBoardId : activeBoardId
+            isGM && GMBoardId != null ? GMBoardId : activeBoardId,
           )}
           isGM={isGM}
           setActiveBoardId={setActiveBoardId}
@@ -103,14 +103,8 @@ export function CampaignPage() {
         />
       </WSProvider>
       {showCalendar && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setShowCalendar(false)} // klik w tło zamyka
-        >
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()} // żeby klik w kalendarz NIE zamykał
-          >
+        <div className="modal-backdrop" onClick={() => setShowCalendar(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button
               className="modal-close"
               onClick={() => setShowCalendar(false)}

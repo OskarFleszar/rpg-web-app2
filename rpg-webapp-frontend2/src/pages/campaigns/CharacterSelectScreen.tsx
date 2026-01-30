@@ -1,17 +1,18 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import type { CharacterBasic } from "../characters/CharactersPage";
-import { CharacterSelectCard } from "./CharacterSelectCard";
-import "../characters/CharactersPage.css";
+
+import "../characters/singlecharacterpage/CharacterPage.css";
 import { useNavigate, useParams } from "react-router";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 import { API_URL } from "../../config";
+import { CharacterSelectCard } from "./cards/CharacterSelectCard";
+import type { CharacterBasic } from "../characters/allcharacterspage/CharactersPage";
 
 export function CharacterSelectScreen() {
   const { id } = useParams();
   const [characters, setCharacters] = useState<CharacterBasic[]>([]);
   const [charactersSelectedId, setCharactersSelectedId] = useState<number[]>(
-    []
+    [],
   );
   const navigate = useNavigate();
 

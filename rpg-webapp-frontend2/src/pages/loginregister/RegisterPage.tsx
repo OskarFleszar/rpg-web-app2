@@ -2,28 +2,31 @@ import { useState } from "react";
 import "./RegisterPage.css";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import { BackgroundFog } from "../styles/stypecomponents/BackgroundFog";
+
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { API_URL } from "../config";
+import { API_URL } from "../../config";
+import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
 
 type RegisterPageProps = { setLogedIn: (logedIn: boolean) => void };
 
-export function LoginPage({ setLogedIn }: RegisterPageProps) {
-  const [password, setPassword] = useState("");
+export function RegisterPage({ setLogedIn }: RegisterPageProps) {
   const [email, setEmail] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const response = await axios.post(`${API_URL}/api/auth/authenticate`, {
+    const response = await axios.post(`${API_URL}/api/auth/register`, {
+      nickname,
       email,
       password,
     });
     const { token } = response.data;
     localStorage.setItem("token", token);
     setLogedIn(true);
-    alert("Login succesfull");
+    alert("Register succesfull");
 
     navigate("/");
   };
@@ -32,20 +35,30 @@ export function LoginPage({ setLogedIn }: RegisterPageProps) {
     <div className="page-wrapper">
       <div className="register-page">
         <div className="register-form-content">
-          <p className="top-text">Login</p>
-          <form onSubmit={handleLogin} className="register-form">
+          <p className="top-text">Register</p>
+          <form onSubmit={handleRegister} className="register-form">
             <div>
               <input
                 className="input-primary register-input"
                 type="text"
-                placeholder="Email adress"
+                placeholder="Nickname"
+                value={nickname}
+                onChange={(event) => {
+                  setNickname(event.target.value);
+                }}
+              />
+            </div>
+            <div>
+              <input
+                className="input-primary register-input"
+                type="email"
+                placeholder="Email address"
                 value={email}
                 onChange={(event) => {
                   setEmail(event.target.value);
                 }}
               />
             </div>
-
             <div className="password-wrapper">
               <input
                 className="input-primary register-input"
@@ -71,7 +84,7 @@ export function LoginPage({ setLogedIn }: RegisterPageProps) {
             </div>
 
             <button className="btn-primary register-button" type="submit">
-              Login
+              Register
             </button>
           </form>
         </div>

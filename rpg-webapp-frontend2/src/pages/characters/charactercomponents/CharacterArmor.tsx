@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Armors } from "./CharacterPage";
+import type { Armors } from "../singlecharacterpage/CharacterPage";
 
 type CharacterArmorProps = {
   armors: Armors[];
@@ -15,13 +15,13 @@ export function CharacterArmor({ armors, setArmors }: CharacterArmorProps) {
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    idx: number
+    idx: number,
   ) => {
     const { name, value } = e.target;
     setArmors((prevArmors) =>
       prevArmors.map((armor, i) =>
-        i === idx ? { ...armor, [name]: value } : armor
-      )
+        i === idx ? { ...armor, [name]: value } : armor,
+      ),
     );
   };
 

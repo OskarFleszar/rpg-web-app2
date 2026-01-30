@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { CampaignCard } from "./CamapignCard";
+import { CampaignCard } from "../cards/CamapignCard";
 import "./CampaignsPage.css";
-import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
+import { BackgroundFog } from "../../../styles/stypecomponents/BackgroundFog";
 import { NavLink } from "react-router";
-import { API_URL } from "../../config";
+import { API_URL } from "../../../config";
 
 type CampaignBasic = {
   campaignId: number;

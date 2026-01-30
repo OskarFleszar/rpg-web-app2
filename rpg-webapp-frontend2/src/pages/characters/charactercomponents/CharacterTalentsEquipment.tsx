@@ -1,5 +1,5 @@
 import type React from "react";
-import type { Items } from "./CharacterPage";
+import type { Items } from "../singlecharacterpage/CharacterPage";
 import { useState } from "react";
 
 type CharacterTalentsEqProps = {
@@ -22,13 +22,13 @@ export function CharacterTalentsEquipment({
     e:
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLTextAreaElement>,
-    idx: number
+    idx: number,
   ) => {
     const { name, value } = e.target;
     setItems((prevItems) =>
       prevItems.map((item, i) =>
-        i === idx ? { ...item, [name]: value } : item
-      )
+        i === idx ? { ...item, [name]: value } : item,
+      ),
     );
   };
 
@@ -54,7 +54,7 @@ export function CharacterTalentsEquipment({
 
   const handleTextareaChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>,
-    idx: number
+    idx: number,
   ) => {
     const target = e.target;
 

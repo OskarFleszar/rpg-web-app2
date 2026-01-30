@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { API_URL } from "../../../config";
 import axios from "axios";
-import type { CharacterImageDTO } from "../../../pages/characters/CharacterPage";
+import type { CharacterImageDTO } from "../../../pages/characters/singlecharacterpage/CharacterPage";
 import { toImgSrcBackground } from "../utils/images";
 import useImage from "use-image";
 

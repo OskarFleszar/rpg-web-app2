@@ -1,18 +1,22 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
-import "./CharacterPage.css";
-import { CharacterBasicInfo } from "./CharacterBasicInfo";
-import { CharacterAttributes } from "./CharacterAttributes";
-import { CharacterSkills } from "./CharacterSkills";
-import { CharacterTalentsEquipment } from "./CharacterTalentsEquipment";
-import { CharacterWeapons } from "./CharacterWeapons";
-import { CharacterArmor } from "./CharacterArmor";
-import { CharacterGoldNotes } from "./CharacterGoldNotes";
-import type { Armors, Items, Weapons } from "./CharacterPage";
+import "./singlecharacterpage/CharacterPage.css";
+import { CharacterBasicInfo } from "./charactercomponents/CharacterBasicInfo";
+import { CharacterAttributes } from "./charactercomponents/CharacterAttributes";
+import { CharacterSkills } from "./charactercomponents/CharacterSkills";
+import { CharacterTalentsEquipment } from "./charactercomponents/CharacterTalentsEquipment";
+import { CharacterWeapons } from "./charactercomponents/CharacterWeapons";
+import { CharacterArmor } from "./charactercomponents/CharacterArmor";
+import { CharacterGoldNotes } from "./charactercomponents/CharacterGoldNotes";
+import type {
+  Armors,
+  Items,
+  Weapons,
+} from "./singlecharacterpage/CharacterPage";
 import { useNavigate } from "react-router";
 import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
-import { CharacterFirstInfo } from "./CharacterFirstInfo";
+import { CharacterFirstInfo } from "./charactercomponents/CharacterFirstInfo";
 import { API_URL } from "../../config";
 
 export function CreateCharacterPage() {
@@ -51,7 +55,7 @@ export function CreateCharacterPage() {
   const [equipment, setEquipment] = useState<Items[]>([]);
   const [talents, setTalents] = useState<Items[]>([]);
   const [characterImage, setCharacterImage] = useState<string | undefined>(
-    defaultPfp
+    defaultPfp,
   );
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export function CreateCharacterPage() {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
       const responseAttributes = await axios.get(
         `${API_URL}/api/character/default-attributes`,
@@ -74,7 +78,7 @@ export function CreateCharacterPage() {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       setSkills(responseSkills.data);
@@ -102,7 +106,7 @@ export function CreateCharacterPage() {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
       const id = response.data;
 
@@ -116,7 +120,7 @@ export function CreateCharacterPage() {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
         setSelectedImageFile(null);
       }
@@ -124,7 +128,7 @@ export function CreateCharacterPage() {
     } catch (error) {
       console.error(
         `An error occured while trying to upload the character picture`,
-        error
+        error,
       );
     }
   };

@@ -41,10 +41,6 @@ export function GMPanel({
 
   const userId = localStorage.getItem("userId");
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [backgroundImageRaw, setBackgroundImageRaw] = useState<string | null>(
-    null,
-  );
-  const [imageType, setImageType] = useState<string | null>(null);
 
   const [boardBasicData, setBoardBasicData] = useState<BoardBasic[]>([]);
 
@@ -62,8 +58,6 @@ export function GMPanel({
     const file = event.target.files?.[0];
     if (file) {
       setSelectedImageFile(file);
-      setBackgroundImageRaw(URL.createObjectURL(file));
-      setImageType(file.type || "image/jpeg");
     }
   };
 

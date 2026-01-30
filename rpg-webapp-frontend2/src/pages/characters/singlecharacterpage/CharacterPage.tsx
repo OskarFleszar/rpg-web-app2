@@ -1,19 +1,19 @@
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router";
-import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
-import "./CharacterPage.css";
-import { CharacterBasicInfo } from "./CharacterBasicInfo";
-import { CharacterAttributes } from "./CharacterAttributes";
-import { CharacterSkills } from "./CharacterSkills";
-import { CharacterTalentsEquipment } from "./CharacterTalentsEquipment";
-import { CharacterWeapons } from "./CharacterWeapons";
-import { CharacterArmor } from "./CharacterArmor";
-import { CharacterGoldNotes } from "./CharacterGoldNotes";
-import { BackgroundFog } from "../../styles/stypecomponents/BackgroundFog";
-import { CharacterFirstInfo } from "./CharacterFirstInfo";
-import { API_URL } from "../../config";
-import { toImgSrc } from "./CharacterCard";
+import defaultPfp from "../../../assets/images/braver-blank-pfp.jpg";
+import "../singlecharacterpage/CharacterPage.css";
+import { CharacterBasicInfo } from "../charactercomponents/CharacterBasicInfo";
+import { CharacterAttributes } from "../charactercomponents/CharacterAttributes";
+import { CharacterSkills } from "../charactercomponents/CharacterSkills";
+import { CharacterTalentsEquipment } from "../charactercomponents/CharacterTalentsEquipment";
+import { CharacterWeapons } from "../charactercomponents/CharacterWeapons";
+import { CharacterArmor } from "../charactercomponents/CharacterArmor";
+import { CharacterGoldNotes } from "../charactercomponents/CharacterGoldNotes";
+import { BackgroundFog } from "../../../styles/stypecomponents/BackgroundFog";
+import { CharacterFirstInfo } from "../charactercomponents/CharacterFirstInfo";
+import { API_URL } from "../../../config";
+import { toImgSrc } from "../charactercard/CharacterCard";
 
 export type Items = {
   name: string;

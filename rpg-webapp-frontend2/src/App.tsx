@@ -1,23 +1,26 @@
 import { Route, Routes } from "react-router";
 import "./App.css";
 import { HomePage } from "./pages/HomePage";
-import { CharactersPage } from "./pages/characters/CharactersPage";
-import { CampaignsPage } from "./pages/campaigns/CampaignsPage";
+
+import { CampaignsPage } from "./pages/campaigns/allcampaignspage/CampaignsPage";
 import { ProfilePage } from "./pages/profile/ProfilePage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { LoginPage } from "./pages/LoginPage";
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Header } from "./components/header/Header";
-import { CharacterPage } from "./pages/characters/CharacterPage";
+import { CharacterPage } from "./pages/characters/singlecharacterpage/CharacterPage";
 import { CreateCharacterPage } from "./pages/characters/CreateCharacterPage";
-import { CampaignPage } from "./pages/campaigns/CampaignPage";
+import { CampaignPage } from "./pages/campaigns/singlecampaignpage/CampaignPage";
 import { CharacterSelectScreen } from "./pages/campaigns/CharacterSelectScreen";
 import { UpcomingSessionsPage } from "./pages/upcoming-sessions/UpcomingSessionsPage";
 import { RequireAuth } from "./RequireAuth";
-import { CreateCampaignPage } from "./pages/campaigns/CreateCampaignPage";
+
 import { SpellsCard } from "./pages/characters/SpellsCard/SpellsCard";
 import { API_URL } from "./config";
+import { RegisterPage } from "./pages/loginregister/RegisterPage";
+import { LoginPage } from "./pages/loginregister/LoginPage";
+import { CharactersPage } from "./pages/characters/allcharacterspage/CharactersPage";
+import { CreateCampaignPage } from "./pages/campaigns/createcampaignpage/CreateCampaignPage";
 
 function App() {
   const [logedIn, setLogedIn] = useState(() => !!localStorage.getItem("token"));

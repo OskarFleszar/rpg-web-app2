@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import "./CharacterCard.css";
-import defaultPfp from "../../assets/images/braver-blank-pfp.jpg";
+import defaultPfp from "../../../assets/images/braver-blank-pfp.jpg";
 
 export type CharacterCardProps = {
   character: {
@@ -28,7 +28,7 @@ export const toImgSrc = (val?: string | null, mime = "image/jpeg") => {
 export function CharacterCard({ character }: CharacterCardProps) {
   const imgSrc = toImgSrc(
     character.characterImage,
-    character.imageType || undefined
+    character.imageType || undefined,
   );
 
   const name = character.name || "Character Name";
@@ -38,10 +38,10 @@ export function CharacterCard({ character }: CharacterCardProps) {
     len > 40
       ? "name-xl"
       : len > 28
-      ? "name-lg"
-      : len > 20
-      ? "name-md"
-      : "name-sm";
+        ? "name-lg"
+        : len > 20
+          ? "name-md"
+          : "name-sm";
 
   return (
     <Link
