@@ -14,6 +14,7 @@ import com.rpgapp.rpg_webapp.rolls.RollService;
 import com.rpgapp.rpg_webapp.user.User;
 import com.rpgapp.rpg_webapp.user.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -104,7 +105,7 @@ public class ChatService {
         return ChatEntryDTO.message(user.getId(), user.getNickname(), now, body.content());
     }
 
-
+    @Transactional
     public ChatEntryDTO handleIncomingRoll(long campaignId, Long userId, RollPostDTO body) {
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new IllegalArgumentException("Campaign not found"));

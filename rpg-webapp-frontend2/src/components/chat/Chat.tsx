@@ -1,9 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./Chat.css";
 import { useChannel, usePublish } from "../../ws/hooks";
 import axios from "axios";
 import { API_URL } from "../../config";
+
+const BASE_ATTRIBUTES = [
+  "Weapon Skill",
+  "Ballistic Skill",
+  "Strength",
+  "Toughness",
+  "Agility",
+  "Intelligence",
+  "Willpower",
+  "Fellowship",
+  "Other",
+] as const;
+
+type BaseAttribute = (typeof BASE_ATTRIBUTES)[number];
 
 type RollInfo = {
   rollType: string;
@@ -74,8 +88,10 @@ export function Chat({
     rollType: "d100",
     numberOfDice: 1,
     rollFor: "Other",
+    rollAttribute: "Other",
     bonus: 0,
   });
+
   const [characters, setCharacters] = useState<Character[]>([]);
 
   const selectedCharacter =
@@ -86,6 +102,27 @@ export function Chat({
   const selectedSkills = selectedCharacter?.skills
     ? Object.entries(selectedCharacter.skills).map(([name]) => name)
     : [];
+
+  const rollForOptions = useMemo(() => {
+    const selectedAttr = rollData.rollAttribute as BaseAttribute;
+
+    if (selectedAttr === "Other") {
+      return [{ value: "Other", label: "Other" }];
+    }
+
+    // skille które używają tego atrybutu
+    const skillsForAttr = selectedCharacter?.skills
+      ? Object.entries(selectedCharacter.skills)
+          .filter(([_, info]) => info.rollFor === selectedAttr)
+          .map(([skillName]) => skillName)
+      : [];
+
+    return [
+      { value: selectedAttr, label: selectedAttr },
+
+      ...skillsForAttr.map((s) => ({ value: s, label: s })),
+    ];
+  }, [rollData.rollAttribute, selectedCharacter]);
 
   useEffect(() => {
     fetchChatHistory();
@@ -123,7 +160,7 @@ export function Chat({
         {
           params: { ids: characterIds.join(",") },
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        },
       );
       setCharacters(response.data);
       console.log("fetched characters", response.data);
@@ -161,7 +198,7 @@ export function Chat({
   };
 
   const handleRollDataChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
 
@@ -221,8 +258,8 @@ export function Chat({
                       m.roll.outcome === "success"
                         ? "#00d100"
                         : m.roll.outcome === "failure"
-                        ? "#ff2c2cff"
-                        : "#f4efe4",
+                          ? "#ff2c2cff"
+                          : "#f4efe4",
                   }}
                 >{`( total: ${m.roll.total} )`}</span>
               ) : (
@@ -232,7 +269,7 @@ export function Chat({
                 {new Date(m.timestamp).toLocaleTimeString()}
               </span>
             </div>
-          )
+          ),
         )}
       </div>
 
@@ -284,18 +321,42 @@ export function Chat({
             />
           </div>
           <div className="single-input-container">
-            <p className="input-label">Roll For</p>
+            <p className="input-label">Roll Attribute</p>
             <select
-              value={rollData.rollFor}
-              onChange={handleRollDataChange}
-              name="rollFor"
+              name="rollAttribute"
+              value={rollData.rollAttribute}
+              onChange={(e) =>
+                setRollData((prev) => ({
+                  ...prev,
+                  rollAttribute: e.target.value,
+                  rollFor: e.target.value,
+                }))
+              }
             >
-              {selectedSkills.map((skill) => (
-                <option key={skill} value={skill}>
-                  {skill}
+              {BASE_ATTRIBUTES.map((attr) => (
+                <option key={attr} value={attr}>
+                  {attr}
                 </option>
               ))}
-              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className="single-input-container">
+            <p className="input-label">Roll For</p>
+            <select
+              name="rollFor"
+              value={rollData.rollFor}
+              onChange={(e) =>
+                setRollData((prev) => ({
+                  ...prev,
+                  rollFor: e.target.value,
+                }))
+              }
+            >
+              {rollForOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
           <div className="single-input-container character-select">

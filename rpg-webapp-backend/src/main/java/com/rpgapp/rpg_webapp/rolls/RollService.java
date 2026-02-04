@@ -5,10 +5,14 @@ import com.rpgapp.rpg_webapp.campaign.CampaignRepository;
 import com.rpgapp.rpg_webapp.character.*;
 import com.rpgapp.rpg_webapp.character.Character;
 import com.rpgapp.rpg_webapp.user.User;
+
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,34 +52,58 @@ public class RollService {
             default -> throw new IllegalArgumentException("Unknown dice type: " + diceType);
         };
     }
+@Transactional
+   public boolean getRollOutcome(Character character, Roll roll) {
+    String rollFor = roll.getRollFor();
+    int bonus = roll.getBonus();
 
-    public boolean getRollOutcome(Character character, Roll roll) {
-        String rollFor = roll.getRollFor();
-        Skills.SkillLevel SkillLevel = character.getSkills().getSkillLevel(rollFor);
-        Skills.RollFor SkillRollsFor = character.getSkills().getRollFor(rollFor);
-        double dzielnik = 1;
-        int dodatek = 0;
-        int bonus = roll.getBonus();
+    // clamp bonusówW
+    int totalBonus = Math.max(-30, Math.min(30, bonus));
 
-        switch (SkillLevel){
-            case NOT_PURCHASED -> dzielnik = 2;
-            case PLUS_10 -> dodatek = 10;
-            case PLUS_20 -> dodatek = 20;
+    // 1) Jeśli to czysty atrybut (np. rollFor == "WS"/"BS"/itd.)
+    // Uwaga: używaj equals, a nie !=
+    if (!"Other".equals(rollFor)) {
+        // jeśli rollFor jest kluczem atrybutu i istnieje
+        Attribute.Attributes attr = character.getAttributes().getAttributes().get(rollFor);
+        if (attr != null) {
+            int value = attr.getCurrentValue();
+            return roll.getRollResult() <= (value + totalBonus);
         }
-
-        int totalBonus = dodatek + bonus;
-        if(totalBonus > 30) totalBonus = 30;
-        else if (totalBonus < -30) { 
-            totalBonus = -30;
-        }
-
-        String attributeKey = SkillRollsFor.name();
-        Attribute.Attributes Attribute = character.getAttributes().getAttributes().get(attributeKey);
-        int AttributeValue = Attribute.getCurrentValue();
-        return  (roll.getRollResult() <= ((AttributeValue/dzielnik)+totalBonus));
     }
 
+    // 2) W przeciwnym razie skill → ustal jaki atrybut go zasila + poziom skilla
+    Skills.SkillLevel skillLevel = character.getSkills().getSkillLevel(rollFor);
+    Skills.RollFor rollForAttr = character.getSkills().getRollFor(rollFor);
 
+    double divisor = 1.0;
+    int addOn = 0;
+
+    if (skillLevel != null) {
+        switch (skillLevel) {
+            case NOT_PURCHASED -> divisor = 2.0;
+            case PLUS_10 -> addOn = 10;
+            case PLUS_20 -> addOn = 20;
+        }
+    }
+
+    int total = Math.max(-30, Math.min(30, addOn + totalBonus));
+
+    if (rollForAttr == null) {
+        // fallback: jeśli nie wiemy jaki atrybut zasila skill, możesz:
+        // - zwrócić false
+        // - albo potraktować jak "Other"
+        return false;
+    }
+
+    Attribute.Attributes baseAttr = character.getAttributes().getAttributes().get(rollForAttr.name());
+    if (baseAttr == null) return false;
+
+    int value = baseAttr.getCurrentValue();
+    return roll.getRollResult() <= ((value / divisor) + total);
+}
+
+
+    @Transactional
     public void rollTheDiceWs(Roll roll, Long campaignId, SimpMessageHeaderAccessor headerAccessor) {
         User user = characterService.getCurrentUserWS(headerAccessor);
         roll.setUser(user);
@@ -100,10 +128,9 @@ public class RollService {
         roll.setRollTime(LocalDateTime.now());
 
 
-        if(!roll.getRollFor().equals("Other")) {
-            String outcome = getRollOutcome(character, roll) ? "success" : "fail";
-            roll.setOutcome(outcome);
-        }
+        String outcome = getRollOutcome(character, roll) ? "success" : "fail";
+roll.setOutcome(outcome);
+
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new IllegalArgumentException("Campaign not found"));
         roll.setCampaign(campaign);
