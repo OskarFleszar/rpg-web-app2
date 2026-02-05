@@ -1,7 +1,27 @@
 /* === CHAT === */
 
-.chat-container {
+.chat {
   position: fixed;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: stretch;
+  z-index: 20;
+
+  transform: translateX(calc(100%));
+  transition:
+    transform 0.5s ease,
+    opacity 0.5s ease;
+  opacity: 0.9;
+}
+
+.chat.open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.chat-container {
+  position: relative;
   right: 0px;
   bottom: 0px;
 
@@ -142,9 +162,23 @@
 
 .roll-controls-row {
   display: flex;
-
+  flex-direction: column;
   gap: 6px;
   align-items: stretch;
+  justify-content: space-between;
+}
+
+.roll-controls-top-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.5rem;
+}
+
+.roll-controls-bottom-row {
+  display: flex;
+  flex-direction: row;
   justify-content: space-between;
 }
 
@@ -162,7 +196,7 @@
   padding: 0.25rem 0.4rem;
   color: #f4efe4;
   font-family: var(--font-heading);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   min-width: 0;
 }
 
@@ -190,7 +224,9 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
 }
 
 .chat-input-section button:hover {
@@ -218,4 +254,47 @@
   .chat-input-section > div {
     flex-wrap: wrap;
   }
+}
+
+.number-of-dice-input {
+  max-width: 60px;
+}
+
+.top-row-select {
+  width: 118px;
+}
+
+.chat-panel-open-button {
+  align-self: top;
+  border: none;
+  cursor: pointer;
+  position: fixed;
+  right: 420px;
+  top: 4vh;
+  z-index: 21;
+
+  width: 26px;
+  height: 52px;
+  border-radius: 20px 0 0 20px;
+
+  background: radial-gradient(
+    circle at 30% 0%,
+    #ffdf8a,
+    #e7992c 45%,
+    #7c2700 100%
+  );
+  color: #16110a;
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.85);
+}
+
+.chat-panel-open-button:hover {
+  transform: translateX(-1px);
 }

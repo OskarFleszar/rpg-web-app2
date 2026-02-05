@@ -9,7 +9,6 @@
   align-items: stretch;
   gap: 0px;
 
-
   background: transparent;
   border: none;
   box-shadow: none;
@@ -19,7 +18,9 @@
   z-index: 30;
 
   transform: translateX(calc(-100% + 26px));
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition:
+    transform 0.5s ease,
+    opacity 0.5s ease;
   opacity: 0.9;
 }
 
@@ -83,7 +84,6 @@
   box-shadow: 0 0 0 1px rgba(176, 140, 87, 0.7);
 }
 
-/* Wspólna klasa dla "przycisków" (button + label jako button) */
 .gm-panel-button {
   border: none;
   border-radius: 999px;
@@ -101,27 +101,25 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.75);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
 
-  /* kluczowe, żeby label zachowywał się jak button */
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  /* szerokość jak inne buttony */
   width: 7rem;
   font-size: 0.7rem;
   font-weight: 600;
 
-  /* WRAP */
-  white-space: normal;      /* pozwala zawijać */
-  overflow-wrap: anywhere;  /* zawijaj nawet długie słowa */
-  word-break: break-word;   /* fallback */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   text-align: center;
   line-height: 1.1;
 }
 
-/* Hover/active jak Twoje buttony */
 .gm-panel-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
@@ -131,7 +129,6 @@
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
 }
 
-/* opcjonalnie: żeby label wyglądał jak "disabled" gdy brak pliku */
 .gm-panel-button.is-disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -141,15 +138,14 @@
   font-size: 0.6rem;
 }
 
-
 .GM-panel-open-button {
   align-self: center;
   border: none;
   cursor: pointer;
 
   width: 26px;
-  height: 72px;
-  border-radius: 0 999px 999px 0;
+  height: 52px;
+  border-radius: 0 20px 20px 0;
 
   background: radial-gradient(
     circle at 30% 0%,
@@ -243,4 +239,3 @@
   justify-content: space-between;
   gap: 12px;
 }
-
