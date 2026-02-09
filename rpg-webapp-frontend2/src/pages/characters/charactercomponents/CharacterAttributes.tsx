@@ -9,15 +9,19 @@ type Attributes = Record<string, Attribute>;
 type AttributesProps = {
   attributes: Attributes;
   setAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
+  currentHealth: number;
+  setCurrentHealth: (v: number) => void;
 };
 
 export function CharacterAttributes({
   attributes,
   setAttributes,
+  currentHealth,
+  setCurrentHealth,
 }: AttributesProps) {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    field: keyof Attribute
+    field: keyof Attribute,
   ) => {
     const { name, value } = e.target;
     setAttributes((prevAttributes) => ({
@@ -65,20 +69,56 @@ export function CharacterAttributes({
                   />
                 </form>
               </div>
-              <div className="attribute-value">
-                <form>
-                  <label>Current Value:</label>
-                  <input
-                    className="input-primary"
-                    type="number"
-                    name={attributeName}
-                    value={attributeValues.currentValue}
-                    onChange={(e) => {
-                      handleChange(e, "currentValue");
-                    }}
-                  />
-                </form>
-              </div>
+              {attributeName == "Health" ? (
+                <div className="attribute-value">
+                  <form>
+                    <label>Current Value:</label>
+
+                    <div className="hp-row">
+                      <input
+                        className="input-primary health-value"
+                        type="number"
+                        name={attributeName}
+                        value={currentHealth}
+                        onChange={(e) => {
+                          const raw =
+                            e.target.value === "" ? 0 : Number(e.target.value);
+                          const maxHp = attributeValues.currentValue ?? 0;
+                          setCurrentHealth(Math.max(0, Math.min(raw, maxHp)));
+                        }}
+                      />
+
+                      <span className="hp-separator" aria-hidden="true">
+                        /
+                      </span>
+                      <input
+                        className="input-primary health-value"
+                        type="number"
+                        name={attributeName}
+                        value={attributeValues.currentValue}
+                        onChange={(e) => {
+                          handleChange(e, "currentValue");
+                        }}
+                      />
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className="attribute-value">
+                  <form>
+                    <label>Current Value:</label>
+                    <input
+                      className="input-primary"
+                      type="number"
+                      name={attributeName}
+                      value={attributeValues.currentValue}
+                      onChange={(e) => {
+                        handleChange(e, "currentValue");
+                      }}
+                    />
+                  </form>
+                </div>
+              )}
             </div>
           );
         })}

@@ -40,6 +40,7 @@ public class CharacterDetailsDTO {
   private Integer bronze;
 
   private Attribute attributes;
+  private Integer currentHealth;
   private Skills skills;
   private List<Weapons> weapons;
   private List<Armor> armor;

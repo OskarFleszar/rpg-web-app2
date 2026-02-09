@@ -192,6 +192,7 @@ public class CharacterService {
                 c.getSilver(),
                 c.getBronze(),
                 c.getAttributes(),
+                c.getCurrentHealth(),
                 c.getSkills(),
                 c.getWeapons(),
                 c.getArmor(),
@@ -217,6 +218,9 @@ public class CharacterService {
         }
         if (updatedCharacter.getLastProfession() != null) {
             existingCharacter.setLastProfession(updatedCharacter.getLastProfession());
+        }
+        if (updatedCharacter.getCurrentHealth() != null) {
+            existingCharacter.setCurrentHealth(updatedCharacter.getCurrentHealth());
         }
         if (updatedCharacter.getAge() != null) {
             existingCharacter.setAge(updatedCharacter.getAge());

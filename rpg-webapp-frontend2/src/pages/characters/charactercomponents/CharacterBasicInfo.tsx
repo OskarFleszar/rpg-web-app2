@@ -22,6 +22,7 @@ type CharacterProps = {
   silver: number;
   bronze: number;
   notes: string;
+  currentHealth: number;
 };
 
 type CharacterBasicInfoProps = {
@@ -36,7 +37,7 @@ export function CharacterBasicInfo({
   const handleChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLSelectElement>
+      | React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setCharacter((prevCharacter) => ({

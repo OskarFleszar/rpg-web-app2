@@ -50,6 +50,7 @@ export function CharacterPage() {
     age: 0,
     gender: "",
     eyeColor: "",
+    currentHealth: 0,
     weight: 0,
     hairColor: "",
     height: 0,
@@ -246,7 +247,12 @@ export function CharacterPage() {
           <CharacterAttributes
             attributes={attributes}
             setAttributes={setAttributes}
+            currentHealth={character.currentHealth}
+            setCurrentHealth={(v) =>
+              setCharacter((p) => ({ ...p, currentHealth: v }))
+            }
           />
+
           <CharacterSkills skills={skills} setSkills={setSkills} />
           <CharacterTalentsEquipment
             items={equipment}

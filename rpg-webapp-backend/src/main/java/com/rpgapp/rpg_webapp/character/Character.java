@@ -50,6 +50,8 @@ public class Character {
     @Embedded
     private Attribute attributes;
 
+    private Integer currentHealth;
+
     @Embedded
     private Skills skills;
 
@@ -91,7 +93,7 @@ public class Character {
             String dmName, Integer totalExp, Integer currentExp, Integer gold, Integer silver, Integer bronze,
             Attribute attributes, Skills skills, List<Weapons> weapons, List<Armor> armor, List<Items> talents,
             List<Items> equipment, String backstory, String notes, User user, byte[] characterImage, String imageType,
-            SpellCard spellCard) {
+            SpellCard spellCard, Integer currentHealth) {
         this.name = name;
         this.race = race;
         this.currentProfession = currentProfession;
@@ -126,5 +128,6 @@ public class Character {
         this.characterImage = characterImage;
         this.imageType = imageType;
         this.spellCard = spellCard;
+        this.currentHealth = currentHealth;
     }
 }
