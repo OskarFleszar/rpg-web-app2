@@ -193,6 +193,12 @@ export type ChangeBoardOp = {
   boardId: number;
   campaignId: number;
 };
+
+export type FogOffOnOp = {
+  type: "fog.on.off";
+  boardId: number;
+  clientId?: string;
+};
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
@@ -210,4 +216,5 @@ export type BoardOp =
   | ChangeBoardOp
   | TokenAddOp
   | TokenMoveOp
-  | TokenDeleteOp;
+  | TokenDeleteOp
+  | FogOffOnOp;

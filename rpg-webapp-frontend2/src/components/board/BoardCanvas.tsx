@@ -23,6 +23,7 @@ import { TokenLayer } from "./boardrendercomponents/TokenLayer";
 import { useStageSize } from "./hooks/useStageSize";
 import { useToolHandlers } from "./hooks/useToolHandlers";
 import { useSelectableProps } from "./hooks/useSelectableProps";
+import { FogOfWarLayer } from "./boardrendercomponents/FogOfWarLayer";
 
 type Props = {
   boardId: number;
@@ -30,6 +31,8 @@ type Props = {
   setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>;
   campaignId: string | undefined;
   selectedCharacterId: number | "" | null;
+  fogOfWarOn: boolean;
+  setFogOfWarOn: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type PushUndo = (
@@ -50,6 +53,8 @@ export default function BoardCanvas({
   setActiveBoardId,
   campaignId,
   selectedCharacterId,
+  fogOfWarOn,
+  setFogOfWarOn,
 }: Props) {
   const [boardMeta, setBoardMeta] = useState<BoardMeta | null>(null);
 
@@ -162,12 +167,21 @@ export default function BoardCanvas({
   });
 
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
-    useWsIncoming(boardId, setObjects, clientId, setActiveBoardId, campaignId, {
-      pushUndo: (a) => pushUndoRef.current?.(a),
-      shouldIgnoreEraseApplied: (ids) =>
-        !!shouldIgnoreEraseAppliedRef.current?.(ids),
-      OnBoardCleared: () => pointer.clearSelection(),
-    });
+    useWsIncoming(
+      boardId,
+      setObjects,
+      clientId,
+      setActiveBoardId,
+      campaignId,
+      fogOfWarOn,
+      setFogOfWarOn,
+      {
+        pushUndo: (a) => pushUndoRef.current?.(a),
+        shouldIgnoreEraseApplied: (ids) =>
+          !!shouldIgnoreEraseAppliedRef.current?.(ids),
+        OnBoardCleared: () => pointer.clearSelection(),
+      },
+    );
 
   const { pushUndo, shouldIgnoreEraseApplied } = useUndo({
     boardId,
@@ -307,6 +321,13 @@ export default function BoardCanvas({
                 isMine={isMine}
                 erasePreview={erasePreview}
                 pendingRemoval={pendingRemoval}
+              />
+
+              <FogOfWarLayer
+                fogOfWarOn={fogOfWarOn}
+                boardWidth={boardWidth}
+                boardHeight={boardHeight}
+                isGM={isGM}
               />
 
               <TokenLayer

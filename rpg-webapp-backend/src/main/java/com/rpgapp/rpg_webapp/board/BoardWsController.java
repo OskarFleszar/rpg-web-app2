@@ -276,6 +276,17 @@ public class BoardWsController {
             broker.convertAndSend("/topic/board." + id + ".op", out);
         }
 
+        case "fog.on.off" -> {
+            var boardIdRaw = body.get("boardId");
+            Long boardId = Long.valueOf(boardIdRaw.toString());
+
+            var out = new HashMap<String, Object>();
+            out.put("type", "fog.on.off");
+            out.put("boardId", boardId);
+
+            broker.convertAndSend("/topic/board." + id + ".op", out);
+        }
+
 
 
 

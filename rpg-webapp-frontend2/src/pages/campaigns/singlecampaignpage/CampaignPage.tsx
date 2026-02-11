@@ -21,6 +21,7 @@ export function CampaignPage() {
   const [GMRoll, setGMRoll] = useState(false);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
   const [GMBoardId, setGMBoardId] = useState<number | null>(null);
+  const [fogOfWarOn, setFogOfWarOn] = useState<boolean>(false);
   const [selectedCharacterId, setSelectedCharacterId] = useState<
     number | "" | null
   >("");
@@ -79,6 +80,8 @@ export function CampaignPage() {
             gmBoardId={GMBoardId}
             setGmBoardId={setGMBoardId}
             setShowCalendar={setShowCalendar}
+            fogOfWarOn={fogOfWarOn}
+            setFogOfWarOn={setFogOfWarOn}
           />
         ) : (
           <></>
@@ -100,6 +103,8 @@ export function CampaignPage() {
           setActiveBoardId={setActiveBoardId}
           campaignId={id}
           selectedCharacterId={selectedCharacterId}
+          fogOfWarOn={fogOfWarOn}
+          setFogOfWarOn={setFogOfWarOn}
         />
       </WSProvider>
       {showCalendar && (

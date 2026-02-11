@@ -23,6 +23,8 @@ export function useWsIncoming(
   clientId: string,
   setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>,
   campaignId: string | undefined,
+  fogOfWarOn: boolean,
+  setFogOfWarOn: React.Dispatch<React.SetStateAction<boolean>>,
   opts?: {
     pushUndo?: PushUndo;
     shouldIgnoreEraseApplied?: ShouldIgnoreErase;
@@ -205,6 +207,9 @@ export function useWsIncoming(
         handleTransformApplied({ op, setObjects, clientId });
 
         break;
+      }
+      case "fog.on.off": {
+        setFogOfWarOn(!fogOfWarOn);
       }
     }
   });

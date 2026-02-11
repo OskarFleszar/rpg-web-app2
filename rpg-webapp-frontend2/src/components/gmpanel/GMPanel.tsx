@@ -17,6 +17,8 @@ type GMPanelProps = {
   gmBoardId: number | null;
   setGmBoardId: React.Dispatch<React.SetStateAction<number | null>>;
   setShowCalendar: React.Dispatch<React.SetStateAction<boolean>>;
+  fogOfWarOn: boolean;
+  setFogOfWarOn: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type BoardBasic = {
@@ -34,6 +36,8 @@ export function GMPanel({
   gmBoardId,
   setGmBoardId,
   setShowCalendar,
+  fogOfWarOn,
+  setFogOfWarOn,
 }: GMPanelProps) {
   const publish = usePublish();
 
@@ -108,6 +112,24 @@ export function GMPanel({
               type="checkbox"
               checked={GMRoll}
               onChange={() => setGMRoll(!GMRoll)}
+            />
+            <span className="character-checkbox-custom" />
+          </label>
+        </div>
+
+        <div className="gmroll">
+          <span>Fog of War</span>
+          <label className="checkbox-wrapper">
+            <input
+              className="character-select-checkbox"
+              type="checkbox"
+              checked={fogOfWarOn}
+              onChange={() => {
+                publish(`/app/board.${boardId}.op`, {
+                  type: "fog.on.off",
+                  boardId,
+                } as const);
+              }}
             />
             <span className="character-checkbox-custom" />
           </label>
