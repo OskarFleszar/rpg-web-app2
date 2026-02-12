@@ -29,6 +29,12 @@ type Args = {
   pointer: { onStagePointerDown: (e: any) => void };
 
   eraser: { onDown: () => void; onMove: () => void; onUp: () => void };
+
+  fog: {
+    onPointerDown: () => void;
+    onPointerMove: () => void;
+    onPointerUp: () => void;
+  };
 };
 
 export function useToolHandlers({
@@ -41,6 +47,7 @@ export function useToolHandlers({
   token,
   pointer,
   eraser,
+  fog,
 }: Args) {
   const [pointerOnLayer, setPointerOnLayer] = useState<Point | null>(null);
 
@@ -60,6 +67,7 @@ export function useToolHandlers({
       if (tool === "rect" || tool === "ellipse") return shapes.onPointerDown();
       if (tool === "pointer") return pointer.onStagePointerDown(e);
       if (tool === "token") return token.onPointerDown();
+      if (tool === "fog") return fog.onPointerDown();
     },
     [
       tool,
@@ -71,6 +79,7 @@ export function useToolHandlers({
       shapes,
       pointer,
       token,
+      fog,
     ],
   );
 
@@ -81,13 +90,15 @@ export function useToolHandlers({
       tool === "eraser" ||
       tool === "pencil" ||
       tool === "rect" ||
-      tool === "ellipse";
+      tool === "ellipse" ||
+      tool === "fog";
     if (needsCursor) updatePointer();
     if (!pt || !isInsideBoard(pt)) return;
 
     if (tool === "pencil") return pencil.onPointerMove();
     if (tool === "eraser") return eraser.onMove();
     if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
+    if (tool === "fog") return fog.onPointerMove();
   }, [
     tool,
     stageRef,
@@ -97,6 +108,7 @@ export function useToolHandlers({
     pencil,
     eraser,
     shapes,
+    fog,
   ]);
 
   const onPointerUp = useCallback(() => {
@@ -105,6 +117,7 @@ export function useToolHandlers({
     if (tool === "pencil") return pencil.onPointerUp();
     if (tool === "eraser") return eraser.onUp();
     if (tool === "rect" || tool === "ellipse") return shapes.onPointerUp();
+    if (tool === "fog") return fog.onPointerUp();
   }, [tool, pencil, eraser, shapes]);
 
   return { onPointerDown, onPointerMove, onPointerUp, pointerOnLayer };

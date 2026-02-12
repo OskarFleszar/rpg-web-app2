@@ -5,7 +5,8 @@ export type Tool =
   | "rect"
   | "ellipse"
   | "pointer"
-  | "token";
+  | "token"
+  | "fog";
 
 export type Stroke = {
   type: "stroke";

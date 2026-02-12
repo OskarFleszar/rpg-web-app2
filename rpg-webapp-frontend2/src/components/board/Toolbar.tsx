@@ -11,6 +11,10 @@ type Props = {
   setWidth: (n: number) => void;
   eraserSize: number;
   setEraserSize: (n: number) => void;
+  fogEraserSize: number;
+  setFogEraserSize: (n: number) => void;
+  isGM: boolean;
+  fogOfWarOn: boolean;
 };
 
 export default function Toolbar(props: Props) {
@@ -23,6 +27,11 @@ export default function Toolbar(props: Props) {
     setWidth,
     eraserSize,
     setEraserSize,
+    fogEraserSize,
+    setFogEraserSize,
+
+    isGM,
+    fogOfWarOn,
   } = props;
   return (
     <div className={`board-toolbar ${tool === "pencil" ? "pencil-open" : ""}`}>
@@ -124,6 +133,30 @@ export default function Toolbar(props: Props) {
           <span> T </span>
         </button>
       </div>
+
+      {isGM && fogOfWarOn ? (
+        <div className={`eraser-select ${tool === "fog" ? "open" : ""}`}>
+          <button
+            className={`tool-button ${tool === "fog" ? "active" : ""}`}
+            title="Fog"
+            onClick={() => setTool("fog")}
+          >
+            🩹
+          </button>
+          <div className="drawing-settings">
+            <label className="tool-tile">
+              <input
+                type="number"
+                min={1}
+                value={fogEraserSize}
+                onChange={(e) => setFogEraserSize(Number(e.target.value))}
+              />
+            </label>
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

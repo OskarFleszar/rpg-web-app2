@@ -34,7 +34,7 @@ export function UpcomingSessionsPage() {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
       setSessions(res.data);
       console.log(res.data);
@@ -52,7 +52,7 @@ export function UpcomingSessionsPage() {
   const handleVote = async (
     campaignId: number,
     proposalId: number,
-    vote: "YES" | "NO"
+    vote: "YES" | "NO",
   ) => {
     try {
       console.log(vote, localStorage.getItem("userId"));
@@ -63,7 +63,7 @@ export function UpcomingSessionsPage() {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       loadSessions();
@@ -85,7 +85,7 @@ export function UpcomingSessionsPage() {
 
         {loading && <p>Loading…</p>}
 
-        {!loading && sessions.length === 0 && <p>No planed sessions yet.</p>}
+        {!loading && sessions.length === 0 && <p>No planned sessions yet.</p>}
 
         {!loading &&
           sessions.map((s) => {
@@ -102,8 +102,8 @@ export function UpcomingSessionsPage() {
                     s.status === "CONFIRMED"
                       ? "#008000"
                       : s.status === "REJECTED"
-                      ? "#D2042D"
-                      : "",
+                        ? "#D2042D"
+                        : "",
                 }}
               >
                 <div className="top-proposal-content">

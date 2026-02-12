@@ -24,6 +24,7 @@ import { useStageSize } from "./hooks/useStageSize";
 import { useToolHandlers } from "./hooks/useToolHandlers";
 import { useSelectableProps } from "./hooks/useSelectableProps";
 import { FogOfWarLayer } from "./boardrendercomponents/FogOfWarLayer";
+import { useFogErase } from "./hooks/useFogErase";
 
 type Props = {
   boardId: number;
@@ -101,9 +102,12 @@ export default function BoardCanvas({
   const [color, setColor] = useState("#222222");
   const [strokeWidth, setStrokeWidth] = useState(3);
   const [eraserSize, setEraserSize] = useState(20);
+  const [fogEraserSize, setFogEraserSize] = useState(20);
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const layerRef = useRef<Konva.Layer | null>(null);
+  const fogLayerRef = useRef<Konva.Layer | null>(null);
+  const tokenLayerRef = useRef<Konva.Layer | null>(null);
 
   const {
     stageScale,
@@ -239,6 +243,18 @@ export default function BoardCanvas({
     isGM,
   });
 
+  const fog = useFogErase({
+    active: isGM && fogOfWarOn && tool === "fog",
+    boardId,
+    stageRef,
+    layerRef,
+    radius: fogEraserSize,
+    clientId,
+    addMyPath,
+    removeMyPath,
+    currentUserId,
+  });
+
   const background = useBoardBackground(boardId);
 
   useEffect(() => {
@@ -256,6 +272,7 @@ export default function BoardCanvas({
       token,
       pointer,
       eraser: { onDown: erDown, onMove: erMove, onUp: erUp },
+      fog,
     });
 
   const selectableProps = useSelectableProps({ tool, isGM, isMine, pointer });
@@ -271,6 +288,10 @@ export default function BoardCanvas({
         setWidth={setStrokeWidth}
         eraserSize={eraserSize}
         setEraserSize={setEraserSize}
+        fogEraserSize={fogEraserSize}
+        setFogEraserSize={setFogEraserSize}
+        isGM={isGM}
+        fogOfWarOn={fogOfWarOn}
       />
 
       {!boardMeta ? (
@@ -322,14 +343,32 @@ export default function BoardCanvas({
                 erasePreview={erasePreview}
                 pendingRemoval={pendingRemoval}
               />
-
+            </Group>
+          </Layer>
+          <Layer ref={fogLayerRef}>
+            <Group
+              clipX={0}
+              clipY={0}
+              clipWidth={boardWidth}
+              clipHeight={boardHeight}
+            >
               <FogOfWarLayer
                 fogOfWarOn={fogOfWarOn}
                 boardWidth={boardWidth}
                 boardHeight={boardHeight}
                 isGM={isGM}
+                fogStrokes={fog.fogStrokes}
               />
+            </Group>
+          </Layer>
 
+          <Layer ref={tokenLayerRef}>
+            <Group
+              clipX={0}
+              clipY={0}
+              clipWidth={boardWidth}
+              clipHeight={boardHeight}
+            >
               <TokenLayer
                 objects={objects}
                 boardMeta={boardMeta}
