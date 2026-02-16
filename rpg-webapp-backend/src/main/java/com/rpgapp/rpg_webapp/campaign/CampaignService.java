@@ -56,6 +56,7 @@ public class CampaignService {
         b.setCols(20);
         b.setRows(20);
         b.setCellSize(80);
+        b.setFogOnOff(false);
         b = boardRepository.save(b);
 
         campaign.setActiveBoard(b);
@@ -122,6 +123,7 @@ public class CampaignService {
     public void addNewBoard(Campaign campaign, String name, Integer cols, Integer rows) {
 
         Board b = new Board();
+        b.setFogOnOff(false);
         b.setCampaign(campaign);
         b.setName(name);
         b.setCellSize(80);
@@ -142,6 +144,22 @@ public class CampaignService {
         campaign.getBoards().add(b);
         b = boardRepository.save(b);
     }
+
+    @Transactional
+    public boolean turnFogOnOff(Long campaignId, Long boardId) {
+        Campaign campaign = getCampaignData(campaignId).orElseThrow();
+
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new EntityNotFoundException("Board not found: " + boardId));
+
+
+
+        board.setFogOnOff(!Boolean.TRUE.equals(board.getFogOnOff()));
+
+        boardRepository.save(board);
+        return board.getFogOnOff();
+    }
+
 
     public List<BoardBasicDTO> getBoards (Long canpaignId) {
         return boardRepository.findBoards(canpaignId);

@@ -449,6 +449,8 @@ public class BoardService {
         campaignService.changeActiveBoard(campaignId, boardId);
     }
 
-    
+    public void turnFogOnOff (Long campaignId, Long boardId) {
+        campaignService.turnFogOnOff(campaignId, boardId);
+    }
 
 }

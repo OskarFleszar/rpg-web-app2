@@ -199,6 +199,15 @@ export type FogOffOnOp = {
   boardId: number;
   clientId?: string;
 };
+
+export type FogLineErased = {
+  type: "fog.line.erased";
+  pathId: string;
+  boardId: number;
+  radius: number;
+  points: number[][];
+  clientId?: string;
+};
 export type BoardOp =
   | StrokeStartOp
   | StrokeAppendOp
@@ -217,4 +226,5 @@ export type BoardOp =
   | TokenAddOp
   | TokenMoveOp
   | TokenDeleteOp
-  | FogOffOnOp;
+  | FogOffOnOp
+  | FogLineErased;

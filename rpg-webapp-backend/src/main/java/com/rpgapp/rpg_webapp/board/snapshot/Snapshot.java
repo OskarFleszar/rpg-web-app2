@@ -47,6 +47,11 @@ public class Snapshot {
         l.getObjects().add(obj);
     }
 
+    public void addFogStroke(String layerId, FogEraseObject s) {
+        Layer l = getOrCreateLayer(layerId, 10);
+        l.getObjects().add(s);
+    }
+
     public boolean appendPoints(String pathId, List<int[]> pts) {
         for (Layer l : layers) {
             for (BoardObject o : l.getObjects()) {

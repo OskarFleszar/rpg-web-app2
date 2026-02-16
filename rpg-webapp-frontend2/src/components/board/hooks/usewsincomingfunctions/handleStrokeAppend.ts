@@ -50,13 +50,7 @@ export function handleStrokeAppend({
         points: add,
         ownerId: state!.ownerId,
       };
-      console.log(
-        "stroke append: ",
-        "color:",
-        state!.color,
-        "width:",
-        state!.strokeWidth,
-      );
+
       return [...prev, newStroke];
     }
     const existing = prev[idx];

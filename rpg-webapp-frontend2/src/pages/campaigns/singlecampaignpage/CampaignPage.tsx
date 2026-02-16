@@ -66,6 +66,29 @@ export function CampaignPage() {
     }
   };
 
+  const effectiveBoardId =
+    isGM && GMBoardId != null ? GMBoardId : activeBoardId;
+
+  useEffect(() => {
+    if (!effectiveBoardId) return;
+
+    (async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/board/${effectiveBoardId}/fogonoff`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+        setFogOfWarOn(response.data);
+      } catch (error) {
+        console.error("An error occured while fetching fog state", error);
+      }
+    })();
+  }, [effectiveBoardId]);
+
   return (
     <div className="campaign-page">
       <WSProvider baseUrl={baseUrl}>

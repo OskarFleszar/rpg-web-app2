@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = StrokeObject.class, name = "stroke"),
         @JsonSubTypes.Type(value = ShapeObject.class,  name = "shape"),
-        @JsonSubTypes.Type(value = TokenObject.class,  name = "token")
+        @JsonSubTypes.Type(value = TokenObject.class,  name = "token"),
+        @JsonSubTypes.Type(value = FogEraseObject.class,  name = "fog")
 })
 public abstract class BoardObject {
     private String type;          

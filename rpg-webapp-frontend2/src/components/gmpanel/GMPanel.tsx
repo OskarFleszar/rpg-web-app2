@@ -127,6 +127,7 @@ export function GMPanel({
               onChange={() => {
                 publish(`/app/board.${boardId}.op`, {
                   type: "fog.on.off",
+                  campaignId,
                   boardId,
                 } as const);
               }}

@@ -37,5 +37,5 @@ public class Board {
 
     private String imageType;
 
-
+    private Boolean fogOnOff;
 }

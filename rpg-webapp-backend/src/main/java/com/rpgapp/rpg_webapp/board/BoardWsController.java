@@ -43,7 +43,7 @@ public class BoardWsController {
         Board board = boards.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found: " + id));
 
-    
+
 
         String type = String.valueOf(body.get("type"));
         switch (type) {
@@ -78,7 +78,7 @@ public class BoardWsController {
                 }
 
                 boolean isOwner = service.isOwner(oid, userId);
-                boolean isGm = false; 
+                boolean isGm = false;
                 if (!(isOwner || isGm)) return;
 
                 if (service.removeObject(id, oid)) {
@@ -149,7 +149,7 @@ public class BoardWsController {
                 var lid = (String) body.get("layerId");
                 if (dto.layerId() == null && lid != null) {
                     dto = new TokenObjectDTO(
-                           dto.id(), dto.characterId(), dto.col(), dto.row(), lid
+                            dto.id(), dto.characterId(), dto.col(), dto.row(), lid
                     );
                 }
 
@@ -227,13 +227,13 @@ public class BoardWsController {
                 if (dto == null || dto.changed() == null || dto.changed().isEmpty()) return;
 
                 var who  = users.findUserById(userId).orElseThrow();
-              
+
                 boolean isGM = Boolean.TRUE.equals(body.get("isGM"));
 
-              
+
                 var applied = service.applyTransforms(id, dto.changed(), who, isGM);
 
-                
+
                 var out = new HashMap<String, Object>();
                 out.put("type", "transform.applied");
                 out.put("boardId", id);
@@ -260,32 +260,44 @@ public class BoardWsController {
                 broker.convertAndSend("/topic/board." + id + ".op", out);
             }
 
-        case "change.board" -> {
-            var boardIdRaw = body.get("boardId");
-            var campaignIdRaw = body.get("campaignId");
+            case "change.board" -> {
+                var boardIdRaw = body.get("boardId");
+                var campaignIdRaw = body.get("campaignId");
 
-            Long boardId = Long.valueOf(boardIdRaw.toString());
-            Long campaignId = Long.valueOf(campaignIdRaw.toString());
+                Long boardId = Long.valueOf(boardIdRaw.toString());
+                Long campaignId = Long.valueOf(campaignIdRaw.toString());
 
-            var out = new HashMap<String, Object>();
-            out.put("type", "change-board");
-            out.put("boardId", boardId);
+                var out = new HashMap<String, Object>();
+                out.put("type", "change-board");
+                out.put("boardId", boardId);
 
-            service.changeBoard(campaignId, boardId);
+                service.changeBoard(campaignId, boardId);
 
-            broker.convertAndSend("/topic/board." + id + ".op", out);
-        }
+                broker.convertAndSend("/topic/board." + id + ".op", out);
+            }
 
-        case "fog.on.off" -> {
-            var boardIdRaw = body.get("boardId");
-            Long boardId = Long.valueOf(boardIdRaw.toString());
+            case "fog.on.off" -> {
+                var boardIdRaw = body.get("boardId");
+                var campaignIdRaw = body.get("campaignId");
 
-            var out = new HashMap<String, Object>();
-            out.put("type", "fog.on.off");
-            out.put("boardId", boardId);
+                Long boardId = Long.valueOf(boardIdRaw.toString());
+                Long campaignId = Long.valueOf(campaignIdRaw.toString());
 
-            broker.convertAndSend("/topic/board." + id + ".op", out);
-        }
+                var out = new HashMap<String, Object>();
+                out.put("type", "fog.on.off");
+                out.put("boardId", boardId);
+
+                service.turnFogOnOff(campaignId,boardId);
+
+                broker.convertAndSend("/topic/board." + id + ".op", out);
+            }
+
+            case "fog.line.erased" -> {
+              var dto = mapper.convertValue(body, FogEraseDTO.class);
+
+
+              broker.convertAndSend("/topic/board." + id + ".op", body);
+            }
 
 
 
@@ -296,24 +308,24 @@ public class BoardWsController {
     }
 
     @MessageMapping("/campaign.{campaignId}.op")
-public void onOp(@DestinationVariable Long campaignId,
-                 @Payload Map<String, Object> body,
-                 Principal principal) {
-    String type = Objects.toString(body.get("type"), "");
-    switch (type) {
-        case "change.board" -> {
-            Long boardId = Long.valueOf(body.get("boardId").toString());
+    public void onOp(@DestinationVariable Long campaignId,
+                     @Payload Map<String, Object> body,
+                     Principal principal) {
+        String type = Objects.toString(body.get("type"), "");
+        switch (type) {
+            case "change.board" -> {
+                Long boardId = Long.valueOf(body.get("boardId").toString());
 
-            service.changeBoard(campaignId, boardId);
+                service.changeBoard(campaignId, boardId);
 
-            var out = new HashMap<String, Object>();
-            out.put("type", "change-board");
-            out.put("boardId", boardId);
+                var out = new HashMap<String, Object>();
+                out.put("type", "change-board");
+                out.put("boardId", boardId);
 
 
-            broker.convertAndSend("/topic/campaign." + campaignId + ".op", out);
+                broker.convertAndSend("/topic/campaign." + campaignId + ".op", out);
+            }
+            // ...
         }
-        // ...
     }
-}
 }

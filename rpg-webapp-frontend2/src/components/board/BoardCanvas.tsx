@@ -30,7 +30,7 @@ type Props = {
   boardId: number;
   isGM: boolean;
   setActiveBoardId: React.Dispatch<React.SetStateAction<number | null>>;
-  campaignId: string | undefined;
+  campaignId: string;
   selectedCharacterId: number | "" | null;
   fogOfWarOn: boolean;
   setFogOfWarOn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -169,6 +169,16 @@ export default function BoardCanvas({
     layerId: "tokens",
     characterId: selectedCharacterIdNum,
   });
+  const fog = useFogErase({
+    active: isGM && fogOfWarOn && tool === "fog",
+    campaignId,
+    boardId,
+    stageRef,
+    layerRef,
+    radius: fogEraserSize,
+    clientId,
+    currentUserId,
+  });
 
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
     useWsIncoming(
@@ -179,6 +189,7 @@ export default function BoardCanvas({
       campaignId,
       fogOfWarOn,
       setFogOfWarOn,
+      fog.setFogStrokes,
       {
         pushUndo: (a) => pushUndoRef.current?.(a),
         shouldIgnoreEraseApplied: (ids) =>
@@ -241,18 +252,6 @@ export default function BoardCanvas({
     markPendingRemoval,
     isMine,
     isGM,
-  });
-
-  const fog = useFogErase({
-    active: isGM && fogOfWarOn && tool === "fog",
-    boardId,
-    stageRef,
-    layerRef,
-    radius: fogEraserSize,
-    clientId,
-    addMyPath,
-    removeMyPath,
-    currentUserId,
   });
 
   const background = useBoardBackground(boardId);

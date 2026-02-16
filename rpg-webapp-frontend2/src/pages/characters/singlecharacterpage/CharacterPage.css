@@ -240,7 +240,7 @@
 }
 
 .attribute-value form .health-value {
-  width: 100%; /* nadpisuje Twoje 59px */
+  width: 100%;
   min-width: 0;
 }
 
@@ -253,7 +253,7 @@
   line-height: 1;
   transform: translateY(-1px);
   user-select: none;
-  /* opcjonalnie: lekki "glow" żeby pasował do złotej ramki */
+ 
   text-shadow: 0 0 8px rgba(201, 179, 122, 0.35);
 }
 

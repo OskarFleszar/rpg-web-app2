@@ -13,28 +13,17 @@ export type FogStroke = {
 
 export function useFogErase(opts: {
   active: boolean;
+  campaignId: string;
   boardId: number;
   stageRef: React.RefObject<Konva.Stage | null>;
   layerRef: React.RefObject<Konva.Layer | null>;
   radius: number;
   clientId: string;
-  addMyPath: (id: string) => void;
-  removeMyPath: (id: string) => void;
 
   currentUserId: string;
 }) {
-  const {
-    active,
-    boardId,
-    stageRef,
-    layerRef,
-    radius,
-    clientId,
-    addMyPath,
-    removeMyPath,
-
-    currentUserId,
-  } = opts;
+  const { active, campaignId, boardId, stageRef, layerRef, radius, clientId } =
+    opts;
   const publish = usePublish();
 
   const [fogStrokes, setFogStrokes] = useState<FogStroke[]>([]);
@@ -53,7 +42,6 @@ export function useFogErase(opts: {
         ? crypto.randomUUID()
         : fallbackUUID();
     pathIdRef.current = id;
-    addMyPath(id);
 
     /*const opStart: StrokeStartOp = {
       type: "stroke.start",
@@ -77,16 +65,7 @@ export function useFogErase(opts: {
         radius,
       },
     ]);
-  }, [
-    addMyPath,
-    boardId,
-    clientId,
-    layerRef,
-    publish,
-    stageRef,
-    radius,
-    currentUserId,
-  ]);
+  }, [active, stageRef, layerRef, radius]);
 
   const onPointerMove = useCallback(() => {
     const pt = getPointerOnLayer(stageRef, layerRef);
@@ -95,6 +74,7 @@ export function useFogErase(opts: {
 
     setFogStrokes((prev) => {
       const idx = prev.findIndex((o) => o.id === pid);
+
       if (idx === -1) return prev;
 
       const stroke = prev[idx];
@@ -103,7 +83,9 @@ export function useFogErase(opts: {
       if (L >= 2) {
         const dx = pt.x - stroke.points[L - 2];
         const dy = pt.y - stroke.points[L - 1];
-        if (dx * dx + dy * dy < 1) return prev;
+        const minDistSq = (radius * 0.25) ** 2;
+
+        if (dx * dx + dy * dy < minDistSq) return prev;
       }
 
       pendingPointsRef.current.push([pt.x, pt.y]);
@@ -111,6 +93,7 @@ export function useFogErase(opts: {
       const updated = { ...stroke, points: [...stroke.points, pt.x, pt.y] };
       const copy = prev.slice();
       copy[idx] = updated;
+
       return copy;
     });
   }, [layerRef, setFogStrokes, stageRef]);
@@ -120,15 +103,19 @@ export function useFogErase(opts: {
     pathIdRef.current = null;
     if (!pid) return;
 
-    removeMyPath(pid);
+    const points = pendingPointsRef.current;
+    pendingPointsRef.current = [];
 
-    /*publish(`/app/board.${boardId}.op`, {
-      type: "stroke.end",
+    publish(`/app/board.${boardId}.op`, {
+      type: "fog.line.erased",
       boardId,
+      campaignId,
       pathId: pid,
+      points,
+      radius,
       clientId,
-    });*/
-  }, [boardId, publish, removeMyPath, clientId]);
+    });
+  }, [boardId, publish, clientId]);
 
   return {
     fogStrokes,

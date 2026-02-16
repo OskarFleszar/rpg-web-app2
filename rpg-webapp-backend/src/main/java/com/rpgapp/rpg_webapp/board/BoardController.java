@@ -71,6 +71,14 @@ public class BoardController {
     }
 
 
+    @GetMapping("/{boardId}/fogonoff")
+    public boolean getFogOnOff (@PathVariable long boardId) {
+        Board b = boardRepository.findById(boardId).orElseThrow();
+        boolean state = b.getFogOnOff();
+        return state;
+    }
+
+
     
 
 
