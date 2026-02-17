@@ -11,6 +11,6 @@ import java.util.List;
 public class StrokeObject extends BoardObject {
     private String pathId;
     private String color;
-    private int width;                 // grubość linii
+    private int width;
     private List<Integer> points = new ArrayList<>();
 }

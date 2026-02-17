@@ -52,9 +52,18 @@ export type Token = {
   characterId: number;
 };
 
-export type Drawable = Stroke | Rect | Ellipse | Token;
+export type FogStroke = {
+  type: "fog";
+  id: string;
+  points: number[];
+  radius: number;
+  ownerId: string;
+};
+
+export type Drawable = Stroke | Rect | Ellipse | Token | FogStroke;
 
 export const isStroke = (o: Drawable): o is Stroke => o.type === "stroke";
 export const isRect = (o: Drawable): o is Rect => o.type === "rect";
 export const isEllipse = (o: Drawable): o is Ellipse => o.type === "ellipse";
 export const isToken = (o: Drawable): o is Token => o.type === "token";
+export const isFog = (o: Drawable): o is FogStroke => o.type === "fog";

@@ -1,15 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { usePublish } from "../../../ws/hooks";
 import type Konva from "konva";
 
 import { getPointerOnLayer } from "../utils/konvaCoords";
 import { fallbackUUID } from "./usePencil";
-
-export type FogStroke = {
-  id: string;
-  points: number[];
-  radius: number;
-};
+import { isFog, type Drawable } from "../types";
 
 export function useFogErase(opts: {
   active: boolean;
@@ -19,14 +14,23 @@ export function useFogErase(opts: {
   layerRef: React.RefObject<Konva.Layer | null>;
   radius: number;
   clientId: string;
-
   currentUserId: string;
+  layerId: string;
+  setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>;
 }) {
-  const { active, campaignId, boardId, stageRef, layerRef, radius, clientId } =
-    opts;
+  const {
+    currentUserId,
+    active,
+    campaignId,
+    boardId,
+    stageRef,
+    layerRef,
+    radius,
+    clientId,
+    layerId,
+    setObjects,
+  } = opts;
   const publish = usePublish();
-
-  const [fogStrokes, setFogStrokes] = useState<FogStroke[]>([]);
 
   const pendingPointsRef = useRef<number[][]>([]);
   const pathIdRef = useRef<string | null>(null);
@@ -43,26 +47,16 @@ export function useFogErase(opts: {
         : fallbackUUID();
     pathIdRef.current = id;
 
-    /*const opStart: StrokeStartOp = {
-      type: "stroke.start",
-      boardId,
-      layerId: "base",
-      pathId: id,
-     
-      width: strokeWidth,
-      clientId,
-      ownerId: currentUserId,
-    };
-    publish(`/app/board.${boardId}.op`, opStart);*/
-
     pendingPointsRef.current.push([pt.x, pt.y]);
 
-    setFogStrokes((prev) => [
+    setObjects((prev) => [
       ...prev,
       {
+        type: "fog",
         id,
         points: [pt.x, pt.y],
         radius,
+        ownerId: currentUserId,
       },
     ]);
   }, [active, stageRef, layerRef, radius]);
@@ -72,12 +66,13 @@ export function useFogErase(opts: {
     const pid = pathIdRef.current;
     if (!pt || !pid) return;
 
-    setFogStrokes((prev) => {
-      const idx = prev.findIndex((o) => o.id === pid);
+    setObjects((prev) => {
+      const idx = prev.findIndex((o) => isFog(o) && o.id === pid);
 
       if (idx === -1) return prev;
 
       const stroke = prev[idx];
+      if (!isFog(stroke)) return prev;
 
       const L = stroke.points.length;
       if (L >= 2) {
@@ -96,7 +91,7 @@ export function useFogErase(opts: {
 
       return copy;
     });
-  }, [layerRef, setFogStrokes, stageRef]);
+  }, [layerRef, setObjects, stageRef]);
 
   const onPointerUp = useCallback(() => {
     const pid = pathIdRef.current;
@@ -114,12 +109,11 @@ export function useFogErase(opts: {
       points,
       radius,
       clientId,
+      layerId,
     });
   }, [boardId, publish, clientId]);
 
   return {
-    fogStrokes,
-    setFogStrokes,
     onPointerDown,
     onPointerMove,
     onPointerUp,

@@ -3,13 +3,13 @@ package com.rpgapp.rpg_webapp.board.dto;
 import java.util.List;
 
 public record FogEraseDTO(
-        String type,
-
         String campaignId,
         long boardId,
         String pathId,
-        double radius,
+        int radius,
         double[][] points,
-        String clientId
+        String clientId,
+
+        String layerId
 ) {}
 

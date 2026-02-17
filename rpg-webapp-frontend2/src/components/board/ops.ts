@@ -207,6 +207,7 @@ export type FogLineErased = {
   radius: number;
   points: number[][];
   clientId?: string;
+  ownerId: string;
 };
 export type BoardOp =
   | StrokeStartOp

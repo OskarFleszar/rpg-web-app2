@@ -8,7 +8,6 @@ import { handleStrokeStart } from "./usewsincomingfunctions/handleStrokeStart";
 import { handleStrokeAppend } from "./usewsincomingfunctions/handleStrokeAppend";
 import { handleTokenAdd } from "./usewsincomingfunctions/handleTokenAdd";
 import { handleTransformApplied } from "./usewsincomingfunctions/handleTransformApplied";
-import type { FogStroke } from "./useFogErase";
 
 type PushUndo = (
   a:
@@ -26,7 +25,7 @@ export function useWsIncoming(
   campaignId: string | undefined,
   fogOfWarOn: boolean,
   setFogOfWarOn: React.Dispatch<React.SetStateAction<boolean>>,
-  setFogStrokes: React.Dispatch<React.SetStateAction<FogStroke[]>>,
+
   opts?: {
     pushUndo?: PushUndo;
     shouldIgnoreEraseApplied?: ShouldIgnoreErase;
@@ -221,11 +220,17 @@ export function useWsIncoming(
 
         console.log("message fog recieved");
 
-        setFogStrokes((prev) => {
+        setObjects((prev) => {
           if (prev.some((s) => s.id === op.pathId)) return prev;
           return [
             ...prev,
-            { id: op.pathId, radius: op.radius, points: flatPoints },
+            {
+              type: "fog",
+              id: op.pathId,
+              radius: op.radius,
+              points: flatPoints,
+              ownerId: op.ownerId,
+            },
           ];
         });
         break;

@@ -1,12 +1,13 @@
 import { Group, Line, Rect } from "react-konva";
-import type { FogStroke } from "../hooks/useFogErase";
+import type { Drawable, FogStroke } from "../types";
+import { useEffect, useState } from "react";
 
 type FogOfWarProps = {
   boardWidth: number;
   boardHeight: number;
   fogOfWarOn: boolean;
   isGM: boolean;
-  fogStrokes: FogStroke[];
+  objects: Drawable[];
 };
 
 export function FogOfWarLayer({
@@ -14,8 +15,15 @@ export function FogOfWarLayer({
   boardHeight,
   fogOfWarOn,
   isGM,
-  fogStrokes,
+  objects,
 }: FogOfWarProps) {
+  const [fogStrokes, setFogStrokes] = useState<FogStroke[]>([]);
+
+  useEffect(() => {
+    setFogStrokes(objects.filter((o): o is FogStroke => o.type === "fog"));
+    console.log(objects);
+  }, [objects]);
+
   if (!fogOfWarOn) return null;
 
   return (

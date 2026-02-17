@@ -146,7 +146,7 @@ public class CampaignService {
     }
 
     @Transactional
-    public boolean turnFogOnOff(Long campaignId, Long boardId) {
+    public void turnFogOnOff(Long campaignId, Long boardId) {
         Campaign campaign = getCampaignData(campaignId).orElseThrow();
 
         Board board = boardRepository.findById(boardId)
@@ -157,7 +157,7 @@ public class CampaignService {
         board.setFogOnOff(!Boolean.TRUE.equals(board.getFogOnOff()));
 
         boardRepository.save(board);
-        return board.getFogOnOff();
+
     }
 
 

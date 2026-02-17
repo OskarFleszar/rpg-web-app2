@@ -36,13 +36,22 @@ type ApiToken = {
   chcaracterId: number | null;
 };
 
-type ApiObject = ApiStroke | ApiShape | ApiToken;
+type ApiFog = {
+  type: "fog";
+  objectId?: string;
+  pathId?: string;
+  points: number[] | number[][];
+  radius: number;
+  ownerId: string | number;
+};
+
+type ApiObject = ApiStroke | ApiShape | ApiToken | ApiFog;
 type ApiLayer = { id: string; locked: boolean; objects: ApiObject[] };
 type ApiSnapshot = { version: number; layers: ApiLayer[] };
 
 export function useSnapshot(
   boardId: number,
-  setObjects: (s: Drawable[]) => void
+  setObjects: (s: Drawable[]) => void,
 ) {
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +60,8 @@ export function useSnapshot(
       const res = await axios.get(`${API_URL}/api/board/${boardId}/state`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+
+      console.log(res.data);
 
       if (cancelled) return;
 

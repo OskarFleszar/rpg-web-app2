@@ -178,6 +178,8 @@ export default function BoardCanvas({
     radius: fogEraserSize,
     clientId,
     currentUserId,
+    layerId: "fog",
+    setObjects,
   });
 
   const { addMyPath, removeMyPath, markPendingRemoval, pendingRemoval } =
@@ -189,7 +191,7 @@ export default function BoardCanvas({
       campaignId,
       fogOfWarOn,
       setFogOfWarOn,
-      fog.setFogStrokes,
+
       {
         pushUndo: (a) => pushUndoRef.current?.(a),
         shouldIgnoreEraseApplied: (ids) =>
@@ -356,7 +358,7 @@ export default function BoardCanvas({
                 boardWidth={boardWidth}
                 boardHeight={boardHeight}
                 isGM={isGM}
-                fogStrokes={fog.fogStrokes}
+                objects={objects}
               />
             </Group>
           </Layer>

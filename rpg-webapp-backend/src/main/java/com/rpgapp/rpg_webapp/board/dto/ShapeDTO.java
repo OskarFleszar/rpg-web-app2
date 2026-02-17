@@ -9,9 +9,9 @@ import java.util.UUID;
 public record ShapeDTO(
         UUID id,
         String layerId,
-        String type,          // "rect" | "ellipse"
+        String type,
         String color,
-        Integer strokeWidth,  // grubość konturu (z frontu może się nazywać strokeWidth)
+        Integer strokeWidth,
         Double x,
         Double y,
 

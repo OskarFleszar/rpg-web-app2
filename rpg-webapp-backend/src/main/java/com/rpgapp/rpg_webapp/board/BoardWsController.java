@@ -294,7 +294,12 @@ public class BoardWsController {
 
             case "fog.line.erased" -> {
               var dto = mapper.convertValue(body, FogEraseDTO.class);
+              var owner = users.findUserById(userId).orElse(null);
+              if (owner == null) return;
 
+              var lid = (String) body.get("layerId");
+
+              service.addFogStroke(dto, owner);
 
               broker.convertAndSend("/topic/board." + id + ".op", body);
             }

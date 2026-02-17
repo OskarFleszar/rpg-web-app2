@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function apiObjectToDrawable(o: any) {
   if (o.type === "stroke") {
     const pts = Array.isArray(o.points?.[0])
       ? (o.points as number[][]).flat()
-      : (o.points as number[]) ?? [];
+      : ((o.points as number[]) ?? []);
     return {
       type: "stroke" as const,
       id: o.objectId,
@@ -50,6 +51,23 @@ export function apiObjectToDrawable(o: any) {
       row: o.row,
       characterId: o.characterId,
       ownerId: String(o.ownerId ?? ""),
+    };
+  }
+
+  if (o.type === "fog") {
+    const pts = Array.isArray(o.points?.[0])
+      ? (o.points as number[][]).flat()
+      : ((o.points as number[]) ?? []);
+
+    const id = String(o.pathId ?? o.objectId ?? "");
+    if (!id) return null;
+
+    return {
+      type: "fog" as const,
+      id,
+      points: pts,
+      ownerId: String(o.ownerId ?? ""),
+      radius: Number(o.radius ?? 0),
     };
   }
 

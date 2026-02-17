@@ -452,5 +452,35 @@ public class BoardService {
     public void turnFogOnOff (Long campaignId, Long boardId) {
         campaignService.turnFogOnOff(campaignId, boardId);
     }
+    @Transactional
+    public void addFogStroke (FogEraseDTO dto, User owner) throws Exception {
+        BoardState st = getOrCreateState(dto.boardId());
+        Snapshot snap = readSnapshot(st);
+
+        var fogStroke = FogEraseObject.builder()
+                .pathId(dto.pathId())
+                .build();
+
+        fogStroke.setRadius(dto.radius());
+        fogStroke.setPoints(dto.points());
+        fogStroke.setType("fog");
+        fogStroke.setCreatedAt(LocalDateTime.now());
+        fogStroke.setPathId(dto.pathId());
+        fogStroke.setOwnerId(owner.getId());
+
+        snap.addFogStroke(dto.layerId(),fogStroke);
+        writeSnapshot(st, snap);
+        states.save(st);
+
+
+        var idx = new BoardObjectIndex();
+        idx.setObjectId(UUID.fromString(dto.pathId()));
+        idx.setBoard(st.getBoard());
+        idx.setOwner(owner);
+        idx.setType("fog");
+        idx.setLayerId(dto.layerId());
+        idx.setCreatedAt(LocalDateTime.now());
+        indexRepo.save(idx);
+    }
 
 }
