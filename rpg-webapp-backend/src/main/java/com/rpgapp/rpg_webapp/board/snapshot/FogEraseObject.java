@@ -11,7 +11,7 @@ import lombok.Setter;
 public class FogEraseObject extends BoardObject{
 
   private String pathId;
-  private double [][] points;
+  private int [] points;
   private int radius;
 
 }

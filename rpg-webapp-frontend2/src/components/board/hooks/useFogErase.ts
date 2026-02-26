@@ -6,6 +6,21 @@ import { getPointerOnLayer } from "../utils/konvaCoords";
 import { fallbackUUID } from "./usePencil";
 import { isFog, type Drawable } from "../types";
 
+type FogEraseChunkOp = {
+  type: "fog.line.erased";
+  boardId: number;
+  campaignId: string;
+  pathId: string;
+  radius: number;
+  chunkIndex: number;
+  isLast: boolean;
+  points: number[];
+  clientId: string;
+  layerId: string;
+};
+
+const CHUNK_POINTS = 200;
+
 export function useFogErase(opts: {
   active: boolean;
   campaignId: string;
@@ -31,6 +46,14 @@ export function useFogErase(opts: {
     setObjects,
   } = opts;
   const publish = usePublish();
+
+  const packPoints = (pts: number[][]) => {
+    const out: number[] = [];
+    for (const [x, y] of pts) {
+      out.push(Math.round(x), Math.round(y));
+    }
+    return out;
+  };
 
   const pendingPointsRef = useRef<number[][]>([]);
   const pathIdRef = useRef<string | null>(null);
@@ -59,7 +82,7 @@ export function useFogErase(opts: {
         ownerId: currentUserId,
       },
     ]);
-  }, [active, stageRef, layerRef, radius]);
+  }, [active, stageRef, layerRef, setObjects, radius, currentUserId]);
 
   const onPointerMove = useCallback(() => {
     const pt = getPointerOnLayer(stageRef, layerRef);
@@ -91,27 +114,44 @@ export function useFogErase(opts: {
 
       return copy;
     });
-  }, [layerRef, setObjects, stageRef]);
+  }, [layerRef, radius, setObjects, stageRef]);
 
   const onPointerUp = useCallback(() => {
     const pid = pathIdRef.current;
     pathIdRef.current = null;
     if (!pid) return;
 
-    const points = pendingPointsRef.current;
+    const pts = pendingPointsRef.current;
     pendingPointsRef.current = [];
 
-    publish(`/app/board.${boardId}.op`, {
-      type: "fog.line.erased",
-      boardId,
-      campaignId,
-      pathId: pid,
-      points,
-      radius,
-      clientId,
-      layerId,
-    });
-  }, [boardId, publish, clientId]);
+    if (!pts.length) return;
+
+    const packed = packPoints(pts);
+
+    const numsPerChunk = CHUNK_POINTS * 2;
+
+    let chunkIndex = 0;
+    for (let i = 0; i < packed.length; i += numsPerChunk) {
+      const slice = packed.slice(i, i + numsPerChunk);
+      const isLast = i + numsPerChunk >= packed.length;
+
+      const op: FogEraseChunkOp = {
+        type: "fog.line.erased",
+        boardId,
+        campaignId,
+        pathId: pid,
+        radius,
+        chunkIndex,
+        isLast,
+        points: slice,
+        clientId,
+        layerId,
+      };
+
+      publish(`/app/board.${boardId}.op`, op);
+      chunkIndex++;
+    }
+  }, [boardId, campaignId, radius, clientId, layerId, publish]);
 
   return {
     onPointerDown,

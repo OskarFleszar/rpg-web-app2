@@ -216,23 +216,40 @@ export function useWsIncoming(
       case "fog.line.erased": {
         if (op.clientId === clientId) break;
 
-        const flatPoints = (op.points ?? []).flat();
-
-        console.log("message fog recieved");
+        const newPts: number[] = Array.isArray(op.points) ? op.points : [];
 
         setObjects((prev) => {
-          if (prev.some((s) => s.id === op.pathId)) return prev;
-          return [
-            ...prev,
-            {
-              type: "fog",
-              id: op.pathId,
-              radius: op.radius,
-              points: flatPoints,
-              ownerId: op.ownerId,
-            },
-          ];
+          const idx = prev.findIndex(
+            (o) => o.type === "fog" && o.id === op.pathId,
+          );
+
+          if (idx === -1) {
+            return [
+              ...prev,
+              {
+                type: "fog",
+                id: op.pathId,
+                radius: op.radius,
+                points: [...newPts],
+                ownerId: (op as any).ownerId ?? "remote",
+              },
+            ];
+          }
+
+          const fog = prev[idx];
+          if (fog.type !== "fog") return prev;
+
+          const updated = {
+            ...fog,
+            radius: op.radius ?? fog.radius,
+            points: [...fog.points, ...newPts],
+          };
+
+          const copy = prev.slice();
+          copy[idx] = updated;
+          return copy;
         });
+
         break;
       }
     }

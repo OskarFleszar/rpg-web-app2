@@ -170,6 +170,7 @@ public class CampaignService {
         Board board  = boardRepository.findById(boardId)
             .orElseThrow(() -> new EntityNotFoundException("Board not found: " + boardId));
         campaign.setActiveBoard(board);
+        campaignRepository.save(campaign);
     }
 
     public List<User> getMembers(Long camapignId) {

@@ -21,7 +21,6 @@ export function FogOfWarLayer({
 
   useEffect(() => {
     setFogStrokes(objects.filter((o): o is FogStroke => o.type === "fog"));
-    console.log(objects);
   }, [objects]);
 
   if (!fogOfWarOn) return null;

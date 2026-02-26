@@ -205,7 +205,7 @@ export type FogLineErased = {
   pathId: string;
   boardId: number;
   radius: number;
-  points: number[][];
+  points: number[];
   clientId?: string;
   ownerId: string;
 };

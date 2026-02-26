@@ -42,6 +42,23 @@ public class BoardService {
 
     private final Map<Long, Map<String, List<int[]>>> tempPaths = new ConcurrentHashMap<>();
 
+    private final Map<Long, Map<String, FogChunkBuffer>> tempFogChunks = new ConcurrentHashMap<>();
+
+    private static final class FogChunkBuffer {
+        final String layerId;
+        final int radius;
+        final Long ownerId;
+        final Map<Integer, int[]> chunksByIndex = new HashMap<>();
+        Integer lastIndex = null;
+
+        FogChunkBuffer(String layerId, int radius, Long ownerId) {
+            this.layerId = layerId;
+            this.radius = radius;
+            this.ownerId = ownerId;
+        }
+    }
+
+
     public BoardService(BoardRepository boards, BoardStateRepository states, BoardObjectIndexRepository indexRepo, ObjectMapper mapper, CharacterService characterService, CampaignService campaignService) {
         this.boards = boards;
         this.states = states;
@@ -453,26 +470,76 @@ public class BoardService {
         campaignService.turnFogOnOff(campaignId, boardId);
     }
     @Transactional
-    public void addFogStroke (FogEraseDTO dto, User owner) throws Exception {
+    public void addFogStrokeChunk(FogEraseDTO dto, User owner) throws Exception {
+        if (dto == null) return;
+        if (dto.pathId() == null || dto.pathId().isBlank()) return;
+        if (dto.layerId() == null || dto.layerId().isBlank()) return;
+        if (dto.points() == null || dto.points().length == 0) return;
+        if (dto.points().length % 2 != 0) return;
+
+        // bufor per boardId
+        var byPath = tempFogChunks.computeIfAbsent(dto.boardId(), k -> new ConcurrentHashMap<>());
+
+        // bufor per pathId
+        var buf = byPath.computeIfAbsent(dto.pathId(),
+                pid -> new FogChunkBuffer(dto.layerId(), dto.radius(), owner.getId()));
+
+        int[] maybeAllPoints = null;
+
+        synchronized (buf) {
+            buf.chunksByIndex.put(dto.chunkIndex(), dto.points());
+            if (dto.isLast()) buf.lastIndex = dto.chunkIndex();
+
+            // jeszcze nie wiemy ile będzie chunków
+            if (buf.lastIndex == null) return;
+
+            // czekamy aż dojdą wszystkie 0..lastIndex
+            for (int i = 0; i <= buf.lastIndex; i++) {
+                if (!buf.chunksByIndex.containsKey(i)) return;
+            }
+
+            // składamy w kolejności
+            int total = 0;
+            for (int i = 0; i <= buf.lastIndex; i++) total += buf.chunksByIndex.get(i).length;
+
+            int[] all = new int[total];
+            int pos = 0;
+            for (int i = 0; i <= buf.lastIndex; i++) {
+                int[] c = buf.chunksByIndex.get(i);
+                System.arraycopy(c, 0, all, pos, c.length);
+                pos += c.length;
+            }
+
+            maybeAllPoints = all;
+        }
+
+        // sprzątamy bufor (poza synchronized)
+        byPath.remove(dto.pathId());
+        if (byPath.isEmpty()) tempFogChunks.remove(dto.boardId());
+
+        // zapis do snapshotu tylko raz (na końcu)
         BoardState st = getOrCreateState(dto.boardId());
         Snapshot snap = readSnapshot(st);
 
+        // jeśli już istnieje (np. duplikat), to ignorujemy
+        if (snap.findObjectById(dto.pathId()) != null) return;
+
         var fogStroke = FogEraseObject.builder()
                 .pathId(dto.pathId())
+                .radius(dto.radius())
+                .points(maybeAllPoints)
                 .build();
 
-        fogStroke.setRadius(dto.radius());
-        fogStroke.setPoints(dto.points());
         fogStroke.setType("fog");
+        fogStroke.setObjectId(dto.pathId());
         fogStroke.setCreatedAt(LocalDateTime.now());
-        fogStroke.setPathId(dto.pathId());
         fogStroke.setOwnerId(owner.getId());
 
-        snap.addFogStroke(dto.layerId(),fogStroke);
+        snap.addFogStroke(dto.layerId(), fogStroke);
         writeSnapshot(st, snap);
         states.save(st);
 
-
+        // index tylko raz (na końcu)
         var idx = new BoardObjectIndex();
         idx.setObjectId(UUID.fromString(dto.pathId()));
         idx.setBoard(st.getBoard());
@@ -482,5 +549,6 @@ public class BoardService {
         idx.setCreatedAt(LocalDateTime.now());
         indexRepo.save(idx);
     }
+
 
 }
