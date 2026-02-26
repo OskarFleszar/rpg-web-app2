@@ -64,7 +64,13 @@ export function useToolHandlers({
 
       if (tool === "pencil") return pencil.onPointerDown();
       if (tool === "eraser") return eraser.onDown();
-      if (tool === "rect" || tool === "ellipse") return shapes.onPointerDown();
+      if (
+        tool === "rect" ||
+        tool === "ellipse" ||
+        tool === "fogcircle" ||
+        tool === "fogsquare"
+      )
+        return shapes.onPointerDown();
       if (tool === "pointer") return pointer.onStagePointerDown(e);
       if (tool === "token") return token.onPointerDown();
       if (tool === "fog") return fog.onPointerDown();
@@ -91,13 +97,21 @@ export function useToolHandlers({
       tool === "pencil" ||
       tool === "rect" ||
       tool === "ellipse" ||
-      tool === "fog";
+      tool === "fog" ||
+      tool === "fogcircle" ||
+      tool === "fogsquare";
     if (needsCursor) updatePointer();
     if (!pt || !isInsideBoard(pt)) return;
 
     if (tool === "pencil") return pencil.onPointerMove();
     if (tool === "eraser") return eraser.onMove();
-    if (tool === "rect" || tool === "ellipse") return shapes.onPointerMove();
+    if (
+      tool === "rect" ||
+      tool === "ellipse" ||
+      tool === "fogcircle" ||
+      tool === "fogsquare"
+    )
+      return shapes.onPointerMove();
     if (tool === "fog") return fog.onPointerMove();
   }, [
     tool,
@@ -116,7 +130,13 @@ export function useToolHandlers({
 
     if (tool === "pencil") return pencil.onPointerUp();
     if (tool === "eraser") return eraser.onUp();
-    if (tool === "rect" || tool === "ellipse") return shapes.onPointerUp();
+    if (
+      tool === "rect" ||
+      tool === "ellipse" ||
+      tool === "fogcircle" ||
+      tool === "fogsquare"
+    )
+      return shapes.onPointerUp();
     if (tool === "fog") return fog.onPointerUp();
   }, [tool, pencil, eraser, shapes]);
 

@@ -5,7 +5,7 @@ import { useCallback, useRef } from "react";
 import { getPointerOnLayer } from "../utils/konvaCoords";
 import { fallbackUUID } from "./usePencil";
 
-type Kind = "rect" | "ellipse";
+type Kind = "rect" | "ellipse" | "fogcircle" | "fogsquare";
 
 export function useShape(opts: {
   kind: Kind;
@@ -67,17 +67,37 @@ export function useShape(opts: {
             strokeWidth,
             ownerId: currentUserId,
           }
-        : {
-            type: "ellipse",
-            id,
-            x,
-            y,
-            width,
-            height,
-            color,
-            strokeWidth,
-            ownerId: currentUserId,
-          },
+        : kind === "ellipse"
+          ? {
+              type: "ellipse",
+              id,
+              x,
+              y,
+              width,
+              height,
+              color,
+              strokeWidth,
+              ownerId: currentUserId,
+            }
+          : kind === "fogcircle"
+            ? {
+                type: "fogcircle",
+                id,
+                x,
+                y,
+                width,
+                height,
+                ownerId: currentUserId,
+              }
+            : {
+                type: "fogsquare",
+                id,
+                x,
+                y,
+                width,
+                height,
+                ownerId: currentUserId,
+              },
     ]);
   }, [color, currentUserId, kind, layerRef, setObjects, stageRef, strokeWidth]);
 
@@ -93,8 +113,11 @@ export function useShape(opts: {
         if (o.id !== tempIdRef.current) return o;
         if (o.type === "rect") return { ...o, ...box };
         if (o.type === "ellipse") return { ...o, ...box };
+        if (o.type === "fogcircle") return { ...o, ...box };
+        if (o.type === "fogsquare") return { ...o, ...box };
+
         return o;
-      })
+      }),
     );
   }, [layerRef, stageRef, setObjects]);
 
@@ -107,14 +130,22 @@ export function useShape(opts: {
       const obj = prev.find((o) => o.id === id);
       if (!obj) return prev;
 
-      const toSend = {
-        type: "shape.add",
-        boardId,
-        layerId: "base",
-        clientId,
-        shape: obj,
-      };
-      console.log("[shape.add SEND]", obj);
+      const toSend =
+        obj.type === "ellipse" || obj.type === "rect"
+          ? {
+              type: "shape.add",
+              boardId,
+              layerId: "base",
+              clientId,
+              shape: obj,
+            }
+          : {
+              type: "shape.add",
+              boardId,
+              layerId: "fog",
+              clientId,
+              shape: obj,
+            };
 
       publish(`/app/board.${boardId}.op`, toSend);
 

@@ -227,7 +227,14 @@ export default function BoardCanvas({
   });
 
   const shapes = useShape({
-    kind: tool === "rect" ? "rect" : "ellipse",
+    kind:
+      tool === "rect"
+        ? "rect"
+        : tool === "ellipse"
+          ? "ellipse"
+          : tool === "fogcircle"
+            ? "fogcircle"
+            : "fogsquare",
     boardId,
     stageRef,
     layerRef,

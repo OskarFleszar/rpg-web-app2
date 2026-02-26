@@ -135,25 +135,51 @@ export default function Toolbar(props: Props) {
       </div>
 
       {isGM && fogOfWarOn ? (
-        <div className={`eraser-select ${tool === "fog" ? "open" : ""}`}>
-          <button
-            className={`tool-button ${tool === "fog" ? "active" : ""}`}
-            title="Fog"
-            onClick={() => setTool("fog")}
-          >
-            🩹
-          </button>
-          <div className="drawing-settings">
-            <label className="tool-tile">
-              <input
-                type="number"
-                min={1}
-                value={fogEraserSize}
-                onChange={(e) => setFogEraserSize(Number(e.target.value))}
-              />
-            </label>
+        <>
+          <div className={`eraser-select ${tool === "fog" ? "open" : ""}`}>
+            <button
+              className={`tool-button ${tool === "fog" ? "active" : ""}`}
+              title="Fog"
+              onClick={() => setTool("fog")}
+            >
+              🩹
+            </button>
+            <div className="drawing-settings">
+              <label className="tool-tile">
+                <input
+                  type="number"
+                  min={1}
+                  value={fogEraserSize}
+                  onChange={(e) => setFogEraserSize(Number(e.target.value))}
+                />
+              </label>
+            </div>
           </div>
-        </div>
+
+          <div
+            className={`eraser-select ${tool === "fogcircle" ? "open" : ""}`}
+          >
+            <button
+              className={`tool-button ${tool === "fogcircle" ? "active" : ""}`}
+              title="Fogcircle"
+              onClick={() => setTool("fogcircle")}
+            >
+              <span className="shape-circle" />
+            </button>
+          </div>
+
+          <div
+            className={`eraser-select ${tool === "fogsquare" ? "open" : ""}`}
+          >
+            <button
+              className={`tool-button ${tool === "fogsquare" ? "active" : ""}`}
+              title="Fogsquare"
+              onClick={() => setTool("fogsquare")}
+            >
+              <span className="shape-square" />
+            </button>
+          </div>
+        </>
       ) : (
         <></>
       )}
