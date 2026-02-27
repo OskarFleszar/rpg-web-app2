@@ -194,19 +194,22 @@ public class BoardService {
         if (dto == null || dto.id() == null || dto.type() == null || dto.layerId() == null) {
             throw new IllegalArgumentException("shape.id, type i layerId są wymagane");
         }
-        if (dto.color() == null || dto.strokeWidth() == null) {
-            throw new IllegalArgumentException("shape.color i strokeWidth są wymagane");
+        if(!dto.type().equals("fogcircle") && !dto.type().equals("fogsquare")) {
+            if (dto.color() == null || dto.strokeWidth() == null) {
+                throw new IllegalArgumentException("shape.color i strokeWidth są wymagane");
+            }
         }
+
 
         String shapeType = dto.type().toLowerCase();
 
         switch (shapeType) {
-            case "rect" -> {
+            case "rect", "fogsquare" -> {
                 if (dto.width() == null || dto.height() == null) {
                     throw new IllegalArgumentException("rect wymaga width i height");
                 }
             }
-            case "ellipse" -> {
+            case "ellipse", "fogcircle" -> {
                 if (dto.width() == null || dto.height() == null) {
                     throw new IllegalArgumentException("ellipse wymaga radiusX i radiusY");
                 }
@@ -221,13 +224,18 @@ public class BoardService {
         obj.setType("shape");
         obj.setObjectId(dto.id().toString());
         obj.setShape(shapeType);
-        obj.setColor(dto.color());
-        obj.setStrokeWidth(dto.strokeWidth());
+        if(dto.color() != null ) {
+            obj.setColor(dto.color());
+        }
+       if (dto.strokeWidth() != null) {
+           obj.setStrokeWidth(dto.strokeWidth());
+       }
+
         obj.setX(dto.x() != null ? dto.x() : 0.0);
         obj.setY(dto.y() != null ? dto.y() : 0.0);
         obj.setRotation(dto.rotation());
 
-        if ("rect".equals(shapeType)) {
+        if ("rect".equals(shapeType) || "fogsquare".equals(shapeType)) {
             obj.setWidth(dto.width());
             obj.setHeight(dto.height());
         } else if ("ellipse".equals(shapeType)) {

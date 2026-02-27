@@ -43,6 +43,31 @@ export function apiObjectToDrawable(o: any) {
     };
   }
 
+  if (o.shape === "fogsquare") {
+    return {
+      type: "fogsquare" as const,
+      id: o.objectId,
+      x: o.x,
+      y: o.y,
+      width: o.width,
+      height: o.height,
+
+      ownerId: String(o.ownerId ?? ""),
+    };
+  }
+  if (o.shape === "fogcircle") {
+    return {
+      type: "fogcircle" as const,
+      id: o.objectId,
+      x: o.x,
+      y: o.y,
+      width: o.width,
+      height: o.height,
+
+      ownerId: String(o.ownerId ?? ""),
+    };
+  }
+
   if (o.type === "token") {
     return {
       type: "token" as const,

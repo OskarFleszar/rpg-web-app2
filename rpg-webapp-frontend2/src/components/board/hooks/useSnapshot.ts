@@ -15,7 +15,7 @@ type ApiStroke = {
 
 type ApiShape = {
   type: "shape" | null;
-  shape: "rect" | "ellipse";
+  shape: "rect" | "ellipse" | "fogcircle" | "fogsquare";
   objectId: string;
   x: number;
   y: number;
