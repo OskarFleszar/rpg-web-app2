@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Circle, Group, Layer, Stage, Transformer } from "react-konva";
 import Konva from "konva";
 import Toolbar from "./Toolbar";
@@ -103,6 +110,7 @@ export default function BoardCanvas({
   const [strokeWidth, setStrokeWidth] = useState(3);
   const [eraserSize, setEraserSize] = useState(20);
   const [fogEraserSize, setFogEraserSize] = useState(20);
+  const [fogStrokeSize, setFogStrokeSize] = useState(20);
 
   const stageRef = useRef<Konva.Stage | null>(null);
   const layerRef = useRef<Konva.Layer | null>(null);
@@ -214,11 +222,13 @@ export default function BoardCanvas({
   }, [pushUndo, shouldIgnoreEraseApplied]);
 
   const pencil = usePencil({
+    kind: tool === "pencil" ? "stroke" : "fogstroke",
     boardId,
     stageRef,
     layerRef,
     color,
     strokeWidth,
+    fogStrokeSize,
     clientId,
     addMyPath,
     removeMyPath,
@@ -267,7 +277,7 @@ export default function BoardCanvas({
 
   useEffect(() => {
     if (tool !== "pointer") pointer.clearSelection();
-  }, [tool]);
+  }, [tool, pointer]);
 
   const { onPointerDown, onPointerMove, onPointerUp, pointerOnLayer } =
     useToolHandlers({
@@ -282,6 +292,26 @@ export default function BoardCanvas({
       eraser: { onDown: erDown, onMove: erMove, onUp: erUp },
       fog,
     });
+
+  useLayoutEffect(() => {
+    const layer = fogLayerRef.current;
+    if (!layer) return;
+
+    const apply = () => {
+      const sceneCanvas = (layer.getCanvas() as any)?._canvas as
+        | HTMLCanvasElement
+        | undefined;
+      if (!sceneCanvas) return;
+
+      sceneCanvas.style.opacity = isGM ? "0.7" : "1";
+    };
+
+    apply();
+
+    const raf = requestAnimationFrame(apply);
+
+    return () => cancelAnimationFrame(raf);
+  }, [isGM, boardId, fogOfWarOn]);
 
   const selectableProps = useSelectableProps({ tool, isGM, isMine, pointer });
 
@@ -298,6 +328,8 @@ export default function BoardCanvas({
         setEraserSize={setEraserSize}
         fogEraserSize={fogEraserSize}
         setFogEraserSize={setFogEraserSize}
+        fogStrokeSize={fogStrokeSize}
+        setFogStrokeSize={setFogStrokeSize}
         isGM={isGM}
         fogOfWarOn={fogOfWarOn}
       />
@@ -353,7 +385,7 @@ export default function BoardCanvas({
               />
             </Group>
           </Layer>
-          <Layer ref={fogLayerRef}>
+          <Layer ref={fogLayerRef} listening={false} perfectDrawEnabled={false}>
             <Group
               clipX={0}
               clipY={0}
@@ -364,7 +396,6 @@ export default function BoardCanvas({
                 fogOfWarOn={fogOfWarOn}
                 boardWidth={boardWidth}
                 boardHeight={boardHeight}
-                isGM={isGM}
                 objects={objects}
               />
             </Group>

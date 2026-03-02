@@ -62,7 +62,8 @@ export function useToolHandlers({
       const pt = getPointerOnLayer(stageRef, layerRef);
       if (!pt || !isInsideBoard(pt)) return;
 
-      if (tool === "pencil") return pencil.onPointerDown();
+      if (tool === "pencil" || tool === "fogpencil")
+        return pencil.onPointerDown();
       if (tool === "eraser") return eraser.onDown();
       if (
         tool === "rect" ||
@@ -95,6 +96,7 @@ export function useToolHandlers({
     const needsCursor =
       tool === "eraser" ||
       tool === "pencil" ||
+      tool === "fogpencil" ||
       tool === "rect" ||
       tool === "ellipse" ||
       tool === "fog" ||
@@ -103,7 +105,8 @@ export function useToolHandlers({
     if (needsCursor) updatePointer();
     if (!pt || !isInsideBoard(pt)) return;
 
-    if (tool === "pencil") return pencil.onPointerMove();
+    if (tool === "pencil" || tool === "fogpencil")
+      return pencil.onPointerMove();
     if (tool === "eraser") return eraser.onMove();
     if (
       tool === "rect" ||
@@ -128,7 +131,7 @@ export function useToolHandlers({
   const onPointerUp = useCallback(() => {
     setPointerOnLayer(null);
 
-    if (tool === "pencil") return pencil.onPointerUp();
+    if (tool === "pencil" || tool === "fogpencil") return pencil.onPointerUp();
     if (tool === "eraser") return eraser.onUp();
     if (
       tool === "rect" ||
@@ -138,7 +141,7 @@ export function useToolHandlers({
     )
       return shapes.onPointerUp();
     if (tool === "fog") return fog.onPointerUp();
-  }, [tool, pencil, eraser, shapes]);
+  }, [fog, tool, pencil, eraser, shapes]);
 
   return { onPointerDown, onPointerMove, onPointerUp, pointerOnLayer };
 }

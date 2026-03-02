@@ -8,13 +8,22 @@ export type Tool =
   | "token"
   | "fog"
   | "fogcircle"
-  | "fogsquare";
+  | "fogsquare"
+  | "fogpencil";
 
 export type Stroke = {
   type: "stroke";
   id: string;
   points: number[];
   color: string;
+  strokeWidth: number;
+  ownerId: string;
+};
+
+export type FogPencilStroke = {
+  type: "fogpencilstroke";
+  id: string;
+  points: number[];
   strokeWidth: number;
   ownerId: string;
 };
@@ -85,6 +94,7 @@ export type FogStroke = {
 
 export type Drawable =
   | Stroke
+  | FogPencilStroke
   | Rect
   | Ellipse
   | Token
@@ -92,7 +102,8 @@ export type Drawable =
   | FogCircle
   | FogSquare;
 
-export const isStroke = (o: Drawable): o is Stroke => o.type === "stroke";
+export const isStroke = (o: Drawable): o is Stroke =>
+  o.type === "stroke" || o.type === "fogpencilstroke";
 export const isRect = (o: Drawable): o is Rect => o.type === "rect";
 export const isEllipse = (o: Drawable): o is Ellipse => o.type === "ellipse";
 export const isToken = (o: Drawable): o is Token => o.type === "token";

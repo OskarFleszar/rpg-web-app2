@@ -26,6 +26,31 @@ export type StrokeEndOp = {
   clientId?: string;
 };
 
+export type FogStrokeStartOp = {
+  type: "fogstroke.start";
+  boardId: number;
+  layerId: string;
+  pathId: string;
+  width: number;
+  ownerId: string;
+  clientId?: string;
+};
+
+export type FogStrokeAppendOp = {
+  type: "fogstroke.append";
+  boardId: number;
+  pathId: string;
+  points: number[][];
+  clientId?: string;
+};
+
+export type FogStrokeEndOp = {
+  type: "fogstroke.end";
+  boardId: number;
+  pathId: string;
+  clientId?: string;
+};
+
 export type ObjectRemoveOp = {
   type: "object.remove";
   boardId: number;

@@ -13,6 +13,8 @@ type Props = {
   setEraserSize: (n: number) => void;
   fogEraserSize: number;
   setFogEraserSize: (n: number) => void;
+  fogStrokeSize: number;
+  setFogStrokeSize: (n: number) => void;
   isGM: boolean;
   fogOfWarOn: boolean;
 };
@@ -29,7 +31,8 @@ export default function Toolbar(props: Props) {
     setEraserSize,
     fogEraserSize,
     setFogEraserSize,
-
+    fogStrokeSize,
+    setFogStrokeSize,
     isGM,
     fogOfWarOn,
   } = props;
@@ -178,6 +181,29 @@ export default function Toolbar(props: Props) {
             >
               <span className="shape-square" />
             </button>
+          </div>
+
+          <div
+            className={`pencil-select ${tool === "fogpencil" ? "open" : ""}`}
+          >
+            <button
+              className={`tool-button ${tool === "fogpencil" ? "active" : ""}`}
+              title="Pencil"
+              onClick={() => setTool("fogpencil")}
+            >
+              ✏️
+            </button>
+
+            <div className="drawing-settings">
+              <label className="tool-tile">
+                <input
+                  type="number"
+                  min={1}
+                  value={fogStrokeSize}
+                  onChange={(e) => setFogStrokeSize(Number(e.target.value))}
+                />
+              </label>
+            </div>
           </div>
         </>
       ) : (

@@ -1,7 +1,12 @@
 import { useCallback, useRef } from "react";
 import { usePublish } from "../../../ws/hooks";
 import type Konva from "konva";
-import type { StrokeAppendOp, StrokeStartOp } from "../ops";
+import type {
+  FogStrokeAppendOp,
+  FogStrokeStartOp,
+  StrokeAppendOp,
+  StrokeStartOp,
+} from "../ops";
 import { isStroke, type Drawable } from "../types";
 import { getPointerOnLayer } from "../utils/konvaCoords";
 
@@ -14,11 +19,13 @@ export function fallbackUUID() {
 }
 
 export function usePencil(opts: {
+  kind: "stroke" | "fogstroke";
   boardId: number;
   stageRef: React.RefObject<Konva.Stage | null>;
   layerRef: React.RefObject<Konva.Layer | null>;
   color: string;
   strokeWidth: number;
+  fogStrokeSize: number;
   clientId: string;
   addMyPath: (id: string) => void;
   removeMyPath: (id: string) => void;
@@ -26,11 +33,13 @@ export function usePencil(opts: {
   currentUserId: string;
 }) {
   const {
+    kind,
     boardId,
     stageRef,
     layerRef,
     color,
     strokeWidth,
+    fogStrokeSize,
     clientId,
     addMyPath,
     removeMyPath,
@@ -46,21 +55,37 @@ export function usePencil(opts: {
   const flushAppend = useCallback(() => {
     const pts = pendingPointsRef.current;
     if (!pts.length || !pathIdRef.current) return;
-    const op: StrokeAppendOp = {
-      type: "stroke.append",
-      boardId,
-      pathId: pathIdRef.current,
-      points: pts.splice(0, pts.length),
-      clientId,
-    };
+
+    let op: StrokeAppendOp | FogStrokeAppendOp;
+
+    if (kind === "stroke") {
+      op = {
+        type: "stroke.append",
+        boardId,
+        pathId: pathIdRef.current,
+        points: pts.splice(0, pts.length),
+        clientId,
+      };
+    } else {
+      {
+        op = {
+          type: "fogstroke.append",
+          boardId,
+          pathId: pathIdRef.current,
+          points: pts.splice(0, pts.length),
+          clientId,
+        };
+      }
+    }
+
     publish(`/app/board.${boardId}.op`, op);
-  }, [boardId, clientId, publish]);
+  }, [kind, boardId, clientId, publish]);
 
   const ensureFlushTimer = useCallback(() => {
     if (flushTimerRef.current != null) return;
     flushTimerRef.current = window.setInterval(
       flushAppend,
-      40
+      40,
     ) as unknown as number;
   }, [flushAppend]);
 
@@ -83,16 +108,31 @@ export function usePencil(opts: {
     pathIdRef.current = id;
     addMyPath(id);
 
-    const opStart: StrokeStartOp = {
-      type: "stroke.start",
-      boardId,
-      layerId: "base",
-      pathId: id,
-      color,
-      width: strokeWidth,
-      clientId,
-      ownerId: currentUserId,
-    };
+    let opStart: StrokeStartOp | FogStrokeStartOp;
+
+    if (kind === "stroke") {
+      opStart = {
+        type: "stroke.start",
+        boardId,
+        layerId: "base",
+        pathId: id,
+        color,
+        width: strokeWidth,
+        clientId,
+        ownerId: currentUserId,
+      };
+    } else {
+      opStart = {
+        type: "fogstroke.start",
+        boardId,
+        layerId: "base",
+        pathId: id,
+        width: fogStrokeSize,
+        clientId,
+        ownerId: currentUserId,
+      };
+    }
+
     publish(`/app/board.${boardId}.op`, opStart);
 
     pendingPointsRef.current.push([pt.x, pt.y]);
@@ -100,27 +140,38 @@ export function usePencil(opts: {
 
     setObjects((prev) => [
       ...prev,
-      {
-        type: "stroke",
-        id,
-        points: [pt.x, pt.y],
-        color,
-        strokeWidth,
-        ownerId: currentUserId,
-      },
+
+      kind === "stroke"
+        ? {
+            type: "stroke",
+            id,
+            points: [pt.x, pt.y],
+            color,
+            strokeWidth,
+            ownerId: currentUserId,
+          }
+        : {
+            type: "fogpencilstroke",
+            id,
+            points: [pt.x, pt.y],
+            strokeWidth: fogStrokeSize,
+            ownerId: currentUserId,
+          },
     ]);
   }, [
-    addMyPath,
-    boardId,
-    clientId,
-    color,
-    ensureFlushTimer,
-    layerRef,
-    publish,
-    setObjects,
     stageRef,
+    layerRef,
+    addMyPath,
+    kind,
+    publish,
+    boardId,
+    ensureFlushTimer,
+    setObjects,
+    color,
     strokeWidth,
+    clientId,
     currentUserId,
+    fogStrokeSize,
   ]);
 
   const onPointerMove = useCallback(() => {
@@ -153,20 +204,28 @@ export function usePencil(opts: {
 
   const onPointerUp = useCallback(() => {
     const pid = pathIdRef.current;
-    pathIdRef.current = null;
     if (!pid) return;
 
     flushAppend();
     clearFlushTimer();
+    pathIdRef.current = null;
     removeMyPath(pid);
 
-    publish(`/app/board.${boardId}.op`, {
-      type: "stroke.end",
-      boardId,
-      pathId: pid,
-      clientId,
-    });
-  }, [boardId, clearFlushTimer, flushAppend, publish, removeMyPath, clientId]);
+    publish(
+      `/app/board.${boardId}.op`,
+      kind === "stroke"
+        ? { type: "stroke.end", boardId, pathId: pid, clientId }
+        : { type: "fogstroke.end", boardId, pathId: pid, clientId },
+    );
+  }, [
+    kind,
+    boardId,
+    clearFlushTimer,
+    flushAppend,
+    publish,
+    removeMyPath,
+    clientId,
+  ]);
 
   return { onPointerDown, onPointerMove, onPointerUp };
 }
