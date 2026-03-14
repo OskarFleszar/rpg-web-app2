@@ -8,6 +8,8 @@ import { handleStrokeStart } from "./usewsincomingfunctions/handleStrokeStart";
 import { handleStrokeAppend } from "./usewsincomingfunctions/handleStrokeAppend";
 import { handleTokenAdd } from "./usewsincomingfunctions/handleTokenAdd";
 import { handleTransformApplied } from "./usewsincomingfunctions/handleTransformApplied";
+import { handleFogStrokeStart } from "./usewsincomingfunctions/handleFogStrokeStart";
+import { handleFogStrokeAppend } from "./usewsincomingfunctions/handleFogStrokeAppend";
 
 type PushUndo = (
   a:
@@ -60,7 +62,7 @@ export function useWsIncoming(
     if (!op || typeof (op as any).type !== "string") return;
 
     const isOwnLiveAppend =
-      op.type === "stroke.append" &&
+      (op.type === "stroke.append" || op.type === "fogstroke.append") &&
       (op as any).clientId === clientId &&
       "pathId" in op &&
       !!(op as any).pathId &&
@@ -90,6 +92,35 @@ export function useWsIncoming(
         break;
       }
       case "stroke.end": {
+        if (op.clientId === clientId && op.pathId && opts?.pushUndo) {
+          opts.pushUndo({ kind: "draw", objectId: op.pathId });
+        }
+        console.log("stroke ended");
+        break;
+      }
+
+      case "fogstroke.start": {
+        handleFogStrokeStart({
+          op,
+          remoteStrokesRef,
+          pendingRemotePointsRef,
+          setObjects,
+        });
+
+        break;
+      }
+
+      case "fogstroke.append": {
+        handleFogStrokeAppend({
+          op,
+          remoteStrokesRef,
+          pendingRemotePointsRef,
+          setObjects,
+          pendingRemoval,
+        });
+        break;
+      }
+      case "fogstroke.end": {
         if (op.clientId === clientId && op.pathId && opts?.pushUndo) {
           opts.pushUndo({ kind: "draw", objectId: op.pathId });
         }

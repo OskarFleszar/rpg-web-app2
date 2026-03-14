@@ -253,4 +253,7 @@ export type BoardOp =
   | TokenMoveOp
   | TokenDeleteOp
   | FogOffOnOp
-  | FogLineErased;
+  | FogLineErased
+  | FogStrokeStartOp
+  | FogStrokeEndOp
+  | FogStrokeAppendOp;

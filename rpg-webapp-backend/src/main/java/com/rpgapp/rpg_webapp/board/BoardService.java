@@ -167,6 +167,66 @@ public class BoardService {
     }
 
     @Transactional
+    public void handleFogStrokeStart(FogStrokeStartDTO dto, User owner) throws Exception {
+        tempPaths.computeIfAbsent(dto.boardId(), k -> new ConcurrentHashMap<>())
+                .put(dto.pathId(), new ArrayList<>());
+
+        BoardState st = getOrCreateState(dto.boardId());
+        Snapshot snap = readSnapshot(st);
+
+        var stroke = StrokeObject.builder()
+                .pathId(dto.pathId())
+                .build();
+
+        stroke.setType("fogpencilstroke");
+        stroke.setObjectId(dto.pathId());
+        stroke.setWidth((int) dto.width());
+        stroke.setOwnerId(owner.getId());
+        stroke.setCreatedAt(LocalDateTime.now());
+
+        if (stroke.getPoints() == null) stroke.setPoints(new ArrayList<>());
+
+        snap.addStroke(dto.layerId(), stroke);
+        writeSnapshot(st, snap);
+        states.save(st);
+
+        var idx = new BoardObjectIndex();
+        idx.setObjectId(UUID.fromString(dto.pathId()));
+        idx.setBoard(st.getBoard());
+        idx.setOwner(owner);
+        idx.setType("fogpencilstroke");
+        idx.setLayerId(dto.layerId());
+        idx.setCreatedAt(LocalDateTime.now());
+        indexRepo.save(idx);
+    }
+
+    public void handleFogStrokeAppend(FogStrokeAppendDTO dto) {
+        var byPath = tempPaths.computeIfAbsent(dto.boardId(), k -> new ConcurrentHashMap<>());
+        var list = byPath.get(dto.pathId());
+        if (list != null) list.addAll(dto.points());
+    }
+    @Transactional
+    public void handleFogStrokeEnd(FogStrokeEndDTO dto) throws Exception {
+        var byPath = tempPaths.get(dto.boardId());
+        var pts = (byPath != null) ? byPath.remove(dto.pathId()) : null;
+        if (byPath != null && byPath.isEmpty()) {
+            tempPaths.remove(dto.boardId());
+        }
+        if (pts == null || pts.isEmpty()) return;
+
+
+        BoardState st = getOrCreateState(dto.boardId());
+        Snapshot snap = readSnapshot(st);
+
+        log.info("WS stroke.end: boardId={}, pathId={}", dto.boardId(), dto.pathId());
+        boolean ok = snap.appendPoints(dto.pathId(), pts);
+        if (ok) {
+            writeSnapshot(st, snap);
+            states.save(st);
+        }
+    }
+
+    @Transactional
     public boolean removeObject(long boardId, UUID objectId) throws Exception {
      BoardState st = getOrCreateState(boardId);
      Snapshot snap = readSnapshot(st);

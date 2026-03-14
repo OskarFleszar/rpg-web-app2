@@ -1,0 +1,77 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  isStroke,
+  type Drawable,
+  type FogPencilStroke,
+  type Stroke,
+} from "../../types";
+
+type StrokeAppendProps = {
+  op: any;
+  remoteStrokesRef: React.RefObject<
+    Map<
+      string,
+      {
+        last?: [number, number];
+
+        strokeWidth: number;
+        ownerId: string;
+      }
+    >
+  >;
+  pendingRemotePointsRef: React.RefObject<Map<string, number[][]>>;
+  setObjects: React.Dispatch<React.SetStateAction<Drawable[]>>;
+  pendingRemoval: Set<string>;
+};
+
+export function handleFogStrokeAppend({
+  op,
+  remoteStrokesRef,
+  pendingRemotePointsRef,
+  setObjects,
+  pendingRemoval,
+}: StrokeAppendProps) {
+  if (pendingRemoval.has(op.pathId)) return;
+
+  const state = remoteStrokesRef.current.get(op.pathId);
+  const add = (op.points ?? []).flat();
+  if (!add.length) return;
+
+  if (!state) {
+    const buf = pendingRemotePointsRef.current.get(op.pathId) ?? [];
+    buf.push(...(op.points ?? []));
+    pendingRemotePointsRef.current.set(op.pathId, buf);
+    return;
+  }
+
+  setObjects((prev) => {
+    const idx = prev.findIndex((o) => o.id === op.pathId);
+    if (idx === -1) {
+      const newStroke: FogPencilStroke = {
+        type: "fogpencilstroke",
+        id: op.pathId,
+
+        strokeWidth: state!.strokeWidth,
+        points: add,
+        ownerId: state!.ownerId,
+      };
+
+      return [...prev, newStroke];
+    }
+    const existing = prev[idx];
+    if (!isStroke(existing)) return prev;
+    const updated: Stroke = {
+      ...existing,
+      points: [...existing.points, ...add],
+    };
+    const copy = prev.slice();
+    copy[idx] = updated;
+    return copy;
+  });
+
+  const lastPts = op.points ?? [];
+  if (lastPts.length) {
+    const last = lastPts[lastPts.length - 1]!;
+    state.last = [last[0], last[1]];
+  }
+}

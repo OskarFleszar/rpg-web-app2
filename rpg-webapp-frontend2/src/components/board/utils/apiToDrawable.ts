@@ -14,6 +14,19 @@ export function apiObjectToDrawable(o: any) {
     };
   }
 
+  if (o.type === "fogpencilstroke") {
+    const pts = Array.isArray(o.points?.[0])
+      ? (o.points as number[][]).flat()
+      : ((o.points as number[]) ?? []);
+    return {
+      type: "fogpencilstroke" as const,
+      id: o.objectId,
+      points: pts,
+      strokeWidth: o.width,
+      ownerId: String(o.ownerId ?? ""),
+    };
+  }
+
   if (o.shape === "rect") {
     return {
       type: "rect" as const,

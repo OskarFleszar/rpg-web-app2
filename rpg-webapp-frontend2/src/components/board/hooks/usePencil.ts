@@ -125,7 +125,7 @@ export function usePencil(opts: {
       opStart = {
         type: "fogstroke.start",
         boardId,
-        layerId: "base",
+        layerId: "fog",
         pathId: id,
         width: fogStrokeSize,
         clientId,

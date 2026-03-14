@@ -70,6 +70,32 @@ public class BoardWsController {
                 service.handleStrokeEnd(dto);
                 broker.convertAndSend("/topic/board." + id + ".op", body);
             }
+
+            case "fogstroke.start" -> {
+                var dto = mapper.convertValue(body, FogStrokeStartDTO.class);
+                if (dto.layerId() == null || dto.pathId() == null)
+                    return;
+
+                User owner = users.findById(userId).orElse(null);
+                if (owner == null)
+                    return;
+
+                service.handleFogStrokeStart(dto, owner);
+                broker.convertAndSend("/topic/board." + id + ".op", body);
+            }
+            case "fogstroke.append" -> {
+                var dto = mapper.convertValue(body, FogStrokeAppendDTO.class);
+                if (dto.points() != null && dto.points().size() > 256)
+                    return;
+                service.handleFogStrokeAppend(dto);
+                broker.convertAndSend("/topic/board." + id + ".op", body);
+            }
+            case "fogstroke.end" -> {
+                var dto = mapper.convertValue(body, FogStrokeEndDTO.class);
+                service.handleFogStrokeEnd(dto);
+                broker.convertAndSend("/topic/board." + id + ".op", body);
+            }
+
             case "object.remove" -> {
                 var dto = mapper.convertValue(body, ObjectRemoveDTO.class);
                 UUID oid;
