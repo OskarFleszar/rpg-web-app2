@@ -20,7 +20,7 @@ target/
 *.ipr
 
 ### Konfiguracja Spring Boot ###
-/src/main/resources/application.properties
+rpg-webapp-backend/src/main/resources/application.properties
 
 ### NetBeans ###
 /nbproject/private/
