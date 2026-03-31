@@ -1,4 +1,4 @@
-````markdown
+
 # RPG Web App 2
 
 A full-stack web application built to support tabletop RPG campaigns with real-time collaboration, tactical board management, character sheets, scheduling, and session communication.
