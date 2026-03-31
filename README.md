@@ -1,4 +1,3 @@
-
 # RPG Web App 2
 
 A full-stack web application built to support tabletop RPG campaigns with real-time collaboration, tactical board management, character sheets, scheduling, and session communication.
@@ -170,7 +169,6 @@ rpg-web-app2/
 ├── docker-compose.yml      # local PostgreSQL setup
 └── README.md
 ```
-````
 
 ### Example backend modules
 
@@ -311,7 +309,7 @@ npm run lint     # run ESLint
 ./mvnw clean package     # build application
 ```
 
-## What I Focused on
+## What I Focused On
 
 This project was a strong exercise in building a feature-rich full-stack product with both standard and real-time functionality.
 
